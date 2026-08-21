@@ -1,4 +1,4 @@
-![StageKitWP Banner](dashboard-header.svg)
+![StageKitWP Banner](images/dashboard-header.svg)
 Welcome to the StageKitWP repository.  Here you will find the documentation to the ecosystem that is specifically designed to assist web builders with creating content and pages related to theatre companies.
 
 The ecosystem consists of the: 
@@ -22,6 +22,7 @@ The ecosystem consists of the:
 **StageKitWP Media Links Plugin (road map):**  This plugin will allow connecting external media sites to present media (photos, videos) in the site
 
 **StageKitWP Payments Plugin (road map):**  This plugin will manage processing payments for the memberships
- 
+
+Full documentation can be found here [StageKitWP Documentation](https://github.com/HuwEvans/StageKitWP/wiki)
 **** Please Note
 Repository of the old theatre-manager ecosystem.  It has been renamed StageKitWP in order to reduce possible collisions with other WordpressPlugins

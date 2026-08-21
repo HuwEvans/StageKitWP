@@ -1,0 +1,20 @@
+{
+  "download_url": "https://hsctjourney.com/updates/stagekitwp-core/stagekitwp-core-5.1.0.zip",
+  "new_version": "5.1.0",
+  "slug": "stagekitwp-core",
+  "tested": "6.8.2",
+  "short_description": "Core StageKitWP plugin for seasons, shows, cast, awards, venues, board members, sponsors, contributors, testimonials, advertisers, and display options.",
+  "name": "stagekitwp-core",
+  "author": "StageKitWP",
+  "author_homepage": "https://github.com/stagekitwp",
+  "version": "5.1.0",
+  "package": "https://hsctjourney.com/updates/stagekitwp-core/stagekitwp-core-5.1.0.zip",
+  "homepage": "https://github.com/stagekitwp/stagekitwp-core",
+  "requires": "6.8.2",
+  "sections": {
+    "description": "The StageKitWP Core plugin provides the content management foundation for the full StageKitWP ecosystem, including custom post types, block support, admin hub screens, and the shared display options system.",
+    "installation": "Upload the stagekitwp-core plugin folder to wp-content/plugins/, activate it, and open the StageKitWP admin hub to begin managing content.",
+    "changelog": "See the plugin changelog in the repository for detailed release notes."
+  },
+  "requires_php": "7.4"
+}

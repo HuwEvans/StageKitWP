@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="ibg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1f3c"/>
+      <stop offset="100%" stop-color="#0a1628"/>
+    </linearGradient>
+    <linearGradient id="comedy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0c040"/>
+      <stop offset="100%" stop-color="#c89a20"/>
+    </linearGradient>
+    <linearGradient id="tragedy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a78c2"/>
+      <stop offset="100%" stop-color="#0d4f8a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="128" cy="128" r="128" fill="url(#ibg)"/>
+
+  <!-- Outer ring -->
+  <circle cx="128" cy="128" r="118" fill="none" stroke="#1a78c2" stroke-width="3" opacity="0.4"/>
+
+  <!-- ── COMEDY MASK (top-left, gold) ── -->
+  <!-- Face -->
+  <ellipse cx="98" cy="105" rx="46" ry="42" fill="url(#comedy)"/>
+  <!-- Eyes -->
+  <ellipse cx="84" cy="97" rx="6" ry="7" fill="#0a1628"/>
+  <ellipse cx="112" cy="97" rx="6" ry="7" fill="#0a1628"/>
+  <!-- Happy smile -->
+  <path d="M80,114 Q98,132 116,114" fill="none" stroke="#0a1628" stroke-width="4" stroke-linecap="round"/>
+  <!-- Cheek blush marks -->
+  <ellipse cx="78" cy="112" rx="5" ry="3" fill="#e8a020" opacity="0.6"/>
+  <ellipse cx="118" cy="112" rx="5" ry="3" fill="#e8a020" opacity="0.6"/>
+  <!-- Crown on comedy -->
+  <path d="M68,68 L76,84 L90,72 L98,88 L106,72 L120,84 L128,68 L128,74 L68,74 Z" fill="#f0c040"/>
+
+  <!-- ── TRAGEDY MASK (bottom-right, blue) ── -->
+  <!-- Face -->
+  <ellipse cx="162" cy="155" rx="46" ry="42" fill="url(#tragedy)"/>
+  <!-- Eyes — downturned -->
+  <ellipse cx="148" cy="147" rx="6" ry="7" fill="#0a1628"/>
+  <ellipse cx="176" cy="147" rx="6" ry="7" fill="#0a1628"/>
+  <!-- Sad frown -->
+  <path d="M144,168 Q162,152 180,168" fill="none" stroke="#0a1628" stroke-width="4" stroke-linecap="round"/>
+  <!-- Tear drops -->
+  <ellipse cx="144" cy="162" rx="2.5" ry="4" fill="#90caf9" opacity="0.8"/>
+  <ellipse cx="178" cy="162" rx="2.5" ry="4" fill="#90caf9" opacity="0.8"/>
+
+  <!-- Dividing diagonal stroke between the two masks -->
+  <line x1="118" y1="82" x2="142" y2="178" stroke="#ffffff" stroke-width="1.5" opacity="0.12"/>
+</svg>

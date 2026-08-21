@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1544 500" width="1544" height="500" role="img" aria-label="TM IO Import and Export for the Theatre Manager ecosystem">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5b1e6b"/>
+      <stop offset="0.55" stop-color="#7b2d8e"/>
+      <stop offset="1" stop-color="#c0392b"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1544" height="500" fill="url(#bg)"/>
+  <rect width="1544" height="250" fill="url(#fade)"/>
+
+  <!-- Decorative flowing data lines on the right -->
+  <g stroke="#ffffff" stroke-opacity="0.10" stroke-width="3" fill="none">
+    <path d="M980 60 C1180 120 1300 20 1544 90"/>
+    <path d="M980 140 C1200 200 1320 110 1544 180"/>
+    <path d="M980 360 C1200 300 1320 410 1544 330"/>
+    <path d="M980 440 C1180 380 1300 470 1544 410"/>
+  </g>
+
+  <!-- Icon mark -->
+  <g transform="translate(96 122)">
+    <rect x="0" y="0" width="256" height="256" rx="52" fill="#ffffff" fill-opacity="0.10"/>
+    <g fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="128" cy="80" rx="46" ry="16" fill="#ffffff" fill-opacity="0.16"/>
+      <path d="M82 80 V150 c0 8.8 20.6 16 46 16 s46-7.2 46-16 V80"/>
+      <path d="M82 115 c0 8.8 20.6 16 46 16 s46-7.2 46-16"/>
+    </g>
+    <g stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M72 188 V214"/><path d="M56 200 L72 216 L88 200"/>
+    </g>
+    <g stroke="#ffdd57" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M184 216 V190"/><path d="M168 204 L184 188 L200 204"/>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="410" y="215" fill="#ffffff" font-size="104" font-weight="800" letter-spacing="1">TM I/O</text>
+    <text x="414" y="288" fill="#ffdd57" font-size="46" font-weight="700">Import &amp; Export</text>
+    <text x="416" y="352" fill="#ffffff" fill-opacity="0.86" font-size="31" font-weight="400">Move CPT data, settings &amp; theme across the Theatre Manager ecosystem</text>
+    <text x="416" y="398" fill="#ffffff" fill-opacity="0.66" font-size="26" font-weight="400">ZIP bundles &#8226; CSV season builder &#8226; page remap &#8226; batched clear &#8226; WP-CLI</text>
+  </g>
+</svg>

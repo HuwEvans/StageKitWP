@@ -1,0 +1,20 @@
+{
+  "download_url": "https://hsctjourney.com/updates/stagekitwp-sync/stagekitwp-sync-3.0.0.zip",
+  "new_version": "3.0.0",
+  "slug": "stagekitwp-sync",
+  "tested": "6.8",
+  "short_description": "Sync SharePoint content and image data into the StageKitWP content model using Microsoft Graph.",
+  "name": "stagekitwp-sync",
+  "author": "StageKitWP",
+  "author_homepage": "https://github.com/stagekitwp",
+  "version": "3.0.0",
+  "package": "https://hsctjourney.com/updates/stagekitwp-sync/stagekitwp-sync-3.0.0.zip",
+  "homepage": "https://github.com/stagekitwp/stagekitwp-sync",
+  "requires": "6.5",
+  "sections": {
+    "description": "The sync plugin connects StageKitWP to Microsoft Graph and imports SharePoint content into the plugin’s custom post types and media library.",
+    "installation": "Upload the stagekitwp-sync plugin folder to wp-content/plugins/, activate it, and connect the required credentials from the Sync admin screen.",
+    "changelog": "Release notes are maintained in the plugin repository."
+  },
+  "requires_php": "8.1"
+}

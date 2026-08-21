@@ -1,0 +1,20 @@
+{
+  "download_url": "https://hsctjourney.com/updates/stagekitwp-import-export/stagekitwp-import-export-2.0.0.zip",
+  "new_version": "2.0.0",
+  "slug": "stagekitwp-import-export",
+  "tested": "6.6",
+  "short_description": "Import and export CPT data, plugin settings, and theme customisations across the StageKitWP ecosystem.",
+  "name": "stagekitwp-import-export",
+  "author": "StageKitWP",
+  "author_homepage": "https://github.com/stagekitwp",
+  "version": "2.0.0",
+  "package": "https://hsctjourney.com/updates/stagekitwp-import-export/stagekitwp-import-export-2.0.0.zip",
+  "homepage": "https://github.com/stagekitwp/stagekitwp-import-export",
+  "requires": "6.0",
+  "sections": {
+    "description": "The import/export plugin packages selected modules into ZIP or JSON bundles and can import them back with conflict handling, remapping, and queued processing.",
+    "installation": "Upload the stagekitwp-import-export plugin folder to wp-content/plugins/, activate it, and open TM I/O in the admin menu.",
+    "changelog": "See CHANGELOG.md for the full release history."
+  },
+  "requires_php": "8.0"
+}

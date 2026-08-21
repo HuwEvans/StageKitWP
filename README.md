@@ -24,5 +24,7 @@ The ecosystem consists of the:
 **StageKitWP Payments Plugin (road map):**  This plugin will manage processing payments for the memberships
 
 Full documentation can be found here [StageKitWP Documentation](https://github.com/HuwEvans/StageKitWP/wiki)
+
+
 **** Please Note
 Repository of the old theatre-manager ecosystem.  It has been renamed StageKitWP in order to reduce possible collisions with other WordpressPlugins

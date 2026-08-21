@@ -1,4 +1,4 @@
-
+![StageKitWP Banner](dashboard-header.svg)
 Welcome to the StageKitWP repository.  Here you will find the documentation to the ecosystem that is specifically designed to assist web builders with creating content and pages related to theatre companies.
 
 The ecosystem consists of the: 

@@ -1,0 +1,294 @@
+<?php
+defined('ABSPATH') || exit;
+
+require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+
+
+class STAGEKITWP_Sync_Log_Table extends WP_List_Table {
+    private $items_raw = [];
+
+    public function __construct() {
+        parent::__construct([
+            'singular' => 'log_entry',
+            'plural'   => 'log_entries',
+            'ajax'     => false,
+        ]);
+    }
+
+    public function get_columns() {
+        return [
+            'timestamp' => 'Timestamp',
+            'level'     => 'Level',
+            'channel'   => 'Channel',
+            'message'   => 'Message',
+            'context'   => 'Context',
+        ];
+    }
+
+    public function prepare_items() {
+        $columns  = $this->get_columns();
+        $hidden   = [];
+        $sortable = [];
+
+        $this->_column_headers = [$columns, $hidden, $sortable];
+
+        $this->items_raw = stagekitwp_sync_read_log_entries();
+
+        // Filter by level or channel
+        if ( isset($_GET['level']) && $_GET['level'] !== '' ) {
+            $level = strtolower(sanitize_text_field($_GET['level']));
+            $this->items_raw = array_filter($this->items_raw, fn($e) => strtolower($e['level']) === $level);
+        }
+        if ( isset($_GET['channel']) && $_GET['channel'] !== '' ) {
+            $channel = strtolower(sanitize_text_field($_GET['channel']));
+            $this->items_raw = array_filter($this->items_raw, fn($e) => strtolower($e['channel']) === $channel);
+        }
+
+        // Pagination
+        $per_page = 20;
+        $current_page = $this->get_pagenum();
+        $total_items = count($this->items_raw);
+
+        $this->items = array_slice($this->items_raw, ($current_page - 1) * $per_page, $per_page);
+        $this->set_pagination_args([
+            'total_items' => $total_items,
+            'per_page'    => $per_page,
+        ]);
+    }
+
+    public function column_default($item, $column_name) {
+        switch ($column_name) {
+            case 'timestamp':
+                return esc_html($item['timestamp'] ?? '');
+            case 'level':
+                return esc_html($item['level'] ?? '');
+            case 'channel':
+                return esc_html($item['channel'] ?? 'default');
+            case 'message':
+                return esc_html($item['message'] ?? '');
+            case 'context':
+                $context = isset($item['context']) ? json_encode($item['context'], JSON_PRETTY_PRINT) : '';
+                return '<pre style="white-space:pre-wrap;">' . esc_html($context) . '</pre>';
+            default:
+                return '';
+        }
+    }
+
+    /**
+     * Override display to prevent duplicate pagination
+     */
+    public function display() {
+        // Only display pagination at top, table, then pagination at bottom (no duplicates)
+        $this->display_tablenav( 'top' );
+        ?>
+        <table class="wp-list-table <?php echo implode( ' ', $this->get_table_classes() ); ?>">
+            <thead>
+                <tr>
+                    <?php $this->print_column_headers(); ?>
+                </tr>
+            </thead>
+            <tbody>
+                <?php $this->display_rows_or_placeholder(); ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <?php $this->print_column_headers( false ); ?>
+                </tr>
+            </tfoot>
+        </table>
+        <?php
+        $this->display_tablenav( 'bottom' );
+    }
+}
+
+/**
+ * Read today's log file and parse entries.
+ */
+function stagekitwp_sync_read_log_entries() {
+    $file = stagekitwp_logger_file_for_date(); // from logger.php
+    if ( ! file_exists($file) ) return [];
+
+    $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $entries = [];
+
+    foreach ($lines as $line) {
+        $json = json_decode($line, true);
+        if ( is_array($json) && isset($json['timestamp'], $json['level'], $json['message']) ) {
+            $entries[] = $json;
+        }
+    }
+
+    return array_reverse($entries); // newest first
+}
+
+/**
+ * Clear the log file
+ */
+function stagekitwp_sync_clear_log_file() {
+    // Make sure stagekitwp_logger_file_for_date is available
+    if (!function_exists('stagekitwp_logger_file_for_date')) {
+        error_log('TM Sync: stagekitwp_logger_file_for_date function not available');
+        return false;
+    }
+    
+    $file = stagekitwp_logger_file_for_date();
+    
+    if (!$file) {
+        error_log('TM Sync: No log file path returned');
+        return false;
+    }
+    
+    error_log('TM Sync: Attempting to clear log file: ' . $file);
+    
+    if (file_exists($file)) {
+        error_log('TM Sync: Log file exists, attempting to delete: ' . $file);
+        $result = @unlink($file);
+        if ($result) {
+            error_log('TM Sync: Log file successfully deleted: ' . $file);
+            return true;
+        } else {
+            error_log('TM Sync: Failed to delete log file: ' . $file . ' (permission denied?)');
+            return false;
+        }
+    } else {
+        error_log('TM Sync: Log file does not exist: ' . $file);
+        // Treat non-existent file as success
+        return true;
+    }
+}
+
+/**
+ * AJAX handler to clear logs
+ */
+function stagekitwp_sync_handle_clear_logs_ajax() {
+    // Verify nonce
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'stagekitwp_sync_settings_nonce')) {
+        wp_send_json_error(['message' => 'Nonce verification failed']);
+        return;
+    }
+    
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['message' => 'Insufficient permissions']);
+        return;
+    }
+    
+    $result = stagekitwp_sync_clear_log_file();
+    
+    if ($result) {
+        wp_send_json_success(['message' => 'Logs cleared successfully']);
+    } else {
+        wp_send_json_error(['message' => 'Failed to clear logs or log file does not exist']);
+    }
+    
+    // Exit immediately to prevent any further logging
+    wp_die();
+}
+
+// Register AJAX handlers (for both logged-in and non-logged-in users, but check permissions)
+add_action('wp_ajax_stagekitwp_sync_clear_logs', 'stagekitwp_sync_handle_clear_logs_ajax');
+add_action('wp_ajax_nopriv_stagekitwp_sync_clear_logs', 'stagekitwp_sync_handle_clear_logs_ajax');
+
+/**
+ * Render the Logs admin page.
+ */
+function stagekitwp_sync_page_logs( $embedded = false ) {
+    stagekitwp_sync_cap_check();
+
+    if ( ! $embedded ) {
+        echo '<div class="wrap"><h1>Sync · Logs</h1>';
+        echo stagekitwp_sync_render_hub_tabs( 'logs' );
+    }
+
+    echo '<form method="get">';
+    echo '<input type="hidden" name="page" value="stagekitwp-sync-logs">';
+    echo '<select name="level"><option value="">All Levels</option>';
+    foreach (['debug','info','notice','warning','error','critical'] as $lvl) {
+        $selected = (isset($_GET['level']) && $_GET['level'] === $lvl) ? 'selected' : '';
+        echo "<option value=\"$lvl\" $selected>" . ucfirst($lvl) . "</option>";
+    }
+    echo '</select>';
+
+    echo '<select name="channel"><option value="">All Channels</option>';
+    foreach (['auth','sync','scheduler','admin-ui','app'] as $ch) {
+        $selected = (isset($_GET['channel']) && $_GET['channel'] === $ch) ? 'selected' : '';
+        echo "<option value=\"$ch\" $selected>" . ucfirst($ch) . "</option>";
+    }
+    echo '</select>';
+
+    submit_button('Filter', 'secondary', '', false);
+    
+    echo '&nbsp;<button type="button" class="button button-secondary" id="stagekitwp-sync-clear-logs-btn" style="background-color: #dc3545; color: white; border-color: #dc3545;">Clear Logs</button>';
+    
+    echo '</form>';
+
+    $table = new STAGEKITWP_Sync_Log_Table();
+    $table->prepare_items();
+    $table->display();
+
+    if ( ! $embedded ) {
+        echo '</div>';
+    }
+    
+    // JavaScript for clear logs button
+    ?>
+    <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const clearBtn = document.getElementById('stagekitwp-sync-clear-logs-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all logs?')) {
+                    clearBtn.disabled = true;
+                    clearBtn.textContent = 'Clearing...';
+                    
+                    fetch(ajaxurl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            action: 'stagekitwp_sync_clear_logs',
+                            nonce: '<?php echo wp_create_nonce("stagekitwp_sync_settings_nonce"); ?>'
+                        })
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Response data:', data);
+                        if (data.success) {
+                            // Show success message and hide table
+                            const wrap = document.querySelector('.wrap');
+                            const successMsg = document.createElement('div');
+                            successMsg.className = 'notice notice-success is-dismissible';
+                            successMsg.innerHTML = '<p><strong>Logs cleared successfully!</strong> Reload the page to see fresh logs.</p>';
+                            wrap.insertBefore(successMsg, wrap.firstChild);
+                            
+                            // Hide the table
+                            const table = document.querySelector('.wp-list-table');
+                            if (table) table.style.display = 'none';
+                            
+                            clearBtn.disabled = false;
+                            clearBtn.textContent = 'Logs Cleared - Reload to Refresh';
+                            clearBtn.style.backgroundColor = '#28a745';
+                            clearBtn.style.borderColor = '#28a745';
+                        } else {
+                            const errorMsg = data.data && data.data.message ? data.data.message : 'Unknown error';
+                            alert('Failed to clear logs: ' + errorMsg);
+                            clearBtn.disabled = false;
+                            clearBtn.textContent = 'Clear Logs';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        alert('Error: ' + error.message);
+                        clearBtn.disabled = false;
+                        clearBtn.textContent = 'Clear Logs';
+                    });
+                }
+            });
+        }
+    });
+    </script>
+    <?php
+}

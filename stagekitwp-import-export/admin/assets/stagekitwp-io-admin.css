@@ -1,0 +1,773 @@
+/* TM IO Admin Styles */
+
+.stagekitwp-io-wrap,
+.stagekitwp-io-hub-wrap {
+	max-width: none;
+	width: 100%;
+}
+
+.stagekitwp-io-hub-wrap > .stagekitwp-io-hub-panels,
+.stagekitwp-io-hub-wrap > .stagekitwp-io-hub-panels > .stagekitwp-io-hub-panel {
+	width: 100%;
+}
+
+.stagekitwp-io-hub-wrap .wrap.stagekitwp-io-wrap,
+.stagekitwp-io-hub-wrap .wrap.stagekitwp-io-help {
+	padding: 0;
+	margin: 0;
+}
+
+.stagekitwp-io-hub-wrap h1 {
+	margin-bottom: 12px;
+}
+
+.stagekitwp-io-hub-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0 0 20px;
+	padding-bottom: 0;
+	border-bottom: 1px solid #c3c4c7;
+}
+
+.stagekitwp-io-hub-tabs .nav-tab,
+.stagekitwp-io-hub-tabs button.nav-tab {
+	appearance: none;
+	border: 1px solid #c3c4c7;
+	border-bottom: none;
+	background: #f6f7f7;
+	color: #2c3338;
+	padding: 8px 14px;
+	border-radius: 6px 6px 0 0;
+	font-weight: 500;
+	line-height: 1.2;
+	box-shadow: none;
+	cursor: pointer;
+}
+
+.stagekitwp-io-hub-tabs .nav-tab.nav-tab-active,
+.stagekitwp-io-hub-tabs button.nav-tab.nav-tab-active {
+	background: #fff;
+	color: #1d2327;
+	font-weight: 600;
+	border-color: #c3c4c7;
+	position: relative;
+	top: 1px;
+}
+
+.stagekitwp-io-hub-panel {
+	width: 100%;
+}
+
+.stagekitwp-io-hub-panel .wrap.stagekitwp-io-wrap,
+.stagekitwp-io-hub-panel .wrap.stagekitwp-io-help {
+	max-width: none;
+	padding: 0;
+}
+
+/* Module table */
+.stagekitwp-io-module-table td,
+.stagekitwp-io-module-table th {
+	vertical-align: middle;
+}
+.stagekitwp-io-module-table .stagekitwp-io-description {
+	color: #646970;
+	font-size: 13px;
+}
+.stagekitwp-io-module-table tr.stagekitwp-io-unavailable td {
+	opacity: 0.55;
+}
+
+/* Badges */
+.stagekitwp-io-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 600;
+}
+.stagekitwp-io-badge--ok   { background: #d1fae5; color: #065f46; }
+.stagekitwp-io-badge--warn { background: #fef3c7; color: #92400e; }
+.stagekitwp-io-badge--err  { background: #fee2e2; color: #991b1b; }
+
+/* Actions row */
+.stagekitwp-io-actions {
+	margin-top: 16px;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+/* Status box */
+.stagekitwp-io-status {
+	margin-top: 16px;
+	padding: 12px 16px;
+	background: #f0f6fc;
+	border-left: 4px solid #2271b1;
+	border-radius: 0 4px 4px 0;
+}
+.stagekitwp-io-status.is-error  { background: #fff0f0; border-color: #d63638; }
+.stagekitwp-io-status.is-success{ background: #f0fff4; border-color: #00a32a; }
+
+/* Tabs */
+.stagekitwp-io-tabs {
+	display: flex;
+	gap: 0;
+	margin-bottom: 0;
+	border-bottom: 1px solid #c3c4c7;
+}
+.stagekitwp-io-tab {
+	padding: 8px 18px;
+	background: #f6f7f7;
+	border: 1px solid #c3c4c7;
+	border-bottom: none;
+	cursor: pointer;
+	font-size: 14px;
+	border-radius: 4px 4px 0 0;
+	margin-right: 2px;
+}
+.stagekitwp-io-tab--active {
+	background: #fff;
+	border-bottom-color: #fff;
+	font-weight: 600;
+}
+
+/* Panels */
+.stagekitwp-io-panel {
+	display: none;
+	padding: 16px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-top: none;
+	margin-bottom: 16px;
+}
+.stagekitwp-io-panel--active { display: block; }
+
+/* Upload drop zone */
+.stagekitwp-io-upload-label {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 32px;
+	border: 2px dashed #c3c4c7;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: border-color 0.15s, background 0.15s;
+	text-align: center;
+}
+.stagekitwp-io-upload-label:hover,
+.stagekitwp-io-upload-label.drag-over {
+	border-color: #2271b1;
+	background: #f0f6fc;
+}
+.stagekitwp-io-upload-label .dashicons {
+	font-size: 36px;
+	width: 36px;
+	height: 36px;
+	color: #2271b1;
+}
+
+/* Progress bar */
+.stagekitwp-io-progress-bar {
+	width: 100%;
+	height: 10px;
+	background: #c3c4c7;
+	border-radius: 5px;
+	overflow: hidden;
+	margin-bottom: 6px;
+}
+#stagekitwp-io-progress-inner {
+	height: 100%;
+	width: 0%;
+	background: #2271b1;
+	transition: width 0.3s ease;
+}
+
+/* Options table */
+.stagekitwp-io-options-table th {
+	width: 200px;
+}
+
+/* ── CSV Season Builder feedback ─────────────────────────────────────────── */
+
+/* Step indicator */
+.stagekitwp-io-steps {
+	display: flex;
+	gap: 0;
+	margin: 0 0 24px;
+	padding: 0;
+	list-style: none;
+	counter-reset: stagekitwp-step;
+}
+.stagekitwp-io-steps li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+	font-size: 13px;
+	color: #8c8f94;
+	padding: 10px 12px 10px 0;
+	border-bottom: 3px solid #dcdcde;
+	position: relative;
+	counter-increment: stagekitwp-step;
+}
+.stagekitwp-io-steps li::before {
+	content: counter(stagekitwp-step);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background: #dcdcde;
+	color: #646970;
+	font-size: 12px;
+	font-weight: 700;
+	flex-shrink: 0;
+}
+.stagekitwp-io-steps li.is-active {
+	color: #2271b1;
+	border-bottom-color: #2271b1;
+	font-weight: 600;
+}
+.stagekitwp-io-steps li.is-active::before {
+	background: #2271b1;
+	color: #fff;
+}
+.stagekitwp-io-steps li.is-done {
+	color: #00a32a;
+	border-bottom-color: #00a32a;
+}
+.stagekitwp-io-steps li.is-done::before {
+	background: #00a32a;
+	color: #fff;
+	content: '✓';
+}
+
+/* Loading spinner */
+.stagekitwp-io-spinner {
+	display: none;
+	align-items: center;
+	gap: 10px;
+	padding: 14px 16px;
+	background: #f0f6fc;
+	border-left: 4px solid #2271b1;
+	border-radius: 0 4px 4px 0;
+	font-size: 14px;
+	color: #2271b1;
+}
+.stagekitwp-io-spinner.is-visible { display: flex; }
+.stagekitwp-io-spinner__dots {
+	display: flex;
+	gap: 4px;
+}
+.stagekitwp-io-spinner__dots span {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #2271b1;
+	animation: stagekitwp-io-bounce 1.2s infinite ease-in-out;
+}
+.stagekitwp-io-spinner__dots span:nth-child(2) { animation-delay: 0.15s; }
+.stagekitwp-io-spinner__dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes stagekitwp-io-bounce {
+	0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+	40%           { transform: scale(1);   opacity: 1;   }
+}
+
+/* Summary stat cards */
+.stagekitwp-io-summary {
+	display: flex;
+	gap: 12px;
+	margin: 16px 0 20px;
+	flex-wrap: wrap;
+}
+.stagekitwp-io-stat {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 14px 20px;
+	min-width: 90px;
+	border-radius: 6px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	text-align: center;
+}
+.stagekitwp-io-stat__number {
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1;
+	margin-bottom: 4px;
+}
+.stagekitwp-io-stat__label {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: #646970;
+	font-weight: 600;
+}
+.stagekitwp-io-stat--create  { border-color: #2271b1; }
+.stagekitwp-io-stat--create  .stagekitwp-io-stat__number { color: #2271b1; }
+.stagekitwp-io-stat--update  { border-color: #dba617; }
+.stagekitwp-io-stat--update  .stagekitwp-io-stat__number { color: #996800; }
+.stagekitwp-io-stat--skip    { border-color: #8c8f94; }
+.stagekitwp-io-stat--skip    .stagekitwp-io-stat__number { color: #50575e; }
+.stagekitwp-io-stat--season  { border-color: #8b5cf6; }
+.stagekitwp-io-stat--season  .stagekitwp-io-stat__number { color: #6d28d9; }
+.stagekitwp-io-stat--error   { border-color: #d63638; }
+.stagekitwp-io-stat--error   .stagekitwp-io-stat__number { color: #d63638; }
+.stagekitwp-io-stat__list {
+	margin: 6px 0 0;
+	padding: 0 0 0 14px;
+	list-style: disc;
+	font-size: 11px;
+	color: #6d28d9;
+	line-height: 1.6;
+	text-align: left;
+	width: 100%;
+}
+
+/* Preview / result table */
+.stagekitwp-io-preview-table-wrap {
+	margin-top: 8px;
+	max-height: 380px;
+	overflow-y: auto;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+.stagekitwp-io-preview-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+.stagekitwp-io-preview-table thead th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	padding: 8px 12px;
+	background: #f6f7f7;
+	border-bottom: 2px solid #dcdcde;
+	text-align: left;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+	color: #50575e;
+}
+.stagekitwp-io-preview-table tbody td {
+	padding: 8px 12px;
+	border-bottom: 1px solid #f0f0f0;
+	vertical-align: middle;
+}
+.stagekitwp-io-preview-table tbody tr:last-child td { border-bottom: none; }
+.stagekitwp-io-preview-table tbody tr:hover td { background: #f8f9fa; }
+.stagekitwp-io-preview-table tbody tr.row--create td { background: #f0f9ff; }
+.stagekitwp-io-preview-table tbody tr.row--update td { background: #fffbeb; }
+.stagekitwp-io-preview-table tbody tr.row--skip   td { background: #fafafa; color: #8c8f94; }
+.stagekitwp-io-preview-table .col-action { width: 80px; }
+.stagekitwp-io-preview-table .col-row    { width: 40px; color: #8c8f94; }
+.stagekitwp-io-preview-table .col-season { max-width: 160px; }
+
+/* Action pill badges */
+.stagekitwp-io-pill {
+	display: inline-block;
+	padding: 2px 9px;
+	border-radius: 10px;
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+}
+.stagekitwp-io-pill--create { background: #dbeafe; color: #1d4ed8; }
+.stagekitwp-io-pill--update { background: #fef3c7; color: #92400e; }
+.stagekitwp-io-pill--skip   { background: #f3f4f6; color: #6b7280; }
+.stagekitwp-io-pill--season { background: #ede9fe; color: #5b21b6; }
+
+/* Result banner */
+.stagekitwp-io-result-banner {
+	display: none;
+	padding: 14px 16px;
+	border-left: 4px solid #2271b1;
+	border-radius: 0 4px 4px 0;
+	background: #f0f6fc;
+	margin-bottom: 16px;
+}
+.stagekitwp-io-result-banner.is-preview { border-color: #2271b1; background: #f0f6fc; }
+.stagekitwp-io-result-banner.is-success { border-color: #00a32a; background: #f0fff4; }
+.stagekitwp-io-result-banner.is-error   { border-color: #d63638; background: #fff0f0; }
+.stagekitwp-io-result-banner__title {
+	font-size: 14px;
+	font-weight: 600;
+	margin: 0 0 2px;
+}
+.stagekitwp-io-result-banner.is-preview .stagekitwp-io-result-banner__title { color: #2271b1; }
+.stagekitwp-io-result-banner.is-success .stagekitwp-io-result-banner__title { color: #00a32a; }
+.stagekitwp-io-result-banner.is-error   .stagekitwp-io-result-banner__title { color: #d63638; }
+.stagekitwp-io-result-banner__sub {
+	font-size: 13px;
+	color: #50575e;
+	margin: 0;
+}
+
+/* Error list */
+.stagekitwp-io-error-list {
+	margin: 12px 0 0;
+	padding: 0;
+	list-style: none;
+}
+.stagekitwp-io-error-list li {
+	display: flex;
+	gap: 8px;
+	padding: 6px 10px;
+	background: #fff8f8;
+	border: 1px solid #f8d7da;
+	border-radius: 3px;
+	margin-bottom: 4px;
+	font-size: 13px;
+	color: #842029;
+}
+.stagekitwp-io-error-list li::before {
+	content: '!';
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	min-width: 18px;
+	border-radius: 50%;
+	background: #d63638;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+}
+
+/* Rollback bar */
+.stagekitwp-io-rollback-bar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 16px;
+	padding: 10px 14px;
+	background: #fff8e5;
+	border: 1px solid #f0c33c;
+	border-radius: 4px;
+	font-size: 13px;
+	color: #50575e;
+}
+.stagekitwp-io-rollback-bar__icon {
+	font-size: 18px;
+	color: #996800;
+}
+.stagekitwp-io-rollback-bar__msg {
+	flex: 1;
+}
+.stagekitwp-io-rollback-bar__timer {
+	font-size: 11px;
+	color: #8c8f94;
+	white-space: nowrap;
+}
+#stagekitwp-io-csv-rollback-btn {
+	white-space: nowrap;
+}
+
+/* ── Clear Data (Purge) page ─────────────────────────────────────────── */
+
+.stagekitwp-io-purge-warning {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 20px;
+	padding: 12px 16px;
+	background: #fef9e7;
+	border-left: 4px solid #e65054;
+	border-radius: 0 4px 4px 0;
+	font-size: 13px;
+}
+.stagekitwp-io-purge-warning__icon { font-size: 18px; }
+
+/* Purge tab switcher */
+.stagekitwp-io-tabs--purge {
+	display: flex;
+	gap: 2px;
+	margin-bottom: 0;
+	border-bottom: 2px solid #dcdcde;
+}
+.stagekitwp-io-tabs--purge .stagekitwp-io-tab {
+	padding: 8px 18px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-bottom: none;
+	border-radius: 4px 4px 0 0;
+	cursor: pointer;
+	font-size: 13px;
+	color: #50575e;
+	transition: background 0.15s;
+}
+.stagekitwp-io-tabs--purge .stagekitwp-io-tab:hover { background: #fff; }
+.stagekitwp-io-tabs--purge .stagekitwp-io-tab.stagekitwp-io-tab--active {
+	background: #fff;
+	color: #1d2327;
+	font-weight: 600;
+	border-bottom: 2px solid #fff;
+	margin-bottom: -2px;
+}
+
+/* Purge panels */
+.stagekitwp-io-purge-panel {
+	display: none;
+	padding: 20px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-top: none;
+	border-radius: 0 0 4px 4px;
+}
+.stagekitwp-io-purge-panel.is-active { display: block; }
+
+/* Count table */
+.stagekitwp-io-purge-count-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 16px 0;
+	font-size: 13px;
+}
+.stagekitwp-io-purge-count-table th,
+.stagekitwp-io-purge-count-table td {
+	padding: 7px 10px;
+	border-bottom: 1px solid #f0f0f1;
+	vertical-align: middle;
+}
+.stagekitwp-io-purge-count-table th {
+	background: #f6f7f7;
+	font-weight: 600;
+	text-align: left;
+}
+.stagekitwp-io-purge-count-table .num { text-align: right; min-width: 60px; }
+.stagekitwp-io-cpt-label {
+	font-size: 11px;
+	color: #8c8f94;
+	margin-left: 6px;
+}
+.stagekitwp-io-count-badge {
+	display: inline-block;
+	min-width: 28px;
+	padding: 1px 7px;
+	background: #f0f0f1;
+	border-radius: 10px;
+	font-size: 12px;
+	text-align: center;
+	font-weight: 600;
+	color: #50575e;
+}
+.stagekitwp-io-count-badge.has-posts {
+	background: #fef0f0;
+	color: #d63638;
+}
+.stagekitwp-io-count-badge.no-posts {
+	background: #f0f6e8;
+	color: #3a7c1a;
+}
+.stagekitwp-io-spinner-inline { color: #8c8f94; font-style: italic; font-size: 12px; }
+
+/* Purge action row */
+.stagekitwp-io-purge-actions {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	margin-top: 8px;
+}
+.stagekitwp-io-btn-danger {
+	background: #d63638 !important;
+	border-color: #a2232a !important;
+	color: #fff !important;
+}
+.stagekitwp-io-btn-danger:hover:not(:disabled) {
+	background: #a2232a !important;
+}
+.stagekitwp-io-btn-danger:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+.stagekitwp-io-cpt-actions { white-space: nowrap; }
+.stagekitwp-io-cpt-actions .button { margin-right: 4px; }
+
+/* Plugin card grid */
+.stagekitwp-io-purge-plugin-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 16px;
+	margin: 16px 0;
+}
+.stagekitwp-io-purge-plugin-card {
+	padding: 16px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #fafafa;
+}
+.stagekitwp-io-purge-plugin-card__title {
+	margin: 0 0 10px;
+	font-size: 13px;
+	font-weight: 700;
+	color: #1d2327;
+}
+.stagekitwp-io-purge-plugin-card__cpts {
+	margin: 0 0 12px;
+	padding: 0;
+	list-style: none;
+}
+.stagekitwp-io-purge-plugin-card__cpts li {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 0;
+	border-bottom: 1px solid #f0f0f1;
+	font-size: 12px;
+}
+.stagekitwp-io-purge-plugin-card__cpts li:last-child { border: none; }
+.stagekitwp-io-purge-plugin-card__cpts .stagekitwp-io-count-badge { margin-left: auto; }
+.stagekitwp-io-purge-plugin-card__footer {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin-top: 4px;
+}
+.stagekitwp-io-plugin-total { font-size: 12px; color: #50575e; flex: 1; }
+.stagekitwp-io-plugin-total strong { color: #1d2327; }
+
+/* Purge result message */
+.stagekitwp-io-purge-result {
+	margin-top: 12px;
+	font-size: 13px;
+}
+.stagekitwp-io-purge-result.is-success { color: #3a7c1a; }
+.stagekitwp-io-purge-result.is-error   { color: #d63638; }
+.stagekitwp-io-purge-result.is-info    { color: #2271b1; }
+
+/* Batched-delete progress bar */
+.stagekitwp-io-purge-progress {
+	margin: 16px 0 4px;
+	padding: 14px 16px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-left: 4px solid #d63638;
+	border-radius: 6px;
+	box-shadow: 0 1px 2px rgba(0,0,0,.05);
+	max-width: 640px;
+}
+.stagekitwp-io-purge-progress[hidden] { display: none; }
+.stagekitwp-io-purge-progress__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+.stagekitwp-io-purge-progress__label {
+	font-weight: 600;
+	font-size: 13px;
+	color: #1d2327;
+}
+.stagekitwp-io-purge-progress__pct {
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	font-size: 13px;
+	color: #d63638;
+}
+.stagekitwp-io-purge-progress__track {
+	height: 12px;
+	background: #f0f0f1;
+	border-radius: 999px;
+	overflow: hidden;
+}
+.stagekitwp-io-purge-progress__bar {
+	height: 100%;
+	width: 0;
+	border-radius: 999px;
+	background: linear-gradient(90deg, #d63638, #e85c5e);
+	transition: width .25s ease;
+}
+.stagekitwp-io-purge-progress__stats {
+	margin-top: 8px;
+	font-size: 12px;
+	color: #646970;
+	font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+	.stagekitwp-io-purge-progress__bar { transition: none; }
+}
+
+/* Season-new annotation */
+.stagekitwp-io-new-season-note {
+	font-size: 11px;
+	color: #6d28d9;
+	font-style: italic;
+	margin-left: 4px;
+}
+
+/* ── Instructions / Help page ──────────────────────────────────────── */
+.stagekitwp-io-help { max-width: 900px; }
+.stagekitwp-io-help h2 {
+	margin-top: 34px;
+	padding-bottom: 6px;
+	border-bottom: 2px solid #7b2d8e;
+	scroll-margin-top: 40px;
+}
+.stagekitwp-io-help h3 { margin-top: 22px; margin-bottom: 4px; }
+.stagekitwp-io-help p, .stagekitwp-io-help li { font-size: 14px; line-height: 1.6; }
+.stagekitwp-io-help code { background: #f0eaf3; color: #6d28d9; padding: 1px 5px; border-radius: 3px; }
+.stagekitwp-io-help-toc {
+	background: #fbf7fd;
+	border: 1px solid #e6d8ee;
+	border-left: 4px solid #7b2d8e;
+	border-radius: 6px;
+	padding: 14px 18px;
+	margin: 18px 0 8px;
+}
+.stagekitwp-io-help-toc ul { margin: 8px 0 0; columns: 2; column-gap: 32px; }
+.stagekitwp-io-help-toc li { margin: 2px 0; }
+.stagekitwp-io-help-table { margin: 12px 0; max-width: 100%; }
+.stagekitwp-io-help-table td, .stagekitwp-io-help-table th { vertical-align: top; }
+.stagekitwp-io-help-bullets li { margin: 6px 0; }
+.stagekitwp-io-help-callout {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+	padding: 12px 16px;
+	border-radius: 6px;
+	margin: 14px 0;
+	font-size: 14px;
+	line-height: 1.55;
+}
+.stagekitwp-io-help-callout--danger {
+	background: #fcf0f1;
+	border: 1px solid #f3c2c4;
+	border-left: 4px solid #c0392b;
+	color: #7a1f19;
+}
+
+/* Per-run batch-size control on Clear Data */
+.stagekitwp-io-purge-batch {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin: 14px 0 18px;
+	padding: 12px 16px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+}
+.stagekitwp-io-purge-batch label { margin: 0; }
+.stagekitwp-io-purge-batch .description { font-size: 12px; color: #646970; }
+
+/* Export: include-media toggle */
+.stagekitwp-io-export-options {
+	margin: 16px 0 4px;
+	padding: 12px 16px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+}
+.stagekitwp-io-export-options label { font-size: 14px; }
+.stagekitwp-io-export-options .description { margin: 6px 0 0; font-size: 12px; color: #646970; }

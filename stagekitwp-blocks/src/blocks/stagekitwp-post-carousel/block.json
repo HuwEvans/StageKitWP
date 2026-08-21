@@ -1,0 +1,58 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "stagekitwp/post-carousel",
+	"version": "1.1.0",
+	"title": "Post Carousel",
+	"category": "stagekitwp-blocks",
+	"icon": "slides",
+	"description": "A responsive post carousel block powered by Swiper.",
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ]
+	},
+	"textdomain": "stagekitwp-blocks",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js",
+	"render": "file:./render.php",
+	"attributes": {
+		"postsPerPage": {
+			"type": "number",
+			"default": 5
+		},
+		"category": {
+			"type": "string",
+			"default": ""
+		},
+		"showExcerpt": {
+			"type": "boolean",
+			"default": true
+		},
+		"autoplay": {
+			"type": "boolean",
+			"default": false
+		},
+		"autoplayDelay": {
+			"type": "number",
+			"default": 3000
+		},
+		"loop": {
+			"type": "boolean",
+			"default": true
+		},
+		"colorMode": {
+			"type": "string",
+			"default": "auto"
+		}
+	},
+	"example": {
+		"attributes": {
+			"postsPerPage": 3,
+			"showExcerpt": true,
+			"loop": true,
+			"colorMode": "auto"
+		}
+	}
+}

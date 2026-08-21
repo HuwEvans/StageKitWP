@@ -1,0 +1,1527 @@
+/* StageKitWP Shortcode Styles */
+
+.stagekitwp-shortcode-wrapper {
+    margin: 0 auto;
+    padding: 20px;
+    max-width: 800px;
+    box-sizing: border-box;
+}
+
+/* Testimonials */
+.stagekitwp-testimonials-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.stagekitwp-testimonial {
+    padding: 20px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 10px;
+    box-shadow: none;
+    background-color: #ffffff;
+    color: #000000;
+    transition: all 0.3s ease;
+}
+
+.stagekitwp-testimonial .stagekitwp-rating {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.stagekitwp-testimonial .stagekitwp-comment {
+    font-size: 1em;
+    margin-bottom: 10px;
+}
+.stagekitwp-rating  {
+		text-align: center;
+}
+.stagekitwp-comment {
+	text-align: center;
+}
+.stagekitwp-testimonial .stagekitwp-author {
+    font-style: italic;
+    font-size: 0.9em;
+    color: #555555;
+}
+.stagekitwp-author {
+	width: 100%;
+	text-align: right;
+}
+
+.stagekitwp-symbol-filled {
+    color: #f5b301; /* Gold or primary color */
+    opacity: 1;
+}
+
+.emoji path{
+	fill: #222;
+}
+.stagekitwp-symbol-empty {
+    color: #333;
+    opacity: 0.3;
+}
+
+
+/* Fix Slick Slider height issue */
+.stagekitwp-testimonials-slider .slick-slide {
+	margin-top: 10px;
+    height: auto !important;
+	top: 10px;
+}
+
+
+/* Slick Slider Arrow Customization */
+.stagekitwp-testimonials-slider .slick-prev,
+.stagekitwp-testimonials-slider .slick-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    line-height: 0px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.stagekitwp-testimonials-slider .slick-prev {
+    left: -50px;
+}
+
+.stagekitwp-testimonials-slider .slick-next {
+    right: -50px;
+}
+
+.stagekitwp-testimonials-slider .slick-dots {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 5px 0 0 0;
+}
+
+.stagekitwp-testimonials-slider .slick-dots li {
+    margin: 0 0px;
+}
+
+.stagekitwp-testimonials-slider .slick-dots li button {
+    font-size: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ccc;
+    border: none;
+    cursor: pointer;
+	line-height: 10px;
+}
+.stagekitwp-testimonials-slider .slick-dots li button::before {
+	line-height: 13px;
+	left:-4px;
+}
+.stagekitwp-testimonials-slider .slick-dots li.slick-active button {
+    background-color: #333;
+}
+/* Hide default text and show Font Awesome icons for arrows */
+.stagekitwp-testimonials-slider .slick-prev,
+.stagekitwp-testimonials-slider .slick-next {
+    font-size: 0; /* Hides the default text */
+    position: absolute;
+    top: 45%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.stagekitwp-testimonials-slider .slick-prev::before,
+.stagekitwp-testimonials-slider .slick-next::before {
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 20px;
+    color: white;
+    opacity: 1;
+	line-height:10px;
+}
+
+.stagekitwp-testimonials-slider .slick-prev::before {
+    content: '\f104'; /* fa-chevron-left */
+}
+
+.stagekitwp-testimonials-slider .slick-next::before {
+    content: '\f105'; /* fa-chevron-right */
+}
+
+/* Board Members */
+.stagekitwp-board_member-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.stagekitwp-board_member-entry {
+    flex: 1 1 250px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    color: #333;
+    box-shadow: none;
+    transition: all 0.3s ease;
+}
+
+/* Advertiser Grid Layout */
+.stagekitwp-advertiser-wrapper {
+  display: grid;
+  justify-content: center;
+  gap: 20px;
+    width: 100%;
+    max-width: 100%;
+    /* Responsive auto-fit by default; only overridden when column count is locked. */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+
+.stagekitwp-advertiser-entry {
+  text-align: center;
+    padding: clamp(10px, 1.1vw, 15px);
+    min-height: clamp(96px, 14vw, 160px);
+    aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
+    min-width: 0;
+}
+
+.stagekitwp-advertiser-entry a {
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+
+.stagekitwp-advertiser-entry:hover {
+  transform: scale(1.05);
+}
+
+.stagekitwp-advertiser-entry img {
+    width: 100%;
+    max-width: 100%;
+    max-height: clamp(58px, 8vw, 95px);
+  height: auto;
+    object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Footer/widget placement tends to be narrower; keep cards visually compact. */
+.site-footer .stagekitwp-advertiser-entry,
+.stagekitwp-footer-widget .stagekitwp-advertiser-entry,
+.widget .stagekitwp-advertiser-entry {
+    min-height: clamp(78px, 9vw, 120px);
+    aspect-ratio: 5 / 2;
+    padding: clamp(8px, 0.8vw, 11px);
+}
+
+/* In narrow widget columns, force safe track sizing to prevent overflow. */
+.site-footer .stagekitwp-advertiser-wrapper,
+.stagekitwp-footer-widget .stagekitwp-advertiser-wrapper,
+.widget .stagekitwp-advertiser-wrapper {
+    width: 100%;
+    justify-content: stretch;
+    gap: 12px;
+}
+
+.site-footer .stagekitwp-advertiser-wrapper:not(.stagekitwp-adv-lock-cols),
+.stagekitwp-footer-widget .stagekitwp-advertiser-wrapper:not(.stagekitwp-adv-lock-cols),
+.widget .stagekitwp-advertiser-wrapper:not(.stagekitwp-adv-lock-cols) {
+    grid-template-columns: 1fr !important;
+}
+
+.site-footer .stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols,
+.stagekitwp-footer-widget .stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols,
+.widget .stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols {
+    grid-template-columns: repeat(var(--stagekitwp-adv-force-cols, 2), minmax(0, 1fr)) !important;
+}
+
+.site-footer .stagekitwp-advertiser-entry,
+.stagekitwp-footer-widget .stagekitwp-advertiser-entry,
+.widget .stagekitwp-advertiser-entry {
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: auto;
+}
+
+.site-footer .stagekitwp-advertiser-entry img,
+.stagekitwp-footer-widget .stagekitwp-advertiser-entry img,
+.widget .stagekitwp-advertiser-entry img {
+    max-height: clamp(42px, 5.8vw, 70px);
+}
+
+.stagekitwp-advertiser-wrapper.stagekitwp-adv-mini-logos .stagekitwp-advertiser-entry {
+    min-height: clamp(64px, 8vw, 96px) !important;
+    padding: clamp(6px, 0.6vw, 9px) !important;
+}
+
+.stagekitwp-advertiser-wrapper.stagekitwp-adv-mini-logos .stagekitwp-advertiser-entry img {
+    max-height: clamp(34px, 4.2vw, 54px) !important;
+}
+
+@media (max-width: 900px) {
+    .stagekitwp-advertiser-entry {
+        min-height: 112px;
+        padding: 12px;
+    }
+    .stagekitwp-advertiser-entry img {
+        max-height: 78px;
+    }
+}
+
+@media (max-width: 600px) {
+    .stagekitwp-advertiser-entry {
+        min-height: 92px;
+        padding: 10px;
+    }
+    .stagekitwp-advertiser-entry img {
+        max-height: 64px;
+    }
+    .stagekitwp-advertiser-entry:hover {
+        transform: none;
+    }
+}
+
+/* Advertiser Slider */
+.stagekitwp-advertiser-slider {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.stagekitwp-advertiser-slider .slick-slide{
+	    height: auto !important;
+}
+.stagekitwp-advertiser-slide {
+  text-align: center;
+}
+
+.stagekitwp-advertiser-slide img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+/* Sponsors */
+.stagekitwp-sponsor-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.stagekitwp-sponsor-entry {
+    flex: 1 1 250px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    color: #333;
+    box-shadow: none;
+    transition: all 0.3s ease;
+}
+
+/* Contributors */
+.stagekitwp-contributor-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.stagekitwp-contributor-entry {
+    flex: 1 1 250px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    color: #333;
+    box-shadow: none;
+    transition: all 0.3s ease;
+}
+
+.stagekitwp-sponsor-slider .slick-slide{
+	    height: auto !important;
+}
+.stagekitwp-sponsor-slide {
+  text-align: center;
+}
+
+.stagekitwp-sponsor-slide img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.stagekitwp-show-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stagekitwp-show-card {
+    border: 1px solid #ccc;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.stagekitwp-show-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.stagekitwp-season-cast {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.stagekitwp-show-card {
+    border: 1px solid #ccc;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+	text-align: center;
+}
+
+.stagekitwp-show-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.stagekitwp-season-cast {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.stagekitwp-show-card {
+    border: 1px solid #ccc;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.stagekitwp-show-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.stagekitwp-cast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.stagekitwp-cast-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #fff;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.stagekitwp-cast-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.stagekitwp_show_synopsis {
+	text-align: left;
+}
+
+
+.stagekitwp-season-banner {
+	text-align: center;
+	width:100%;
+}
+
+/* Programs/gallery tweaks */
+.stagekitwp-programs-gallery .stagekitwp-program-item {
+    padding: 12px;
+}
+.stagekitwp-programs-gallery .stagekitwp-program-item img,
+.stagekitwp-programs-gallery .stagekitwp-program-item canvas {
+    display: block;
+    margin: 0 auto 12px auto;
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+}
+.stagekitwp-program-preview img,
+.stagekitwp-program-preview canvas,
+.stagekitwp-program-preview .stagekitwp-program-preview-img {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    display: block;
+}
+
+/* Season-cast: make program previews small thumbnails and responsive */
+.stagekitwp-season-cast .stagekitwp-program-preview img,
+.stagekitwp-season-cast .stagekitwp-program-preview canvas,
+.stagekitwp-season-cast .stagekitwp-program-preview .stagekitwp-program-preview-img {
+    max-width: 120px; /* thumbnail size */
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* Small screens: allow previews to use full width of their container */
+@media (max-width: 768px) {
+    .stagekitwp-program-preview img,
+    .stagekitwp-program-preview canvas,
+    .stagekitwp-program-preview .stagekitwp-program-preview-img,
+    .stagekitwp-season-cast .stagekitwp-program-preview img,
+    .stagekitwp-season-cast .stagekitwp-program-preview canvas,
+    .stagekitwp-season-cast .stagekitwp-program-preview .stagekitwp-program-preview-img {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+.stagekitwp-programs-gallery .stagekitwp-program-item h4 {
+    margin-top: 0;
+}
+
+/* Shows Shortcode Styles */
+.stagekitwp-season-section {
+    margin-bottom: 40px;
+}
+
+.stagekitwp-season-title {
+    font-size: 2em;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+
+.stagekitwp-slot-title {
+    font-size: 1.5em;
+    margin: 30px 0 20px 0;
+    padding-left: 15px;
+    border-left: 3px solid rgba(0,0,0,0.1);
+}
+
+.stagekitwp-shows-entry {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid;
+    border-radius: 8px;
+}
+
+.stagekitwp-program-section {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.stagekitwp-program-header {
+    margin: 0 0 15px 0;
+    font-size: 1.2em;
+    text-align: center;
+}
+
+.stagekitwp-shows-entry h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.stagekitwp-shows-entry p {
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+/* Show images and program previews */
+.stagekitwp-shows-entry .stagekitwp-show-image {
+    margin: 15px 0;
+    text-align: center;
+}
+
+.stagekitwp-shows-entry .stagekitwp-show-image img {
+    max-width: 200px;
+    height: auto;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+}
+
+.stagekitwp-shows-entry .stagekitwp-program-preview {
+    margin: 15px 0;
+    text-align: center;
+}
+
+.stagekitwp-shows-entry .stagekitwp-program-preview img,
+.stagekitwp-shows-entry .stagekitwp-program-preview canvas {
+    max-width: 150px;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.stagekitwp-shows-entry .stagekitwp-program-link:hover img,
+.stagekitwp-shows-entry .stagekitwp-program-link:hover canvas {
+    transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stagekitwp-shows-entry {
+        padding: 15px;
+    }
+
+    .stagekitwp-shows-entry .stagekitwp-show-image img,
+    .stagekitwp-shows-entry .stagekitwp-program-preview img,
+    .stagekitwp-shows-entry .stagekitwp-program-preview canvas {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* Landing Page Shortcode Styles */
+.stagekitwp-landingpage-wrapper,
+.stagekitwp-landingpage {
+    /* Inherit alignment from parent container */
+    text-align: inherit;
+    width: 100%;
+}
+
+/* Image-only shortcodes with hard_breaks=false - stays inline with text */
+.stagekitwp-landingpage-image-inline {
+    display: inline-block;
+    text-align: center;
+}
+
+.stagekitwp-landingpage-image-inline img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* Mixed content container - centers both text and images */
+.stagekitwp-landingpage-mixed {
+    text-align: center;
+    width: 100%;
+}
+
+.stagekitwp-landingpage-mixed img {
+    /* Images in mixed content display as block and center */
+    display: block;
+    margin: 10px auto;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.stagekitwp-landingpage-field {
+    /* Inherit alignment from parent */
+    text-align: inherit;
+    margin: 0;
+    padding: 0;
+}
+
+/* Images in landing page wrapper when hard_breaks=true */
+.stagekitwp-landingpage-wrapper > img,
+.stagekitwp-landingpage-field img {
+    /* Center images but maintain parent text alignment for text */
+    display: block;
+    margin: 10px auto;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.stagekitwp-landingpage-field br {
+    display: none;
+}
+
+/* Cast with Bio - Responsive Grid Layout */
+.stagekitwp-landingpage-castwithbio {
+    display: grid;
+    grid-template-columns: repeat(var(--cast-cols, 3), 1fr);
+    gap: 25px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.stagekitwp-cast-column {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--stagekitwp-lp-meta-bg, #f9f9f9);
+    border: 1px solid var(--stagekitwp-lp-border, #ddd);
+    border-radius: 8px;
+    padding: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: var(--stagekitwp-lp-cast-size, 1rem);
+    font-style: var(--stagekitwp-lp-cast-style, normal);
+    font-weight: var(--stagekitwp-lp-cast-weight, normal);
+    font-family: var(--stagekitwp-lp-cast-font, var(--stagekitwp-lp-font));
+}
+
+.stagekitwp-cast-column:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stagekitwp-cast-image {
+    display: block;
+    width: 100%;
+    /* Scale image height inversely with number of columns */
+    /* 1 col = 300px, 2 col = 270px, 3 col = 240px, 4+ col = 210px minimum */
+    height: max(210px, calc(300px - (var(--cast-cols, 3) * 15px)));
+    object-fit: contain;
+    background-color: var(--stagekitwp-lp-meta-bg, #f0f0f0);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    aspect-ratio: 3/4;
+}
+
+.stagekitwp-cast-character {
+    font-size: 1.1em;
+    font-weight: bold;
+    font-family: var(--stagekitwp-lp-cast-font, var(--stagekitwp-lp-font));
+    margin: 8px 0 4px 0;
+    color: var(--stagekitwp-lp-heading, #333);
+}
+
+.stagekitwp-cast-actor {
+    font-size: 0.9em;
+    font-style: italic;
+    font-family: var(--stagekitwp-lp-cast-font, var(--stagekitwp-lp-font));
+    color: var(--stagekitwp-lp-text, #666);
+    margin: 4px 0 10px 0;
+    opacity: 0.8;
+}
+
+.stagekitwp-cast-bio {
+    /* Bio uses --stagekitwp-lp-cast-bio-size (separate, typically smaller than card text) */
+    font-size: var(--stagekitwp-lp-cast-bio-size, 0.85em);
+    font-family: var(--stagekitwp-lp-cast-font, var(--stagekitwp-lp-font));
+    line-height: 1.5;
+    color: var(--stagekitwp-lp-text, #555);
+    margin: 0;
+    flex-grow: 1;
+}
+
+/* -----------------------------------------------------------------------
+   Cast grid responsive breakpoints
+   The grid uses repeat(var(--cast-cols,3), 1fr) at full width.
+   At each breakpoint we override with explicit column counts so that
+   cards always have enough room regardless of the castcols= attr.
+   ----------------------------------------------------------------------- */
+
+/* Landscape tablet / small desktop (≤ 1024px): max 3 columns */
+@media (max-width: 1024px) {
+    .stagekitwp-landingpage-castwithbio {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    .stagekitwp-cast-column { padding: 12px; }
+    .stagekitwp-cast-image { height: auto; aspect-ratio: 3/4; }
+}
+
+/* Portrait tablet (≤ 768px): max 2 columns */
+@media (max-width: 768px) {
+    .stagekitwp-landingpage-castwithbio {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+    .stagekitwp-cast-column { padding: 12px; }
+    .stagekitwp-cast-image { height: auto; aspect-ratio: 3/4; margin-bottom: 10px; }
+    .stagekitwp-cast-character { margin: 8px 0 4px; }
+    .stagekitwp-cast-actor    { margin: 0 0 8px; }
+}
+
+/* Small mobile (≤ 480px): 1 column - full width cards */
+@media (max-width: 480px) {
+    .stagekitwp-landingpage-castwithbio {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .stagekitwp-cast-column { padding: 10px; }
+    .stagekitwp-cast-image {
+        height: auto;
+        aspect-ratio: 3/4;
+        max-height: 260px;   /* cap portrait image height on phone */
+        object-fit: cover;
+        margin-bottom: 8px;
+    }
+}
+
+/* URL Button Styles */
+.stagekitwp-url-button {
+    display: inline-block;
+    padding: 12px 24px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Default Button Format */
+.stagekitwp-button-default {
+    background-color: #0073aa;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
+.stagekitwp-button-default:hover {
+    background-color: #005a87;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.stagekitwp-button-default:active {
+    transform: translateY(0);
+}
+
+/* Modern Rounded Button Format */
+.stagekitwp-button-modern {
+    background-color: #2c3e50;
+    color: #ffffff;
+    border-radius: 25px;
+    padding: 12px 32px;
+}
+
+.stagekitwp-button-modern:hover {
+    background-color: #1a252f;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+.stagekitwp-button-modern:active {
+    transform: scale(0.98);
+}
+
+/* Minimal Border Button */
+.stagekitwp-button-minimal {
+    background-color: transparent;
+    color: #0073aa;
+    border: 2px solid #0073aa;
+    border-radius: 4px;
+    padding: 10px 22px;
+}
+
+.stagekitwp-button-minimal:hover {
+    background-color: #0073aa;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 115, 170, 0.3);
+}
+
+/* Outline Button */
+.stagekitwp-button-outline {
+    background-color: transparent;
+    color: #333333;
+    border: 2px solid #333333;
+    border-radius: 6px;
+}
+
+.stagekitwp-button-outline:hover {
+    background-color: #333333;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Gradient Button */
+.stagekitwp-button-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    border-radius: 8px;
+}
+
+.stagekitwp-button-gradient:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Prominent/Call-to-Action Button */
+.stagekitwp-button-prominent {
+    background-color: #e74c3c;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 14px 28px;
+    font-size: 1.1em;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.stagekitwp-button-prominent:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(231, 76, 60, 0.3);
+}
+
+/* Success/Green Button */
+.stagekitwp-button-success {
+    background-color: #27ae60;
+    color: #ffffff;
+    border-radius: 6px;
+}
+
+.stagekitwp-button-success:hover {
+    background-color: #229954;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+/* Ghost Button with hover underline */
+.stagekitwp-button-ghost {
+    background-color: transparent;
+    color: #0073aa;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    padding: 8px 12px;
+    transition: border-color 0.3s ease;
+}
+
+.stagekitwp-button-ghost:hover {
+    border-bottom-color: #0073aa;
+}
+
+/* Glass/Frosted effect button */
+.stagekitwp-button-glass {
+    background: rgba(0, 0, 0, 0.05);
+    color: #333;
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.stagekitwp-button-glass:hover {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Landing Page Wrapper - Inherit all text settings from surrounding context */
+.stagekitwp-landingpage-wrapper,
+.stagekitwp-landingpage-wrapper.stagekitwp-landingpage {
+    /* Inherit text properties from parent/surrounding context */
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    text-decoration: inherit;
+    text-transform: inherit;
+    direction: inherit;
+
+    /* Default alignment, overridden by context below */
+    text-align: left;
+}
+
+/* Field containers inherit all styling from wrapper */
+.stagekitwp-landingpage-field {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    text-decoration: inherit;
+    text-transform: inherit;
+    direction: inherit;
+    text-align: inherit;
+}
+
+/* Ensure nested elements (lists, divs) fully inherit alignment */
+.stagekitwp-landingpage-field > *,
+.stagekitwp-landingpage-wrapper > * {
+    text-align: inherit;
+}
+
+.stagekitwp-landingpage-cast-list,
+.stagekitwp-landingpage-cast-item,
+.stagekitwp-landingpage-castwithbio,
+.stagekitwp-landingpage-venue {
+    text-align: inherit;
+}
+
+/* Images should center naturally when wrapper is centered */
+.stagekitwp-landingpage-field img,
+.stagekitwp-landingpage-wrapper img,
+.stagekitwp-cast-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Center alignment - detect from preceding Gutenberg/Beaver Builder blocks */
+.has-text-align-center + .stagekitwp-landingpage-wrapper,
+.has-text-align-center + hr + .stagekitwp-landingpage-wrapper,
+.has-text-align-center + hr + hr + .stagekitwp-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-center + .stagekitwp-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-center + hr + .stagekitwp-landingpage-wrapper,
+.fl-col.fl-col-text-center + .stagekitwp-landingpage-wrapper,
+.bb-align-center + .stagekitwp-landingpage-wrapper {
+    text-align: center;
+}
+
+/* Left alignment - explicit left-align setting */
+.has-text-align-left + .stagekitwp-landingpage-wrapper,
+.has-text-align-left + hr + .stagekitwp-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-left + .stagekitwp-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-left + hr + .stagekitwp-landingpage-wrapper,
+.fl-col.fl-col-text-left + .stagekitwp-landingpage-wrapper,
+.bb-align-left + .stagekitwp-landingpage-wrapper {
+    text-align: left;
+}
+
+/* Right alignment - explicit right-align setting */
+.has-text-align-right + .stagekitwp-landingpage-wrapper,
+.has-text-align-right + hr + .stagekitwp-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-right + .stagekitwp-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-right + hr + .stagekitwp-landingpage-wrapper,
+.fl-col.fl-col-text-right + .stagekitwp-landingpage-wrapper,
+.bb-align-right + .stagekitwp-landingpage-wrapper {
+    text-align: right;
+}
+
+/* Justify alignment - for blocks set to justified */
+.has-text-align-justify + .stagekitwp-landingpage-wrapper,
+.has-text-align-justify + hr + .stagekitwp-landingpage-wrapper {
+    text-align: justify;
+}
+
+/* Support for theme-specific centering classes */
+.wp-has-text-align-center + .stagekitwp-landingpage-wrapper,
+.entry-content .text-center + .stagekitwp-landingpage-wrapper,
+.centered + .stagekitwp-landingpage-wrapper,
+.center + .stagekitwp-landingpage-wrapper {
+    text-align: center;
+}
+
+/* Cast with bio grid - inherit alignment and respect castcols */
+.stagekitwp-landingpage-castwithbio {
+    display: grid;
+    grid-template-columns: repeat(var(--cast-cols, 3), 1fr);
+    gap: 25px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    text-align: inherit;
+}
+
+.stagekitwp-cast-column {
+    text-align: center;
+}
+
+/* Ensure lists display as block elements and center content appropriately */
+.stagekitwp-landingpage-cast-list {
+    display: block;
+}
+
+.stagekitwp-landingpage-cast-item {
+    display: block;
+}
+
+/* Mixed content (image + text) should maintain wrapper alignment */
+.stagekitwp-landingpage-mixed {
+    text-align: inherit;
+}
+
+/* Non-hard-breaks inline image should inherit wrapper alignment */
+.stagekitwp-landingpage-image-inline {
+    display: inline-block;
+    text-align: inherit;
+}
+
+/* Responsive button adjustments */
+@media (max-width: 768px) {
+    .stagekitwp-url-button {
+        padding: 10px 20px;
+        font-size: 0.95em;
+    }
+    .stagekitwp-button-prominent {
+        padding: 12px 24px;
+        font-size: 1em;
+    }
+}
+
+/* ==========================================================================
+   [stagekitwp_tickets] - Banner layout
+   ========================================================================== */
+.stagekitwp-tickets-block { margin: 20px 0; }
+.stagekitwp-tickets-empty { padding: 20px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; text-align: center; color: #666; }
+
+.stagekitwp-ticket-btn-wrap { margin-bottom: 12px; }
+.stagekitwp-ticket-btn-wrap:last-child { margin-bottom: 0; }
+.stagekitwp-ticket-btn {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 28px;
+    text-decoration: none !important;
+    border-radius: 6px;
+    gap: 4px;
+    text-align: center;
+    line-height: 1.3;
+    transition: filter .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+.stagekitwp-ticket-btn:hover {
+    filter: brightness(1.12);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.18);
+}
+.stagekitwp-ticket-btn-label {
+    display: block !important;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    opacity: .82;
+}
+.stagekitwp-ticket-btn-title {
+    display: block !important;
+    font-size: 20px;
+    font-weight: 700;
+}
+.stagekitwp-ticket-btn-dates {
+    display: block !important;
+    font-size: 12px;
+    font-weight: 400;
+    opacity: .72;
+}
+
+/* ==========================================================================
+   [stagekitwp_tickets] - Cards layout
+   ========================================================================== */
+.stagekitwp-tickets-cards { display: flex !important; flex-wrap: wrap; gap: 20px; }
+/* Card is now a <div> so it can hold multiple <a> children without nesting violations */
+.stagekitwp-ticket-card {
+    flex: 1 1 220px;
+    min-width: 200px;
+    max-width: 320px;
+    background: var(--stagekitwp-tk-bg, #fff);
+    border: 1px solid var(--stagekitwp-tk-border, #e0e0e0);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex !important;
+    flex-direction: column !important;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.stagekitwp-ticket-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.14); }
+/* Poster image link fills the image area */
+.stagekitwp-ticket-card-img-link { display: block; line-height: 0; }
+.stagekitwp-ticket-card-img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+.stagekitwp-ticket-card-img-ph { width: 100%; aspect-ratio: 2/3; background: #e8f4fb; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+.stagekitwp-ticket-card-body { padding: 16px; display: flex !important; flex-direction: column !important; gap: 6px; flex: 1; }
+.stagekitwp-ticket-card-label { display: block !important; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.stagekitwp-ticket-card-title { display: block !important; font-size: 16px; font-weight: 700; line-height: 1.3; }
+.stagekitwp-ticket-card-meta { display: block !important; font-size: 12px; opacity: .68; }
+.stagekitwp-ticket-card-genre { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+/* Footer holds Get Tickets + optional Get Info side by side */
+.stagekitwp-ticket-card-footer { padding: 0 16px 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.stagekitwp-ticket-card-cta {
+    flex: 1 1 auto;
+    display: block;
+    text-align: center;
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: var(--stagekitwp-tk-btn, #0073aa);
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none !important;
+    transition: filter .2s ease;
+}
+.stagekitwp-ticket-card-cta:hover { filter: brightness(1.14); }
+
+/* ==========================================================================
+   [stagekitwp_tickets] - Table layout
+   ========================================================================== */
+.stagekitwp-tickets-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.stagekitwp-tickets-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.stagekitwp-tickets-table thead th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    border-bottom: 2px solid #e0e0e0;
+    white-space: nowrap;
+}
+.stagekitwp-tickets-table tbody td { padding: 12px 14px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; }
+.stagekitwp-tickets-table tbody tr:last-child td { border-bottom: none; }
+.stagekitwp-ticket-table-name { font-weight: 600; }
+.stagekitwp-ticket-table-tag,
+.stagekitwp-ticket-table-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 600;
+    white-space: nowrap;
+    vertical-align: middle;
+    margin-left: 4px;
+}
+.stagekitwp-ticket-table-badge { background: #f0f0f0; color: #555; }
+.stagekitwp-ticket-season-row td { font-weight: 600; }
+.stagekitwp-ticket-table-link {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 4px;
+    background: #0073aa;
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: filter .2s ease;
+}
+.stagekitwp-ticket-table-link:hover { filter: brightness(1.14); }
+
+/* ==========================================================================
+   [stagekitwp_tickets] - Minimal layout
+   ========================================================================== */
+.stagekitwp-tickets-minimal { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+.stagekitwp-tickets-minimal li { border-bottom: 1px solid #e0e0e0; }
+.stagekitwp-tickets-minimal li:first-child { border-top: 1px solid #e0e0e0; }
+.stagekitwp-ticket-min-row {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 4px;
+    text-decoration: none !important;
+    color: inherit;
+    transition: opacity .15s ease;
+}
+.stagekitwp-ticket-min-row:hover { opacity: .8; }
+.stagekitwp-ticket-min-info { display: flex !important; flex-direction: column !important; gap: 3px; }
+.stagekitwp-ticket-min-type { display: block !important; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.stagekitwp-ticket-min-title { display: block !important; font-size: 17px; font-weight: 700; }
+.stagekitwp-ticket-min-dates { display: block !important; font-size: 12px; opacity: .65; }
+.stagekitwp-ticket-min-arrow {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .2s ease;
+}
+.stagekitwp-ticket-min-row:hover .stagekitwp-ticket-min-arrow { transform: translateX(3px); }
+
+/* ==========================================================================
+   [stagekitwp_tickets] - Spotlight layout
+   ========================================================================== */
+.stagekitwp-tickets-spotlight { display: flex; flex-direction: column; gap: 20px; }
+.stagekitwp-ticket-spotlight-hero {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 280px;
+    display: flex !important;
+    align-items: flex-end;
+    text-decoration: none !important;
+    color: #fff;
+}
+.stagekitwp-ticket-spotlight-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.stagekitwp-ticket-spotlight-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,.1) 60%, transparent 100%); }
+.stagekitwp-ticket-spotlight-hero-body { position: relative; z-index: 1; padding: 28px; width: 100%; }
+.stagekitwp-ticket-spotlight-hero-label { display: block !important; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; opacity: .85; margin-bottom: 6px; }
+.stagekitwp-ticket-spotlight-hero-title { display: block !important; font-size: 26px; font-weight: 800; line-height: 1.2; margin-bottom: 14px; }
+.stagekitwp-ticket-spotlight-cta {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: 6px;
+    background: #fff;
+    color: #111;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    transition: opacity .2s ease;
+}
+.stagekitwp-ticket-spotlight-cta:hover { opacity: .88; }
+/* Grid: equal columns matching the full banner width.
+   PHP sets --stagekitwp-spotlight-count on the element (e.g. 3 shows = 3 equal cols). */
+.stagekitwp-ticket-spotlight-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--stagekitwp-spotlight-count, 3), 1fr);
+    gap: 16px;
+    width: 100%;
+    clip-path: inset(0);
+}
+/* Wrapper: flex column so Get Info link sits flush below each tile */
+.stagekitwp-ticket-spotlight-tile-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+/* Tile <a>: vertical card — 4:3 image on top, text body below */
+.stagekitwp-ticket-spotlight-tile {
+    display: flex !important;
+    flex-direction: column !important;
+    border: 1px solid var(--stagekitwp-tk-border, #e0e0e0);
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none !important;
+    color: var(--stagekitwp-tk-text, inherit);
+    transition: box-shadow .2s ease, transform .2s ease;
+    background: var(--stagekitwp-tk-bg, #fff);
+}
+.stagekitwp-ticket-spotlight-tile:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+/* Image — 4:3 landscape across the full tile width */
+.stagekitwp-ticket-spotlight-tile-img-wrap {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--stagekitwp-tk-border, #eee);
+}
+.stagekitwp-ticket-spotlight-tile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    transition: transform .3s ease;
+}
+.stagekitwp-ticket-spotlight-tile:hover .stagekitwp-ticket-spotlight-tile-img { transform: scale(1.04); }
+/* Placeholder when no image */
+.stagekitwp-ticket-spotlight-tile-img-ph {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: var(--stagekitwp-tk-btn, #0073aa);
+    background: color-mix(in srgb, var(--stagekitwp-tk-btn, #0073aa) 10%, transparent);
+}
+/* Text body below the image */
+.stagekitwp-ticket-spotlight-tile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 14px 16px 16px;
+    flex: 1 1 auto;
+}
+.stagekitwp-ticket-spotlight-tile-label { display: block !important; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--stagekitwp-tk-btn, #0073aa) !important; }
+.stagekitwp-ticket-spotlight-tile-title { display: block !important; font-size: 15px; font-weight: 700; line-height: 1.3; color: var(--stagekitwp-tk-text, inherit) !important; }
+.stagekitwp-ticket-spotlight-tile-dates { display: block !important; font-size: 11px; opacity: .68; }
+/* CTA pinned to bottom of body */
+.stagekitwp-ticket-spotlight-tile-cta {
+    display: block;
+    margin-top: auto;
+    padding: 9px 16px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    background: var(--stagekitwp-tk-btn, #0073aa);
+    color: #fff !important;
+    text-decoration: none !important;
+    transition: filter .2s ease;
+}
+.stagekitwp-ticket-spotlight-tile-cta:hover { filter: brightness(1.14); }
+
+/* ==========================================================================
+   [stagekitwp_tickets] - Get Info link (shared across all layouts)
+   ========================================================================== */
+/* Shared "Get Info" link style - appears beside ticket buttons/links in all layouts */
+.stagekitwp-ticket-info-link {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none !important;
+    color: var(--stagekitwp-tk-text, #333) !important;
+    border: 1px solid var(--stagekitwp-tk-border, #ccc);
+    background: transparent;
+    transition: background .18s ease, color .18s ease;
+    white-space: nowrap;
+}
+.stagekitwp-ticket-info-link:hover {
+    background: var(--stagekitwp-tk-border, #e0e0e0);
+    color: var(--stagekitwp-tk-text, #111) !important;
+}
+
+/* Minimal layout: each item is a flex column (row + info button below) */
+.stagekitwp-ticket-min-item {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.stagekitwp-ticket-min-item .stagekitwp-ticket-info-link {
+    align-self: flex-start;
+    margin-left: 16px;   /* indent to align under the title text */
+    font-size: 11px;
+}
+
+/* Banner layout: info link appears below each button */
+.stagekitwp-ticket-btn-wrap .stagekitwp-ticket-info-link {
+    display: block;
+    margin-top: 6px;
+    text-align: center;
+    font-size: 12px;
+    border: none;
+    text-decoration: underline !important;
+    padding: 2px 0;
+    opacity: .75;
+}
+.stagekitwp-ticket-btn-wrap .stagekitwp-ticket-info-link:hover { opacity: 1; background: transparent; }
+
+/* Spotlight tiles: info link sits below each tile */
+.stagekitwp-ticket-spotlight-tile-wrap .stagekitwp-ticket-info-link {
+    display: block;
+    text-align: center;
+    padding: 5px 10px;
+}
+
+/* Table: actions cell holds Get Tickets + Get Info inline */
+.stagekitwp-ticket-table-actions {
+    white-space: nowrap;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.stagekitwp-ticket-table-actions .stagekitwp-ticket-info-link {
+    font-size: 11px;
+    padding: 3px 8px;
+}
+
+/* Card footer: Get Tickets takes remaining space, Get Info is compact */
+.stagekitwp-ticket-card-footer .stagekitwp-ticket-info-link {
+    flex: 0 0 auto;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+/* ==========================================================================
+   [stagekitwp_tickets] - Responsive
+   ========================================================================== */
+@media (max-width: 700px) {
+    /* Spotlight: collapse to 2 equal columns on portrait tablet / large phone */
+    .stagekitwp-ticket-spotlight-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+}
+@media (max-width: 600px) {
+    .stagekitwp-ticket-btn { padding: 16px 20px; }
+    .stagekitwp-ticket-btn-title { font-size: 17px; }
+    .stagekitwp-tickets-cards { flex-direction: column; }
+    .stagekitwp-ticket-card { max-width: 100%; }
+    .stagekitwp-ticket-spotlight-hero-title { font-size: 20px; }
+}
+@media (max-width: 400px) {
+    /* Spotlight: single column on very small phones */
+    .stagekitwp-ticket-spotlight-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ==========================================================================
+   [stagekitwp_venues]
+   ========================================================================== */
+.stagekitwp-venue-card {
+    background-color: var(--stagekitwp-sc-bg, #ffffff);
+    color: var(--stagekitwp-sc-text, #333333);
+    font-family: var(--stagekitwp-sc-font, Georgia);
+    padding: 20px;
+    border: 1px solid var(--stagekitwp-sc-border, #cccccc);
+    border-radius: 8px;
+}
+.stagekitwp-venue-card h2 {
+    color: var(--stagekitwp-sc-h2, #333333);
+    font-family: var(--stagekitwp-sc-font, Georgia);
+    margin-top: 0;
+}
+.stagekitwp-venue-card h3 {
+    color: var(--stagekitwp-sc-h3, #555555);
+    font-family: var(--stagekitwp-sc-font, Georgia);
+}
+.stagekitwp-venue-card .stagekitwp-venue-entry {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--stagekitwp-sc-border, #cccccc);
+}
+.stagekitwp-venue-card .stagekitwp-venue-entry:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+.stagekitwp-venue-card .stagekitwp-venue-entry p {
+    margin: 0 0 .5rem;
+}
+.stagekitwp-venue-card .stagekitwp-venue-entry a {
+    color: var(--stagekitwp-sc-h3, #555555);
+    text-decoration: none;
+    border-bottom: 2px solid var(--stagekitwp-sc-h3, #555555);
+    padding-bottom: 2px;
+}
+.stagekitwp-venue-card .stagekitwp-venue-entry a:hover {
+    opacity: .8;
+}
+.stagekitwp-venue-card .stagekitwp-venue-entry img {
+    max-width: 100%;
+    height: auto;
+}
+.stagekitwp-venue-card .stagekitwp-venue-map-wrap {
+    margin: 15px 0;
+    overflow: hidden;
+}
+.stagekitwp-venue-card .stagekitwp-venue-map {
+    height: 300px;
+    border: 1px solid var(--stagekitwp-sc-border, #cccccc);
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "stagekitwp/bookshelf-container",
+  "title": "Bookshelf Container",
+  "category": "stagekitwp-blocks",
+  "icon": "index-card",
+  "description": "Display bookshelf items as book spines or cover gallery.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "layoutStyle": {
+      "type": "string",
+      "default": "spines"
+    },
+    "booksPerShelf": {
+      "type": "number",
+      "default": 4
+    },
+    "shelfHeight": {
+      "type": "number",
+      "default": 360
+    },
+    "bookcaseWidth": {
+      "type": "number",
+      "default": 1200
+    },
+    "shelfGap": {
+      "type": "number",
+      "default": 18
+    },
+    "shelfTheme": {
+      "type": "string",
+      "default": "walnut"
+    }
+  },
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "editorStyle": "file:./index.css",
+  "example": {
+    "attributes": {
+      "layoutStyle": "spines",
+      "booksPerShelf": 4,
+      "shelfHeight": 360,
+      "bookcaseWidth": 1200,
+      "shelfGap": 18,
+      "shelfTheme": "walnut"
+    },
+    "innerBlocks": [
+      {
+        "name": "stagekitwp/bookshelf-item",
+        "attributes": {
+          "bookTitle": "The Stage Manager's Handbook",
+          "authorName": "Example Author"
+        }
+      },
+      {
+        "name": "stagekitwp/bookshelf-item",
+        "attributes": {
+          "bookTitle": "Designing for the Theatre",
+          "authorName": "Example Author"
+        }
+      },
+      {
+        "name": "stagekitwp/bookshelf-item",
+        "attributes": {
+          "bookTitle": "A Practical Guide to Production",
+          "authorName": "Example Author"
+        }
+      }
+    ]
+  }
+}

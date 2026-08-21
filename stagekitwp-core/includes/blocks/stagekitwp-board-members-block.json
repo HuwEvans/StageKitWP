@@ -1,0 +1,105 @@
+{
+  "name": "stagekitwp/board-members",
+  "title": "Board Members",
+  "description": "Display board member profiles with configurable grid, list, or accordion layouts",
+  "category": "stagekitwp-core",
+  "icon": "groups",
+  "keywords": [
+    "board",
+    "members",
+    "team",
+    "profiles"
+  ],
+  "attributes": {
+    "layout": {
+      "type": "string",
+      "enum": [
+        "grid",
+        "list",
+        "accordion"
+      ],
+      "default": "grid"
+    },
+    "showPhotos": {
+      "type": "boolean",
+      "default": true
+    },
+    "showCompany": {
+      "type": "boolean",
+      "default": true
+    },
+    "photoSize": {
+      "type": "string",
+      "enum": [
+        "small",
+        "medium",
+        "large"
+      ],
+      "default": "medium"
+    },
+    "columns": {
+      "type": "number",
+      "default": 0
+    },
+    "columnsDesktop": {
+      "type": "number",
+      "default": 0
+    },
+    "columnsTablet": {
+      "type": "number",
+      "default": 0
+    },
+    "columnsMobile": {
+      "type": "number",
+      "default": 1
+    },
+    "bgColor": {
+      "type": "string",
+      "default": ""
+    },
+    "textColor": {
+      "type": "string",
+      "default": ""
+    },
+    "borderColor": {
+      "type": "string",
+      "default": ""
+    },
+    "borderWidth": {
+      "type": "number",
+      "default": 0
+    },
+    "rounded": {
+      "type": "boolean",
+      "default": false
+    },
+    "borderRadius": {
+      "type": "number",
+      "default": 0
+    },
+    "shadow": {
+      "type": "boolean",
+      "default": false
+    },
+    "baseFont": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "align": [
+      "wide",
+      "full"
+    ],
+    "anchor": true,
+    "customClassName": true
+  },
+  "example": {
+    "attributes": {
+      "layout": "grid",
+      "showPhotos": true,
+      "showCompany": true,
+      "photoSize": "medium"
+    }
+  }
+}

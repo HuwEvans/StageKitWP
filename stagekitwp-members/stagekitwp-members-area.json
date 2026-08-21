@@ -1,0 +1,258 @@
+{
+  "$schema": "https://miltonplayers.example/schema/stagekitwp-plugin-bundle.json",
+  "generated": "2026-08-10",
+  "plugin": {
+    "name": "StageKitWP - Members",
+    "slug": "stagekitwp-members",
+    "version": "3.0.0",
+    "author": "Huw Evans",
+    "author_homepage": "https://miltonplayers.example",
+    "homepage": "https://miltonplayers.example/stagekitwp-members",
+    "download_url": "https://miltonplayers.example/stagekitwp-members/stagekitwp-members-3.0.0.zip",
+    "requires": "6.0",
+    "tested": "6.6",
+    "requires_php": "7.4",
+    "requires_plugins": [
+      "stagekitwp-core"
+    ],
+    "last_updated": "2026-08-10"
+  },
+  "description": {
+    "short": "A full membership system for theatre groups: roles, invitations, directory, messaging, announcements, events with RSVP and attendance, cast availability, an iCal calendar feed, a REST API, bulk email, and notification preferences.",
+    "full": "StageKitWP - Members turns a StageKitWP site into a private members area. Producers invite members, who register and manage a profile with interests, a photo, and a bio. Members find each other in an opt-in directory, message privately, read the announcements notice board, RSVP to events (Going / Maybe / Can't make it), subscribe to the event calendar in Google/Apple/Outlook, and publish their availability so producers can plan rehearsals and casting. Producers and executives get real member search, CSV exports, an attendance check-in roster, a cast-availability grid, an announcements notice board with optional email delivery, and a queued bulk-email tool with scheduling and per-member notification preferences. A capability-gated stagekitwp-ma/v1 REST API exposes read access to directory-listed members, events, and RSVPs without ever leaking private data. Every feature works on both MySQL and SQLite and is capability-gated for Member, Producer, and Executive roles."
+  },
+  "instructions": {
+    "page_slug": "/instructions",
+    "summary": "See the on-site 'Member Instructions' page (slug: /instructions) for a full member and producer guide. Shortcodes: [stagekitwp_members_login], [stagekitwp_members_open_register], [stagekitwp_members_register], [stagekitwp_members_profile], [stagekitwp_members_member_profile], [stagekitwp_members_producer_dashboard], [stagekitwp_members_directory], [stagekitwp_members_conversations], [stagekitwp_members_conversation], [stagekitwp_members_announcements], [stagekitwp_members_events], [stagekitwp_members_my_rsvps], [stagekitwp_members_rsvp], [stagekitwp_members_availability]. Members can subscribe to the event calendar (/events.ics or a personal token feed) and browse a read-only REST API under stagekitwp-ma/v1. Producers and executives manage invitations, member search and CSV export, events and attendance, cast availability, announcements, and bulk email from the WordPress admin under the TM Members menu. Nav menu items can be auto-injected per role (TM Members > Settings > Navigation Menu) or manually tagged with _stagekitwp_members_visibility meta on any Appearance > Menus item.",
+    "installation": "1. Ensure the StageKitWP Core plugin is installed and active (required). 2. Upload the stagekitwp-members folder to wp-content/plugins/. 3. Activate the plugin from Plugins. 4. Roles, capabilities, and database tables are created automatically. 5. Add the member-facing pages using the shortcodes listed below. 6. (Optional) Enable Custom Login, Open Registration, Cloudflare Turnstile, and Nav Menu injection from TM Members > Settings.",
+    "content_html": "<!-- wp:heading {\"level\":1} -->\n<h1 class=\"wp-block-heading\">TM Members Area &#8212; Instructions</h1>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Welcome to the members area. This guide covers everything you can do here and how each feature works. If you have any trouble, contact a producer or an executive.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Logging in</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Use the <strong>Log In</strong> link in the navigation menu, or go directly to the Login page. Enter your username or email and your password, then click <strong>Log In</strong>. Tick <em>Remember me</em> to stay signed in on your device. If you have forgotten your password, click <strong>Forgot your password?</strong> to receive a reset link by email.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>The login form may include a Cloudflare Turnstile bot-verification widget. If it appears, simply wait for the tick to appear (Managed mode does this automatically) before submitting.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Getting started &amp; registering</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>There are two ways to join:</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li><strong>Invitation:</strong> A producer emails you an invitation link. Click it, choose a password, and your account is created with the Member role. This is the default join path.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li><strong>Open registration</strong> (if enabled): Click <em>Create an account</em> on the Login page or navigate to the Register page. Fill in your first name, last name, username, email, and a password (at least 8 characters). You are logged in automatically after registering.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Navigation</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>The site navigation updates automatically based on your login status and role:</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li><strong>Logged out:</strong> only the <em>Log In</em> link is shown.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li><strong>Logged in as a Member:</strong> My Profile, Events, Announcements, Availability, Messages, and Directory links appear.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li><strong>Logged in as a Producer or Executive:</strong> a <em>Producer Dashboard</em> link appears in addition to the above.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li><strong>Log Out</strong> is always shown when you are logged in.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Your profile</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>On <a href=\"/profile/\">My Profile</a> you can update your display name, upload a profile photo (JPG, PNG, GIF, or WEBP up to 2&nbsp;MB), write a short bio, attach a resume, and select your <em>interests</em> (acting, directing, lighting, sound, and more). Your interests help producers find you for the right roles and crews.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li><strong>Email notifications:</strong> Choose which emails you receive. You are opted in by default and can opt out at any time.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li><strong>Directory listing:</strong> Tick <em>List me in the member directory</em> if you want other members to find you. You are hidden until you opt in.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Member directory</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>The <a href=\"/directory/\">Directory</a> lets members find each other. Search by name or filter by interest, then open a profile to see someone&#8217;s role, interests, and bio &#8212; and send them a message.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Messages</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Use <a href=\"/messages/\">Messages</a> to hold private conversations with other members. Open a conversation to read the full thread and reply. You&#8217;ll be notified of new messages according to your notification preferences.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Announcements</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>The <a href=\"/announcements/\">Announcements</a> page is the group notice board. Producers post news here &#8212; auditions, schedule changes, and reminders &#8212; and it is also emailed to members by default. Notices marked <strong>Important</strong> are highlighted and reach everyone, even members who have opted out of announcement emails.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Events &amp; RSVPs</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>The <a href=\"/events/\">Events</a> page lists upcoming and past productions. For each event you can RSVP <strong>Going</strong>, <strong>Maybe</strong>, or <strong>Can&#8217;t make it</strong>. Your current choice is highlighted, and you can change it any time before the event.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p><strong>Subscribe to the calendar:</strong> On the Events page, use <em>Subscribe to all events</em> or <em>Subscribe to my events</em> to add the schedule to Google Calendar, Apple Calendar, or Outlook. Your personal feed shows only the events you have RSVP&#8217;d to and updates automatically.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Availability</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>On <a href=\"/availability/\">My Availability</a> you can add date ranges marked <strong>Available</strong>, <strong>Unavailable</strong>, or <strong>Tentative</strong>, with an optional note. Producers use this information to plan rehearsals and casting around your schedule.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">For producers &amp; executives</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li><strong>Producer Dashboard:</strong> View member stats, search members by name and interest, and access producer tools from one screen.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li><strong>Invitations:</strong> Invite new members and manage pending, accepted, and revoked invites from the admin area (TM Members &rarr; Invitations).</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li><strong>Search &amp; export:</strong> Filter members by name and interest, and export members, RSVPs, or the email log to CSV.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li><strong>Events:</strong> Create events, set dates, check members in on the attendance roster, and review the cast availability grid.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li><strong>Announcements:</strong> Post to the notice board from the Announcements menu. Choose whether to also email members; executives can mark a notice <em>Important</em> to bypass opt-outs.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li><strong>Bulk email:</strong> Send to members through the email queue with scheduled sending; per-member notification preferences are respected.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">For administrators: configuring the plugin</h2>\n<!-- /wp:heading -->\n\n<!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">Setting up the custom login page</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"ordered\":true} -->\n<ol class=\"wp-block-list\"><!-- wp:list-item -->\n<li>Create a new page (e.g. titled <em>Login</em>) and add the shortcode <code>[stagekitwp_members_login]</code> to its content. Publish it.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Go to <strong>TM Members &rarr; Settings &rarr; Login &amp; Registration</strong>.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Tick <em>Enable custom login page</em>.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Select the page you created from the <em>Login Page</em> dropdown.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Optionally select an <em>After-Login Redirect</em> page (where members land after signing in). If left blank, members are sent to the home page.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Save Settings. From now on any visit to <code>/wp-login.php</code> is silently redirected to your custom page. Password reset, logout, and other WordPress-native login flows are unaffected.</li>\n<!-- /wp:list-item --></ol>\n<!-- /wp:list -->\n\n<!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">Enabling open (public) registration</h3>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>By default, only invited members can register. To allow anyone to create an account:</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list {\"ordered\":true} -->\n<ol class=\"wp-block-list\"><!-- wp:list-item -->\n<li>Create a new page (e.g. <em>Register</em>) and add <code>[stagekitwp_members_open_register]</code>. Publish it.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Go to <strong>TM Members &rarr; Settings &rarr; Login &amp; Registration</strong>.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Tick <em>Allow anyone to register without an invitation</em>.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Select your registration page from the <em>Registration Page</em> dropdown.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Save Settings. A <em>Create an account</em> link now appears on the login form.</li>\n<!-- /wp:list-item --></ol>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>New registrants automatically receive the <strong>Member</strong> role and are logged in immediately. The site administrator receives a new-user notification email.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">Adding Cloudflare Turnstile bot protection</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"ordered\":true} -->\n<ol class=\"wp-block-list\"><!-- wp:list-item -->\n<li>Log in to the <a href=\"https://dash.cloudflare.com/?to=/:account/turnstile\">Cloudflare dashboard</a> and navigate to <strong>Turnstile</strong>.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Click <strong>Add site</strong>. Give it a name, enter your domain, and choose widget type <strong>Managed</strong> (recommended &#8212; invisible for real users, challenged only for bots).</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Copy the <strong>Site Key</strong> and <strong>Secret Key</strong> shown after creation.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Go to <strong>TM Members &rarr; Settings &rarr; Cloudflare Turnstile</strong>.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Paste the Site Key and Secret Key into the respective fields.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Tick <em>Add Turnstile verification to the login form</em>.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Save Settings. The Turnstile widget appears on the login form. The Cloudflare script is loaded only on the login page &#8212; no performance impact elsewhere.</li>\n<!-- /wp:list-item --></ol>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p><strong>Note:</strong> If either key is blank, Turnstile is silently disabled even if the checkbox is ticked &#8212; the login form will never break due to a missing key.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">Setting up the navigation menu</h3>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>The plugin can automatically inject permission-aware items into any registered nav menu location:</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:list {\"ordered\":true} -->\n<ol class=\"wp-block-list\"><!-- wp:list-item -->\n<li>Go to <strong>TM Members &rarr; Settings &rarr; Navigation Menu</strong>.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Choose the <strong>Menu Location</strong> from the dropdown (shows all locations registered by your active theme).</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>For each member screen, select the published page that contains the matching shortcode. Pages with no selection are omitted from the menu.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Tick <em>Add TM Members items to the selected menu location</em>.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Save Settings.</li>\n<!-- /wp:list-item --></ol>\n<!-- /wp:list -->\n\n<!-- wp:paragraph -->\n<p>The injected items behave as follows: logged-out visitors see only <em>Log In</em>; logged-in members see their permitted pages; producers and executives also see <em>Producer Dashboard</em>; all logged-in users see <em>Log Out</em>.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p><strong>Manual visibility tagging:</strong> You can also control individual menu items you have added via <strong>Appearance &rarr; Menus</strong>. Expand any item, add a custom field named <code>_stagekitwp_members_visibility</code>, and set its value to one of: <code>logged_out</code>, <code>logged_in</code>, <code>member</code>, <code>producer</code>, or <code>executive</code>. The item will be hidden from users who do not match that visibility rule.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Shortcode reference</h2>\n<!-- /wp:heading -->\n\n<!-- wp:table -->\n<figure class=\"wp-block-table\"><table><thead><tr><th>Shortcode</th><th>Who can use it</th><th>What it shows</th></tr></thead><tbody><tr><td><code>&#91;stagekitwp_members_login&#93;</code></td><td>Anyone (public)</td><td>Themed login form. Shows logged-in message + Log Out if already signed in.</td></tr><tr><td><code>&#91;stagekitwp_members_open_register&#93;</code></td><td>Anyone (public)</td><td>Self-registration form. Requires Open Registration to be enabled in Settings.</td></tr><tr><td><code>&#91;stagekitwp_members_register&#93;</code></td><td>Invited only</td><td>Invitation-token registration form.</td></tr><tr><td><code>&#91;stagekitwp_members_profile&#93;</code></td><td>Members+</td><td>Front-end profile editor (bio, photo, interests, notifications, directory toggle).</td></tr><tr><td><code>&#91;stagekitwp_members_producer_dashboard&#93;</code></td><td>Producers+</td><td>Member search, stats, and producer tools.</td></tr><tr><td><code>&#91;stagekitwp_members_directory&#93;</code></td><td>Members+</td><td>Searchable, opt-in member directory.</td></tr><tr><td><code>&#91;stagekitwp_members_conversations&#93;</code></td><td>Members+</td><td>Your private message conversation list.</td></tr><tr><td><code>&#91;stagekitwp_members_conversation&#93;</code></td><td>Members+</td><td>A single private conversation thread.</td></tr><tr><td><code>&#91;stagekitwp_members_events&#93;</code></td><td>Members+</td><td>Events list with three-state RSVP and calendar subscribe links.</td></tr><tr><td><code>&#91;stagekitwp_members_my_rsvps&#93;</code></td><td>Members+</td><td>Your RSVP history and attendance record.</td></tr><tr><td><code>&#91;stagekitwp_members_availability&#93;</code></td><td>Members+</td><td>Manage your availability date ranges.</td></tr><tr><td><code>&#91;stagekitwp_members_announcements&#93;</code></td><td>Members+</td><td>Notice board feed; important notices highlighted.</td></tr></tbody></table></figure>\n<!-- /wp:table -->\n"
+  },
+  "changelog": {
+    "current": "3.0.0",
+    "markdown": "# Changelog\n\nAll notable changes to **TM Members Area** are documented here.\nThis project adheres to [Semantic Versioning](https://semver.org/).\n\n## [2.0.0] — 2026-07-06\n\n### Security & hardening (Phase 5)\n- **Profile image uploads** are now validated: images only\n  (JPG/PNG/GIF/WEBP), a 2 MB size cap, and a real-image check via\n  `getimagesize()` — a renamed `.php` or oversized file is rejected.\n- **Avatar fallback**: a deleted or missing profile image now degrades to\n  an initial-letter placeholder instead of a broken-image icon, in both\n  the directory grid and the single profile view.\n- **`uninstall.php`**: deleting the plugin is a no-op by default (data is\n  preserved). A new \"Delete all data on uninstall\" setting must be enabled\n  first; only then are the custom tables, options, roles, CPT content, and\n  plugin user meta removed.\n- **i18n**: the `stagekitwp-members-area` text domain is now loaded from\n  `/languages`, with a POT template added.\n- **Nonce/capability audit**: verified every state-changing handler\n  (profile, events, announcements, RSVP, availability, check-in, export,\n  email queue, messaging, REST) enforces a nonce and the correct capability\n  or access check.\n\n## [1.8.0] — 2026-07-06\n\n### Added — REST API (Phase H)\n- New `stagekitwp-ma/v1` REST namespace, all endpoints capability-gated:\n  - `GET /members`, `GET /members/<id>` — directory-listed members only\n    (`stagekitwp_members_search_members`); never returns email or private meta, and\n    404s for unlisted members so their existence is not leaked.\n  - `GET /events`, `GET /events/<id>` — published events\n    (`stagekitwp_members_rsvp_events`), with `?when=upcoming|past|all`.\n  - `GET /events/<id>/rsvps` — RSVP roster + counts (`stagekitwp_members_manage_events`).\n  - `POST /events/<id>/rsvp` — set the current user's RSVP\n    (`stagekitwp_members_rsvp_events`).\n\n### Fixed\n- Members now have the `stagekitwp_members_search_members` and `stagekitwp_members_message_members`\n  capabilities, so the opt-in member directory is browsable by any logged-in\n  member as designed (previously Producer-only). Capability map bumped to\n  1.0.2 and re-synced.\n- `STAGEKITWP_MEMBERS_Directory::role_label()` and `directory_page_id()` are now public\n  helpers; `role_label()` accepts a user ID or object.\n\n## [1.7.0] — 2026-07-06\n\n### Added — iCal feed (Phase G)\n- Subscribe-able calendar feed of published events:\n  `/events.ics` (public) and `/?stagekitwp_members_ical=me&uid=&token=` (a member's\n  RSVP'd events, secured by a stable per-user token).\n- RFC 5545 output: all-day vs timed events, text escaping, and 75-octet\n  line folding.\n- \"Subscribe to all events\" and \"Subscribe to my events\" links on the\n  Events page.\n- Canonical trailing-slash redirect suppressed for `/events.ics`.\n\n## [1.6.0] — 2026-07-06\n\n### Added — Announcements (Phase F)\n- New `stagekitwp_ann` post type with an admin **Delivery** panel.\n- `[stagekitwp_members_announcements]` feed for members, with important notices\n  highlighted.\n- On publish, announcements are delivered on-site and (by default) by email\n  to members who have not opted out. Executives can mark an announcement\n  **Important** to bypass the announcement opt-out.\n- One-time delivery guard prevents re-sending when a published announcement\n  is edited.\n\n## [1.5.0] — 2026-07-06\n\n### Added — Casting & Availability (Phase E)\n- New `stagekitwp_members_availability` table and `STAGEKITWP_MEMBERS_Availability` API for member\n  availability ranges (available / unavailable / tentative) with notes.\n- `[stagekitwp_members_availability]` shortcode: members add and remove date ranges from\n  the front end.\n- **Cast Availability** grid on the event editor: for every member who has\n  RSVP'd, shows their availability against the event date so producers can\n  spot conflicts at a glance.\n\n### Added — Events & Attendance (Phase D)\n- New `stagekitwp_members_rsvps` table and `STAGEKITWP_MEMBERS_RSVP` API — a queryable, scalable\n  replacement for the old per-user RSVP meta. One-time, idempotent migration\n  copies legacy RSVPs into the table.\n- `[stagekitwp_members_events]` shortcode: upcoming/past productions with three-state RSVP\n  (Going / Maybe / Can't make it) and live response counts.\n- `[stagekitwp_members_my_rsvps]` shortcode: a member's RSVP history with attendance.\n- Attendance check-in roster on the event editor (mark attended).\n- RSVP CSV export now includes RSVP status and attendance columns.\n\n### Added — Member Directory (Phase C)\n- `[stagekitwp_members_directory]` shortcode: searchable, filterable member grid\n  (opt-in; members are hidden until they choose to be listed).\n- Read-only member profiles with bio, interests, and a message link.\n- \"List me in the member directory\" privacy toggle on the profile form.\n\n### Added — Producer Tools (Phase B)\n- Real member search filtering by name/email and interest.\n- CSV export for members, event RSVPs, and the email log\n  (nonce-protected, capability-gated, UTF-8 BOM for Excel).\n\n### Added — Notification Preferences (Phase A)\n- `STAGEKITWP_MEMBERS_Notifications` with four notification types and opt-out defaults.\n- Preference-aware routing for messages and bulk announcements.\n- Executive/admin \"Important\" override to bypass announcement opt-out.\n- Notification checkboxes on the profile form.\n\n### Changed / Fixed\n- Parent admin menu now registers at priority 9 so submenus (Export,\n  Invitations) resolve correctly — fixes a 403 on those pages.\n- PHP 8.4 compatibility: explicit `fputcsv()` escape argument.\n- All new tables and queries are portable across MySQL and SQLite.\n\n## [1.4.0] — Email Queue (Phase 4)\n- Rebuilt `STAGEKITWP_MEMBERS_Email_Queue` with durable job records, batching\n  (25/run), retry with attempt ceiling (3), pruning, and scheduled sends.\n- Admin queue viewer with retry/delete/clear.\n\n## [1.3.0] — Messaging (Phase 3)\n- `[stagekitwp_members_conversation]` thread view and participant-guarded reply form.\n- Improved `[stagekitwp_members_conversations]` list; fixed serialized meta_query bug.\n- Notifications routed through the central logged send path.\n\n## [1.2.0] — Invitations & Registration (Phase 2)\n- Full invitation lifecycle (pending → accepted / revoked) with tokens,\n  resend, and revoke.\n- `[stagekitwp_members_register]` shortcode and invitations admin screen.\n\n## [1.1.0] — Roles & Capabilities (Phase 1)\n- Member, Producer, and Executive roles with eight custom capabilities.\n- Version-gated role re-sync; mapped event capabilities.\n\n## [1.0.0] — Foundation (Phase 0)\n- Central versioned migration runner (`STAGEKITWP_MEMBERS_DB`) on `plugins_loaded`.\n- Portable table-existence checks; fixed cron interval and activation hooks.\n- Initial membership system integrated with StageKitWP.\n\n[2.0.0]: https://miltonplayers.example/stagekitwp-members-area\n[1.8.0]: https://miltonplayers.example/stagekitwp-members-area\n[1.7.0]: https://miltonplayers.example/stagekitwp-members-area\n[1.6.0]: https://miltonplayers.example/stagekitwp-members-area\n[1.5.0]: https://miltonplayers.example/stagekitwp-members-area\n",
+    "entries": [
+      {
+        "version": "2.1.4",
+        "date": "2026-07-16",
+        "notes": "### Changed\n- Member shortcode styles now consume StageKitWP theme tokens for light/dark mode (`--stagekitwp-surface-bg`, `--stagekitwp-body-text`, `--stagekitwp-heading-text`, `--stagekitwp-link`, `--stagekitwp-link-hover`, `--stagekitwp-primary`).\n- Updated shortcode CSS packs: events, availability, announcements, directory/profile, messaging, auth forms, and nav-menu injected items.\n- `[stagekitwp_members_events]` now switches heading, cards, links, RSVP controls, notices, and pills consistently with theme mode."
+      },
+      {
+        "version": "2.1.3",
+        "date": "2026-07-16",
+        "notes": "### Changed\n- `[stagekitwp_members_events]` custom `title` now replaces the default Upcoming heading (no duplicate headings).\n- Public (logged-out) event cards now hide Going/Maybe response counts."
+      },
+      {
+        "version": "2.1.2",
+        "date": "2026-07-16",
+        "notes": "### Added\n- Event editor visibility mode (`Public` / `Private`) for each event.\n- `[stagekitwp_members_events]` now supports `title` attribute for custom heading text.\n\n### Changed\n- Public events view now hides subscribe links when logged out.\n- Public iCal feed now includes only events marked `Public`.\n- Instructions metadata now lists all shortcodes, including `[stagekitwp_members_member_profile]` and `[stagekitwp_members_rsvp]`."
+      },
+      {
+        "version": "2.1.1",
+        "date": "2026-07-07",
+        "notes": "### Fixed\n- Users with the WordPress Subscriber role saw only Log In / Log Out because they hold no TM capabilities. Documented requirement: users must be assigned the stagekitwp_member (or higher) TM role via Users > Edit User or WP-CLI `wp user set-role`. Log Out is now explicitly scoped to any logged-in user regardless of TM role.\n- Instructions page (ID 421) fully rewritten to cover: login (incl. Turnstile), registration paths, navigation menu behaviour and role requirement, per-feature member guides, full administrator configuration guide (role assignment, menu setup, custom login, open registration, Turnstile, URL overrides), and an updated shortcode reference table with audience column."
+      },
+      {
+        "version": "2.1.0",
+        "date": "2026-07-07",
+        "notes": "### Added — Custom Login, Open Registration, Cloudflare Turnstile & Nav Menu\n\n#### Custom Login & Registration\n- `[stagekitwp_members_login]` — themed login form replacing /wp-login.php. Supports Remember me, Forgot password, Create Account link (when open reg is on), and a logged-in state.\n- `[stagekitwp_members_open_register]` — public self-registration form; new accounts receive the Member role and are auto-logged in. Separate from the invitation-only `[stagekitwp_members_register]` flow.\n- Custom login page redirect: visits to /wp-login.php (login action only) are transparently redirected to the configured page. Password reset, logout, and all other WP-native flows are unaffected.\n- After-login redirect: configurable page to send members after login (defaults to home).\n- All form POSTs are nonce-protected; errors survive the POST→redirect cycle via 60-second transients.\n\n#### Cloudflare Turnstile\n- Optional bot-protection widget on the login form.\n- Turnstile JS enqueued only on the login page — no global script load.\n- Server-side token verification via Cloudflare siteverify API.\n- Requires both site key and secret key; missing either silently disables the widget.\n\n#### Permission-aware Nav Menu\n- Auto-inject mode: appends role-aware items to any registered menu location. Logged-out visitors see only Log In. Logged-in members see their permitted pages. Producers see Producer Dashboard. All logged-in users see Log Out.\n- Manual-tag mode: set `_stagekitwp_members_visibility` custom meta on any Appearance → Menus item to `logged_out`, `logged_in`, `member`, `producer`, or `executive`.\n- Injected items carry semantic CSS classes for easy theme styling.\n\n#### Settings — new sections\n- Login & Registration: enable/disable custom login, select Login page, Registration page, After-Login Redirect page.\n- Cloudflare Turnstile: enable/disable; site key and secret key.\n- Navigation Menu: enable/disable auto-inject; choose menu location; assign a page to each of the seven member screens."
+      },
+      {
+        "version": "2.0.0",
+        "date": "2026-07-06",
+        "notes": "### Security & hardening (Phase 5)\n- **Profile image uploads** are now validated: images only\n  (JPG/PNG/GIF/WEBP), a 2 MB size cap, and a real-image check via\n  `getimagesize()` — a renamed `.php` or oversized file is rejected.\n- **Avatar fallback**: a deleted or missing profile image now degrades to\n  an initial-letter placeholder instead of a broken-image icon, in both\n  the directory grid and the single profile view.\n- **`uninstall.php`**: deleting the plugin is a no-op by default (data is\n  preserved). A new \"Delete all data on uninstall\" setting must be enabled\n  first; only then are the custom tables, options, roles, CPT content, and\n  plugin user meta removed.\n- **i18n**: the `stagekitwp-members-area` text domain is now loaded from\n  `/languages`, with a POT template added.\n- **Nonce/capability audit**: verified every state-changing handler\n  (profile, events, announcements, RSVP, availability, check-in, export,\n  email queue, messaging, REST) enforces a nonce and the correct capability\n  or access check."
+      },
+      {
+        "version": "1.8.0",
+        "date": "2026-07-06",
+        "notes": "### Added — REST API (Phase H)\n- New `stagekitwp-ma/v1` REST namespace, all endpoints capability-gated:\n  - `GET /members`, `GET /members/<id>` — directory-listed members only\n    (`stagekitwp_members_search_members`); never returns email or private meta, and\n    404s for unlisted members so their existence is not leaked.\n  - `GET /events`, `GET /events/<id>` — published events\n    (`stagekitwp_members_rsvp_events`), with `?when=upcoming|past|all`.\n  - `GET /events/<id>/rsvps` — RSVP roster + counts (`stagekitwp_members_manage_events`).\n  - `POST /events/<id>/rsvp` — set the current user's RSVP\n    (`stagekitwp_members_rsvp_events`).\n\n### Fixed\n- Members now have the `stagekitwp_members_search_members` and `stagekitwp_members_message_members`\n  capabilities, so the opt-in member directory is browsable by any logged-in\n  member as designed (previously Producer-only). Capability map bumped to\n  1.0.2 and re-synced.\n- `STAGEKITWP_MEMBERS_Directory::role_label()` and `directory_page_id()` are now public\n  helpers; `role_label()` accepts a user ID or object."
+      },
+      {
+        "version": "1.7.0",
+        "date": "2026-07-06",
+        "notes": "### Added — iCal feed (Phase G)\n- Subscribe-able calendar feed of published events:\n  `/events.ics` (public) and `/?stagekitwp_members_ical=me&uid=&token=` (a member's\n  RSVP'd events, secured by a stable per-user token).\n- RFC 5545 output: all-day vs timed events, text escaping, and 75-octet\n  line folding.\n- \"Subscribe to all events\" and \"Subscribe to my events\" links on the\n  Events page.\n- Canonical trailing-slash redirect suppressed for `/events.ics`."
+      },
+      {
+        "version": "1.6.0",
+        "date": "2026-07-06",
+        "notes": "### Added — Announcements (Phase F)\n- New `stagekitwp_ann` post type with an admin **Delivery** panel.\n- `[stagekitwp_members_announcements]` feed for members, with important notices\n  highlighted.\n- On publish, announcements are delivered on-site and (by default) by email\n  to members who have not opted out. Executives can mark an announcement\n  **Important** to bypass the announcement opt-out.\n- One-time delivery guard prevents re-sending when a published announcement\n  is edited."
+      },
+      {
+        "version": "1.5.0",
+        "date": "2026-07-06",
+        "notes": "### Added — Casting & Availability (Phase E)\n- New `stagekitwp_members_availability` table and `STAGEKITWP_MEMBERS_Availability` API for member\n  availability ranges (available / unavailable / tentative) with notes.\n- `[stagekitwp_members_availability]` shortcode: members add and remove date ranges from\n  the front end.\n- **Cast Availability** grid on the event editor: for every member who has\n  RSVP'd, shows their availability against the event date so producers can\n  spot conflicts at a glance.\n\n### Added — Events & Attendance (Phase D)\n- New `stagekitwp_members_rsvps` table and `STAGEKITWP_MEMBERS_RSVP` API — a queryable, scalable\n  replacement for the old per-user RSVP meta. One-time, idempotent migration\n  copies legacy RSVPs into the table.\n- `[stagekitwp_members_events]` shortcode: upcoming/past productions with three-state RSVP\n  (Going / Maybe / Can't make it) and live response counts.\n- `[stagekitwp_members_my_rsvps]` shortcode: a member's RSVP history with attendance.\n- Attendance check-in roster on the event editor (mark attended).\n- RSVP CSV export now includes RSVP status and attendance columns.\n\n### Added — Member Directory (Phase C)\n- `[stagekitwp_members_directory]` shortcode: searchable, filterable member grid\n  (opt-in; members are hidden until they choose to be listed).\n- Read-only member profiles with bio, interests, and a message link.\n- \"List me in the member directory\" privacy toggle on the profile form.\n\n### Added — Producer Tools (Phase B)\n- Real member search filtering by name/email and interest.\n- CSV export for members, event RSVPs, and the email log\n  (nonce-protected, capability-gated, UTF-8 BOM for Excel).\n\n### Added — Notification Preferences (Phase A)\n- `STAGEKITWP_MEMBERS_Notifications` with four notification types and opt-out defaults.\n- Preference-aware routing for messages and bulk announcements.\n- Executive/admin \"Important\" override to bypass announcement opt-out.\n- Notification checkboxes on the profile form.\n\n### Changed / Fixed\n- Parent admin menu now registers at priority 9 so submenus (Export,\n  Invitations) resolve correctly — fixes a 403 on those pages.\n- PHP 8.4 compatibility: explicit `fputcsv()` escape argument.\n- All new tables and queries are portable across MySQL and SQLite."
+      },
+      {
+        "version": "1.4.0",
+        "date": "Email Queue (Phase 4)",
+        "notes": "- Rebuilt `STAGEKITWP_MEMBERS_Email_Queue` with durable job records, batching\n  (25/run), retry with attempt ceiling (3), pruning, and scheduled sends.\n- Admin queue viewer with retry/delete/clear."
+      },
+      {
+        "version": "1.3.0",
+        "date": "Messaging (Phase 3)",
+        "notes": "- `[stagekitwp_members_conversation]` thread view and participant-guarded reply form.\n- Improved `[stagekitwp_members_conversations]` list; fixed serialized meta_query bug.\n- Notifications routed through the central logged send path."
+      },
+      {
+        "version": "1.2.0",
+        "date": "Invitations & Registration (Phase 2)",
+        "notes": "- Full invitation lifecycle (pending → accepted / revoked) with tokens,\n  resend, and revoke.\n- `[stagekitwp_members_register]` shortcode and invitations admin screen."
+      },
+      {
+        "version": "1.1.0",
+        "date": "Roles & Capabilities (Phase 1)",
+        "notes": "- Member, Producer, and Executive roles with eight custom capabilities.\n- Version-gated role re-sync; mapped event capabilities."
+      },
+      {
+        "version": "1.0.0",
+        "date": "Foundation (Phase 0)",
+        "notes": "- Central versioned migration runner (`STAGEKITWP_MEMBERS_DB`) on `plugins_loaded`.\n- Portable table-existence checks; fixed cron interval and activation hooks.\n- Initial membership system integrated with StageKitWP."
+      }
+    ]
+  },
+  "capabilities": [
+    "stagekitwp_members_manage_profile",
+    "stagekitwp_members_rsvp_events",
+    "stagekitwp_members_search_members",
+    "stagekitwp_members_message_members",
+    "stagekitwp_members_send_email",
+    "stagekitwp_members_manage_events",
+    "stagekitwp_members_manage_members",
+    "stagekitwp_members_manage_settings"
+  ],
+  "roles": [
+    "stagekitwp_member",
+    "stagekitwp_producer",
+    "stagekitwp_executive"
+  ],
+  "shortcodes": [
+    {
+      "tag": "[stagekitwp_members_login]",
+      "description": "Themed login form with optional Turnstile bot check and Create Account link. Shows a logged-in message with Log Out button if the user is already authenticated."
+    },
+    {
+      "tag": "[stagekitwp_members_open_register]",
+      "description": "Public self-registration form (first name, last name, username, email, password). Open registration must be enabled in Settings. New accounts receive the Member role and are auto-logged in."
+    },
+    {
+      "tag": "[stagekitwp_members_register]",
+      "description": "Registration form for invited members (invitation-only flow; validates token from email link)."
+    },
+    {
+      "tag": "[stagekitwp_members_profile]",
+      "description": "Front-end member profile editor: bio, resume, profile photo upload, interests, notification preferences, and directory visibility toggle."
+    },
+    {
+      "tag": "[stagekitwp_members_member_profile]",
+      "description": "Read-only single-member profile view (typically linked from the directory)."
+    },
+    {
+      "tag": "[stagekitwp_members_producer_dashboard]",
+      "description": "Producer dashboard with member search, stats overview, and producer tools. Requires stagekitwp_members_manage_events capability."
+    },
+    {
+      "tag": "[stagekitwp_members_directory]",
+      "description": "Searchable, filterable member directory (opt-in; members are hidden until they enable directory listing on their profile)."
+    },
+    {
+      "tag": "[stagekitwp_members_conversations]",
+      "description": "A member's private message conversation list."
+    },
+    {
+      "tag": "[stagekitwp_members_conversation]",
+      "description": "A single private conversation thread with reply form."
+    },
+    {
+      "tag": "[stagekitwp_members_events]",
+      "description": "Events list with three-state RSVP; supports title, show, and layout attributes"
+    },
+    {
+      "tag": "[stagekitwp_members_my_rsvps]",
+      "description": "A member's RSVP history and attendance record."
+    },
+    {
+      "tag": "[stagekitwp_members_rsvp]",
+      "description": "Single-event RSVP form intended for use on stagekitwp_event single templates."
+    },
+    {
+      "tag": "[stagekitwp_members_availability]",
+      "description": "Manage availability date ranges (Available / Unavailable / Tentative) with optional notes."
+    },
+    {
+      "tag": "[stagekitwp_members_announcements]",
+      "description": "Announcements / notice board feed. Important announcements are highlighted."
+    }
+  ],
+  "feeds": [
+    {
+      "url": "/events.ics",
+      "description": "Public iCal feed of all published events"
+    },
+    {
+      "url": "/?stagekitwp_members_ical=me&uid=<id>&token=<token>",
+      "description": "A member's RSVP'd events (per-user token)"
+    }
+  ],
+  "rest_api": {
+    "namespace": "stagekitwp-ma/v1",
+    "endpoints": [
+      {
+        "route": "GET /members",
+        "cap": "stagekitwp_members_search_members",
+        "description": "Directory-listed members (no email/private data)"
+      },
+      {
+        "route": "GET /members/<id>",
+        "cap": "stagekitwp_members_search_members",
+        "description": "One listed member; 404 if unlisted"
+      },
+      {
+        "route": "GET /events",
+        "cap": "stagekitwp_members_rsvp_events",
+        "description": "Published events (when=upcoming|past|all)"
+      },
+      {
+        "route": "GET /events/<id>",
+        "cap": "stagekitwp_members_rsvp_events",
+        "description": "One event"
+      },
+      {
+        "route": "GET /events/<id>/rsvps",
+        "cap": "stagekitwp_members_manage_events",
+        "description": "RSVP roster + counts"
+      },
+      {
+        "route": "POST /events/<id>/rsvp",
+        "cap": "stagekitwp_members_rsvp_events",
+        "description": "Set the current user's RSVP"
+      }
+    ]
+  },
+  "icons": {
+    "svg": "assets/images/icon.svg",
+    "1x": "assets/images/icon-128x128.png",
+    "2x": "assets/images/icon-256x256.png",
+    "default": "assets/images/icon-256x256.png"
+  },
+  "banners": {
+    "svg": "assets/images/banner.svg",
+    "low": "assets/images/banner-772x250.png",
+    "high": "assets/images/banner-1544x500.png"
+  },
+  "screenshots": [
+    {
+      "src": "assets/images/screenshot-1-events.jpg",
+      "caption": "Members RSVP to upcoming and past events with Going / Maybe / Can't make it."
+    },
+    {
+      "src": "assets/images/screenshot-2-availability.jpg",
+      "caption": "Members publish availability ranges so producers can plan around their schedules."
+    },
+    {
+      "src": "assets/images/screenshot-3-directory.jpg",
+      "caption": "An opt-in, searchable member directory filtered by name and interest."
+    },
+    {
+      "src": "assets/images/screenshot-4-announcements.jpg",
+      "caption": "Announcements feed with important notices highlighted; delivered on-site and by email."
+    }
+  ]
+}

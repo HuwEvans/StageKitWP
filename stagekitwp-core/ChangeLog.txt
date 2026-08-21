@@ -1,0 +1,3252 @@
+# Changelog
+
+## Version 5.2.0 — 2026-08-21 — Admin hub media picker fixes + Documentation link
+
+Patch release fixing broken media upload buttons on hub screens and a broken/warning-prone external Documentation link.
+
+### Fixes
+
+- **Media picker on Season Content / People, Places & Partners:** `wp.media` and its click handler were only enqueued on the exact Dashboard hook, CPT edit screens, the Season Builder tab, and Display Options — never on the Season Content or People, Places & Partners hub pages, even though both render full in-page CPT editors with "Select Image"/"Select Logo"/"Select Banner" buttons. Broadened the admin asset loader to match any StageKitWP admin screen.
+- **Board Member photo picker:** Board Member uses its own dedicated button and JS file (`board-member-media.js`), separate from the shared media-button handler, and was gated strictly to `post.php`/`post-new.php`. Broadened its enqueue check to also load on any StageKitWP hub screen.
+- **Documentation submenu:** using a raw external URL as the `add_submenu_page()` slug is unreliable — depending on whether a callback is registered, WordPress core either rebuilds it into a broken internal link, or runs `file_exists()` against the full URL (which throws a visible PHP warning under `open_basedir` restrictions on some hosts). Replaced with the standard, robust pattern: a normal internal page that redirects to the GitHub wiki on its `load-` hook, before any output is sent.
+
+### Files changed
+
+- `includes/stagekitwp-core-functions.php`
+- `includes/stagekitwp-core-admin-menu.php`
+- `cpt/stagekitwp-core-cpt/board-members.php`
+- `stagekitwp-core.php`
+- `stagekitwp-core.json`
+
+## Version 5.1.0 — 2026-08-18 — Fresh-install completeness and ecosystem integration
+
+Patch release focused on making the Core plugin self-contained and reliable on fresh installations.
+
+### Highlights
+
+- **Complete Gutenberg delivery:** Core distribution packages now include the `blocks/` assets required by the editor bundles and landing-page block.
+- **Complete Beaver Builder delivery:** Core distribution packages now include the full `modules/` directory and module assets.
+- **Complete CPT delivery:** Core packages include the full ten-CPT registration tree under `cpt/`.
+- **Stable ecosystem integration:** Core theme detection and shared dark/light-mode integration recognize versioned theme installations.
+- **Fresh-install registration:** Shortcodes, Gutenberg block assets, Beaver Builder modules, and Core CPTs are available from the packaged plugin structure.
+
+### Files changed
+
+- `stagekitwp-core.php`
+- `stagekitwp-core.json`
+- `cpt/`
+- `includes/`
+- `blocks/`
+- `modules/`
+- `ChangeLog.txt`
+
+## Version 5.0.0 — 2026-08-10 — Tabbed ecosystem admin release
+
+Major ecosystem release that collapses the Theatre Manager admin surface under one tabbed parent menu and keeps the supporting plugins and theme aligned with the same navigation model.
+
+### Highlights
+
+- **Single ecosystem menu:** Theatre Manager now acts as the primary admin hub, with tabbed access for the core dashboard, Documentation, Season Content, People / Places / Partners, TM Sync, TM I/O, TM Members Area, RC Library, and theme tools.
+- **Embedded admin screens:** Supporting plugin screens were updated to render inside their hub tabs instead of forcing separate top-level workflows, keeping the admin experience compact.
+- **Menu palette:** The shared menu now uses category colors so theme, core, and supporting plugin entries are visually distinguishable at a glance.
+- **Release coordination:** Version numbers were advanced across the plugin and companion products to mark the ecosystem-wide admin restructuring.
+
+### Files changed
+
+- `includes/admin-menu.php`
+- `theatre-manager-plugin.php`
+- `theatre-manager.json`
+- `ChangeLog.txt`
+
+## Version 4.6.17 — 2026-08-09 — Security hardening + WPCS/OWASP remediation
+
+Patch release focused on hardening request handling, improving output escaping, and resolving standards findings across plugin and theme integration touchpoints.
+
+### Highlights
+
+- **Superglobal hardening:** Added guarded `isset()` checks, `wp_unslash()`, and strict sanitization for multiple save handlers and admin actions (cast, contributors, sponsors, testimonials, season builder, and preview regeneration flow).
+- **Output escaping cleanup:** Escaped dynamic admin/theme outputs flagged by review (notices, inline style values, and numeric render values) and tightened i18n helper usage where appropriate.
+- **Deprecated API cleanup:** Replaced deprecated page lookup usage in the theme helper with a modern query-based approach.
+- **Bootstrap performance guard:** Plugin admin-only includes are now loaded behind `is_admin()` to avoid unnecessary front-end include work.
+- **Shortcode query efficiency:** Added lightweight query defaults (`no_found_rows`, cache flags) and escaped show-title rendering in programs shortcode loops.
+
+### Files changed
+
+- `cpt/cast.php`
+- `cpt/contributors.php`
+- `cpt/sponsors.php`
+- `cpt/testimonials.php`
+- `includes/season-builder.php`
+- `includes/admin-menu.php`
+- `includes/sample-content.php`
+- `includes/shortcodes/programs-shortcode.php`
+- `theatre-manager-plugin.php`
+- `theatre-manager.json`
+- `ChangeLog.txt`
+
+## Version 4.6.16 — 2026-08-06 — Empty-state HTML overrides + Programs current-link fallback hardening
+
+Patch release focused on configurable season/show empty-state messaging and improved `[tm_programs]` current-link fallback behavior.
+
+### Highlights
+
+- **Settings page overrides:** Added two new rich-text settings on **Theatre Manager → Settings** under **Shortcode Empty-State Messages**:
+  - **No Seasons Found (Season shortcodes)**
+  - **No Shows In Season**
+- **Media library support in message editors:** Both message override editors now include the WordPress **Add Media** button so images can be inserted directly from the Media Library.
+- **Shortcode wiring:**
+  - `[tm_seasons]` now uses the new **No Seasons Found** HTML override when no seasons are returned.
+  - `[tm_season_shows]` now uses the new **No Seasons Found** override when no season is resolved and **No Shows In Season** when a selected season has no associated shows.
+- **Programs shortcode reliability:** `[tm_programs layout="current_link"]` fallback lookup now searches the entire current season first, then all published shows, removing narrow query caps that could miss valid program links.
+
+### Files changed
+
+- `includes/admin-menu.php`
+- `includes/shortcodes/tm_seasons.php`
+- `includes/shortcodes/tm_season_shows.php`
+- `includes/shortcodes/programs-shortcode.php`
+- `shortcode_usage.txt`
+- `theatre-manager-plugin.php`
+- `theatre-manager.json`
+- `ChangeLog.txt`
+
+## Version 4.6.15 — 2026-08-04 — Awards recipient toggle + Past Shows mobile stacking
+
+Patch release focused on awards shortcode display controls and a more complete mobile Past Shows layout.
+
+### Highlights
+
+- **Awards shortcode:** `[tm_awards]` now supports `show_recipient="true|false"` across every layout (`table`, `cards`, `list`, `showcase`). When `false`, recipient names are omitted entirely.
+- **Awards table layout:** Status now appears in the first column instead of the last, so the Winner / Nominated / Not Eligible badge reads first in each row.
+- **Past Shows mobile layout:** `[tm_past_shows]` list layout no longer hides Season, Slot, and Author on narrow viewports. Rows now stack vertically on mobile with inline labels, preserving all data.
+- **Instructions update:** Admin shortcode help, `shortcode_usage.txt`, and the update manifest documentation were updated to reflect the new awards option and the Past Shows mobile behavior.
+
+### Files changed
+
+- `includes/shortcodes/awards-shortcode.php`
+- `includes/shortcodes/past-shows-shortcode.php`
+- `includes/admin-menu.php`
+- `shortcode_usage.txt`
+- `theatre-manager.json`
+- `theatre-manager-plugin.php`
+- `ChangeLog.txt`
+
+## Version 4.6.14 — 2026-08-04 — Fix: review_align not applied to rating/comment
+
+Fixes a bug where `review_align` (Per Show / Per Show Slider modes) only visibly moved the name/date meta line — the star rating and comment text stayed centered no matter what alignment was selected.
+
+### Root cause
+
+The plugin's global `assets/css/shortcodes.css` stylesheet has legacy rules hardcoding `.tm-rating` and `.tm-comment` to `text-align:center`. These rules have higher specificity/appear later than the per-instance `.tm-review-align-*` rule on the parent `.tm-per-show-review`, so `text-align` did not inherit down to the rating/comment children as expected.
+
+### Fix
+
+Added explicit per-instance CSS re-asserting the review's own alignment directly on `.tm-rating`, `.tm-comment`, and `.tm-meta` for each of `tm-review-align-left`, `tm-review-align-center`, and `tm-review-align-right` (covers `alternating` and `alternating_lr` too, since both resolve to one of these three classes per review). Verified via `inspect_design` and screenshot across `classic` and `overlay` layouts — rating stars, comment, and meta now move together with each review's alignment.
+
+### Files changed
+
+- `includes/shortcodes/testimonials-shortcode.php`
+- `theatre-manager.json`
+- `theatre-manager-plugin.php`
+- `ChangeLog.txt`
+
+## Version 4.6.13 — 2026-08-04 — New: left/right alternating review alignment
+
+Adds a second alternating option to the `review_align` attribute for `[tm_testimonials]` Per Show and Per Show Slider modes.
+
+### What's new
+
+- **New value — `alternating_lr`:** Cycles each review's text alignment left → right → left → right (no center), starting with left on the first review of each show's card. Complements the existing `alternating` value, which cycles right → left → center.
+- Available everywhere `review_align` already appears: the shortcode attribute, Display Options (Testimonials tab), the Gutenberg block's Review Alignment field, the Beaver Builder module's Review Alignment field, and the Theatre Manager Theme Customizer's Review Alignment control.
+- Verified via `inspect_design`: each review's `text-align` and margin auto-alignment toggles correctly between left/right, resetting to left at the start of every new show's card.
+
+### Files changed
+
+- `includes/shortcodes/testimonials-shortcode.php`
+- `includes/display-options.php`
+- `includes/admin-menu.php`
+- `shortcode_usage.txt`
+- `blocks/tm-blocks/index.js`
+- `modules/tm-testimonials-module/tm-testimonials-module.php`
+- `theatre-manager.json`
+- `theatre-manager-plugin.php`
+- `ChangeLog.txt`
+
+## Version 4.6.12 — 2026-08-04 — Fix: Spotlight layout image size
+
+Fixes a bug where `[tm_testimonials layout="spotlight"]` did not honor the configured `image_height` (and, in the `image_position="top"` banner variant, effectively ignored `image_width` too by stretching full-bleed regardless of the image's aspect ratio).
+
+### Root cause
+
+The spotlight grid used `align-items:stretch` with `.tm-testimonial-media { height:100%; min-height:Xpx }`. Because the media column was stretched to match the height of its sibling review-text column, a short `image_height` was overridden whenever the review text ran long enough to make that row taller — the image rendered taller than requested instead of at the exact configured height.
+
+### Fix
+
+- `.tm-testimonial-media` in spotlight layout is now a fixed box at exactly `image_width` x `image_height` for left/right/center positions (grid `align-items` changed from `stretch` to `center`, image no longer stretches to fill the row).
+- The `image_position="top"` banner variant keeps its intentional full-card-width look, but height is now capped at exactly `image_height` instead of drifting with content length.
+- Verified across grid, per_show, and per_show_slider modes with `layout="spotlight"` at multiple `image_width`/`image_height` combinations via `inspect_design`.
+
+### Files changed
+
+- `includes/shortcodes/testimonials-shortcode.php`
+- `theatre-manager.json`
+- `theatre-manager-plugin.php`
+- `ChangeLog.txt`
+
+## Version 4.6.11 — 2026-08-04 — Per Show Slider mode
+
+Adds a slider variant of the per-show layout: `mode="per_show_slider"` shows exactly one show at a time, cycling through shows with the same Slick-powered arrows, dots, adaptive height, and autoplay as the existing `mode="slider"`, but each slide is the single-card per-show layout (image + stacked reviews) added in 4.6.10 rather than one testimonial per slide.
+
+### Highlights
+
+- **New mode `per_show_slider`:** Reuses the exact same per-show query, single-card markup, and CSS from `mode="per_show"`; only the track behavior changes to a one-at-a-time Slick carousel identical to the regular slider (arrows, dots, adaptiveHeight, autoplay 5s).
+- All `layout` variants (classic, quote, minimal, spotlight, overlay), `image_position`, `image_fit`, `image_focus`, `reviews_per_show`, and `review_align` (including `alternating`) work the same as in `per_show` mode — only now one show shows at a time in a carousel.
+- Added `per_show_slider` to Display Options mode dropdown, the Gutenberg testimonials block's Mode field, the Beaver Builder module's Mode field, and the Theatre Manager Theme Customizer's Display Mode control.
+
+### Files changed
+
+- `includes/shortcodes/testimonials-shortcode.php`
+- `includes/display-options.php`
+- `includes/admin-menu.php`
+- `shortcode_usage.txt`
+- `blocks/tm-blocks/index.js`
+- `modules/tm-testimonials-module/tm-testimonials-module.php`
+- `theatre-manager.json`
+- `theatre-manager-plugin.php`
+- `ChangeLog.txt`
+- (theme) `wp-content/themes/theatre-manager-theme/functions.php`
+
+## Version 4.6.10 — 2026-08-04 — Testimonials Per Show: single-card layout
+
+Refinement release: `mode="per_show"` now honors the shortcode's card `layout` styling instead of using a bespoke image+title+boxed-review-list structure.
+
+### Highlights
+
+- **Single card per show:** Each show in `per_show` mode now renders as one `.tm-testimonial` card — the same element used by slider/grid/full modes — so `layout="classic"`, `quote`, `minimal`, `spotlight`, and `overlay` all apply, along with `image_position`, `image_fit`, and `image_focus`.
+- **Stacked reviews inside the card:** Up to `reviews_per_show` reviews are stacked inside that single card, separated by a thin divider line, instead of each review getting its own separate boxed card.
+- **Per-review alignment preserved:** `review_align` (including `alternating`) still applies per review inside the card, giving a staggered right/left/center layout within the single card.
+- **Overlay layout fix:** In `per_show` mode, `layout="overlay"` now flows the review stack below the image instead of absolutely pinning it over a fixed-height box — a fixed overlay box can't hold a variable number of stacked reviews without clipping/overflowing.
+
+### Files changed
+
+- `includes/shortcodes/testimonials-shortcode.php`
+- `theatre-manager.json`
+- `theatre-manager-plugin.php`
+- `ChangeLog.txt`
+
+## Version 4.6.9 — 2026-08-03 — Testimonials Per Show view
+
+Feature release adding a new grouped-by-show view to the testimonials shortcode.
+
+### Highlights
+
+- **Testimonials shortcode:** `[tm_testimonials]` now supports `mode="per_show"`, a new view that groups testimonials by their linked show. Only shows with at least one linked, published testimonial are listed, ordered alphabetically by show title.
+- **Per-show display:** Each group shows the show's Testimonial Media image (falling back to the show's Image field when Testimonial Media is empty), the show title, and up to `reviews_per_show` reviews for that show (default `4`).
+- **New attribute — `reviews_per_show`:** Controls the maximum number of reviews shown per show in `per_show` mode. Default `4`.
+- **New attribute — `review_align`:** Controls per-review card text alignment in `per_show` mode: `left`, `center`, `right`, or `alternating`. `alternating` cycles right → left → center → repeat per show group.
+- **Display Options parity:** Testimonials tab now has default controls for `mode="per_show"` — Reviews Per Show and Review Alignment.
+- **Docs update:** Admin shortcode instructions and `shortcode_usage.txt` document the new mode, attributes, and examples.
+
+### Files changed
+
+- `includes/shortcodes/testimonials-shortcode.php`
+- `includes/display-options.php`
+- `includes/admin-menu.php`
+- `shortcode_usage.txt`
+- `theatre-manager.json`
+- `theatre-manager-plugin.php`
+- `ChangeLog.txt`
+
+## Version 4.6.8 — 2026-07-24 — Sponsor tier, header, and logo controls
+
+Patch release focused on sponsor presentation controls and documentation parity.
+
+### Highlights
+
+- **Sponsors CPT:** Added Diamond as the top sponsor tier in the sponsor edit screen.
+- **Sponsor shortcode:** `[tm_sponsors]` now supports `show_headers` to hide tier headers, `logo_size` for optional percentage or pixel-based logo sizing, and per-tier label overrides for Diamond/Platinum/Gold/Silver/Bronze.
+- **Display Options:** Sponsor tab now documents the Diamond tier and the new grid controls so header labels can be renamed globally.
+- **Instructions update:** Sponsor shortcode instructions now describe the Diamond tier, header toggle, and logo sizing examples.
+
+### Files changed
+
+- `cpt/sponsors.php`
+- `includes/helpers.php`
+- `includes/display-options.php`
+- `includes/shortcodes/sponsors-shortcode.php`
+- `modules/tm-sponsors-module/tm-sponsors-module.php`
+- `modules/tm-sponsors-module/includes/frontend.php`
+- `includes/admin-menu.php`
+- `ChangeLog.txt`
+
+## Version 4.6.7 — 2026-07-17 — Season Builder testimonials list + testimonial media support
+
+Patch release focused on Season Builder parity for testimonial workflows.
+
+### Highlights
+
+- **Season Builder (Details tab):** Added a per-show Testimonials list (name, comment preview, rating, date) with direct Edit links to each testimonial.
+- **Season Builder (Media tab):** Added a new **Testimonial Media** field for each show card.
+- **Save/load parity:** Season Builder now loads and saves show testimonial media using `_tm_show_testimonial_media`, matching the Show CPT field.
+- **New show parity:** The dynamic "Add Show" media card template now includes the Testimonial Media picker and preview.
+- **Instructions update:** Updated shortcode reference notes to explain where testimonial media is managed in Season Builder.
+
+### Files changed
+
+- `includes/season-builder.php`
+- `shortcode_usage.txt`
+- `theatre-manager-plugin.php`
+- `theatre-manager.json`
+- `ChangeLog.txt`
+
+## Version 4.6.6 — 2026-07-17 — Testimonials show-link, media, layouts, and visibility controls
+
+Feature release focused on extending testimonial data and rendering options.
+
+### Highlights
+
+- **Testimonials CPT:** Added optional linked show field and optional testimonial date field.
+- **Shows CPT:** Added optional testimonial media field for each show.
+- **Shortcode expansion:** `[tm_testimonials]` now supports `mode` (slider|grid|full), `layout` (classic|quote|minimal|spotlight), `columns`, `limit`, and `show_id` filtering.
+- **Per-field toggles:** Added shortcode visibility controls for name, comment, rating, linked show, date, and media.
+- **Display Options parity:** Added new default controls for testimonials layout/mode and each visibility toggle.
+- **Builder integrations:** Updated Beaver Builder testimonials module and Gutenberg testimonials block controls to expose the new options.
+- **Docs update:** Admin shortcode instructions now document new testimonials parameters and examples.
+
+### Files changed
+
+- `cpt/testimonials.php`
+- `cpt/shows.php`
+- `includes/shortcodes/testimonials-shortcode.php`
+- `includes/display-options.php`
+- `includes/admin-menu.php`
+- `modules/tm-testimonials-module/tm-testimonials-module.php`
+- `modules/tm-testimonials-module/includes/frontend.php`
+- `blocks/tm-blocks/index.js`
+- `theatre-manager-plugin.php`
+- `ChangeLog.txt`
+
+## Version 4.6.5 — 2026-07-16 — Auditions compact title support
+
+Patch release focused on `[tm_auditions]` compact-layout heading control.
+
+### Highlights
+
+- **Compact layout title:** Added optional `title` attribute for `[tm_auditions layout="compact"]`.
+- **Conditional rendering:** If `title` is omitted/empty, no compact heading is rendered.
+- **Styling parity:** Compact title now renders using the same heading class style used by events (`tm-events-heading`).
+- **Docs update:** Updated shortcode reference docs in admin instructions with the new parameter and example.
+
+### Files changed
+
+- `includes/shortcodes/tm_auditions.php`
+- `includes/admin-menu.php`
+- `theatre-manager-plugin.php`
+- `theatre-manager.json`
+- `ChangeLog.txt`
+
+## Version 4.6.4 — 2026-07-14 — Search result styling polish
+
+Patch release focused on visual cleanup for search results under the companion theme's dark mode.
+
+### Highlights
+
+- **Search results styling:** Reworked the search results template to use theme colour tokens instead of hardcoded light-only card colours.
+- **Dark mode readability:** Search cards, borders, metadata, excerpt text, and relevance badges now inherit the active theme palette cleanly in dark mode.
+
+### Files changed
+
+- `theatre-manager-plugin.php`
+- `theatre-manager.json`
+- `ChangeLog.txt`
+- `wp-content/themes/theatre-manager-theme/search.php`
+
+## Version 4.6.3 — 2026-07-14 — Complete search + board member photo-shape controls
+
+Patch release focused on reliable full-site search coverage and board-member display control parity.
+
+### Highlights
+
+- **Search coverage:** Expanded frontend search to include Theatre Manager CPT content from post meta (`_tm_*`) and taxonomy terms.
+- **SQLite compatibility:** Fixed search SQL compatibility with the SQLite integration (removed problematic escaping pattern assumptions and hardened join alias detection).
+- **Search relevance:** Added weighted relevance ordering and visible relevance labels/scores in search result cards.
+- **Board members:** Added `circle_photos` attribute support across all layouts that render rounded thumbnails (grid/list/table) and fixed per-shortcode instance rendering so `photo_size` and `circle_photos` always apply correctly.
+
+### Files changed
+
+- `theatre-manager-plugin.php`
+- `theatre-manager.json`
+- `ChangeLog.txt`
+- `shortcode_usage.txt`
+- `includes/shortcodes/board-members-shortcode.php`
+- `wp-content/themes/theatre-manager-theme/functions.php`
+- `wp-content/themes/theatre-manager-theme/search.php`
+
+## Version 4.6.2 — 2026-07-13 — Advertiser widget grid controls
+
+Patch release focused on tighter shortcode control for advertiser grids in widget columns.
+
+### Highlights
+
+- Added `lock_columns` shortcode attribute for `[tm_advertisers]` to force requested column count in widget/footer contexts.
+- Added `mini_logos` shortcode attribute for `[tm_advertisers]` to use compact card sizing and smaller logo heights.
+- Updated widget-aware advertiser CSS so unlocked grids safely collapse, while locked grids use forced `columns` with overflow-safe tracks.
+
+### Files changed
+
+- `includes/shortcodes/advertisers-shortcode.php`
+- `assets/css/shortcodes.css`
+- `shortcode_usage.txt`
+- `theatre-manager-plugin.php`
+- `theatre-manager.json`
+
+## Version 4.6.1 — 2026-07-13 — Landing page controls + board/advertiser/media improvements
+
+Patch release focused on per-show landing page control parity, board member display controls, and responsive advertiser/media improvements.
+
+### Highlights
+
+- **Landing page:** Added optional program button output in `card` (2-column) and `hero` layouts via `program_button="true"`.
+- **Show edit parity:** Front-end Display meta box now includes per-show Program button control and Program PDF field support, and auto-generated landing page shortcodes now pass `program_button` correctly.
+- **Board members:** Added configurable circular grid photo size (`tm_board_member_photo_size`, 60-220px) with shortcode override `photo_size` and Beaver Builder pass-through.
+- **Landing page PDF link:** Added `program_pdf` field rendering (PDF icon + link) and heading override support.
+- **Media page support:** Added `tm_media_page_id` setting and `TM_Media` sample page flow updates.
+- **Advertisers:** Improved responsive grid heights and logo scaling across desktop/tablet/mobile.
+
+### Files changed
+
+- `theatre-manager-plugin.php`
+- `includes/show-front-display.php`
+- `includes/shortcodes/tm_landingpage.php`
+- `includes/shortcodes/board-members-shortcode.php`
+- `modules/tm-board-members-module/tm-board-members-module.php`
+- `modules/tm-board-members-module/includes/frontend.php`
+- `includes/display-options.php`
+- `includes/admin-menu.php`
+- `includes/sample-content.php`
+- `assets/css/shortcodes.css`
+- `theatre-manager.json`
+- `shortcode_usage.txt`
+
+## Series summary: 4.5.12 – 4.5.18 — 2026-07-05 — Tickets overhaul + critical live-site fix
+
+This batch of patch releases completed a full overhaul of the `[tm_tickets]` shortcode and fixed a critical regression that suppressed all shortcode styles on live sites.
+
+### Key changes at a glance
+
+| Version | Change |
+|---|---|
+| 4.5.12 | `[tm_landingpage]` hero banner, heading size, cast dark mode, cast typography |
+| 4.5.13 | `[tm_tickets]` Get Info button — replaced invalid nested `<a>` links in all 5 layouts |
+| 4.5.14 | Spotlight: show images on tiles (4:3), responsive cast grid fix |
+| 4.5.15 | Spotlight: full-width horizontal cards (reverted in 4.5.16) |
+| 4.5.16 | Spotlight: N equal columns matching banner width; `--tm-spotlight-count` CSS var |
+| 4.5.17 | Spotlight `object-fit:contain`; dark/light toggle moved to vars-only patcher path |
+| 4.5.18 | **Critical:** `headers_sent()` guard removed from `tm_add_shortcode_inline_style()` |
+
+### Critical fix detail (4.5.18)
+`headers_sent()` returns `true` as soon as any HTML output starts. On live WordPress sites this is always the case by `the_content` time, silently discarding every shortcode `<style>` block. All `--tm-tk-*`, `--tm-lp-*`, and other CSS custom properties were undefined, causing black tiles and invisible text. Removed the guard; `<style>` in `<body>` is valid HTML5.
+
+### Tickets layout summary (post-4.5.13)
+- **banner**: ticket buttons + underline Get Info below each
+- **minimal**: row + pill Get Info below each row
+- **cards**: card is a `<div>` (not `<a>`); footer holds Get Tickets + Get Info as sibling links
+- **table**: Get Info beside Get Tickets in the actions cell
+- **spotlight**: `<div>` tile-wrap holds ticket `<a>` card + Get Info sibling; N equal columns via `--tm-spotlight-count`; 4:3 `object-fit:contain` images
+
+---
+
+## Version 4.6.0 — 2026-07-05 — Production release: Image & Banner Size Guide
+
+Production release bump covering the 4.5.18–4.5.23 patch series plus the new image documentation.
+
+### What’s new: Image & Banner Size Guide
+
+A new **Image & Banner Size Guide** section has been added to the Instructions page (`Theatre Manager → Instructions`). It covers every image field in the plugin with optimum dimensions, minimum sizes, format recommendations, aspect ratio notes, and per-shortcode context.
+
+#### Show Poster (`_tm_show_sm_image`)
+- **Recommended:** 800 × 1200 px (2:3 portrait)
+- **Minimum:** 600 × 900 px
+- Appears in 5 shortcodes across 7 contexts. `[tm_landingpage]` hero shows the full image at natural size (`object-fit:contain`); card/programme/minimal layouts use `object-fit:cover` within a fixed frame. `[tm_tickets]` cards use a 2:3 frame; spotlight tiles use 4:3 (`object-fit:contain`, letterboxed). `[tm_season_shows]` spotlight and cards use a 4:3 frame.
+
+#### Season Front Image (`_tm_season_image_front`)
+- **Recommended:** 900 × 1200 px (3:4 portrait)
+- Displayed in `[tm_seasons]` 16:9 hero (`object-fit:contain`). Used as fallback in `[tm_tickets]` spotlight hero when no Website Banner is uploaded.
+
+#### Season Website Banner (`_tm_season_social_banner`)
+- **Recommended:** 1920 × 600 px (~16:5 landscape)
+- **Minimum:** 1200 × 375 px
+- Served at `full` WP size. Used as: `[tm_season_shows]` full-width strip (220 px height, `background-size:cover`); `[tm_tickets]` spotlight hero (full-width, `object-fit:cover`, min-height 280 px, preferred over front image); `[tm_seasons]` 16:9 hero (preferred over front image); `[tm_landingpage]` season banner strip (hero + programme layouts, full-width, height auto).
+
+#### Cast Photo (`_tm_cast_picture`)
+- **Recommended:** 600 × 800 px (3:4 portrait)
+- Displayed in `[tm_landingpage]` cast grid: 3:4 frame, `object-fit:contain`. Card width varies by column count.
+
+#### Board Member Photo (`_tm_photo`)
+- **Recommended:** 400 × 400 px (square) or 400 × 533 px (portrait)
+- Grid: circular 120 × 120 px, `object-fit:cover`. List: 64 × 64 px circle. Table: 44 × 44 px circle. Spotlight: 3:4 portrait frame, `object-fit:cover`.
+
+#### Sponsor / Advertiser Logo (`_tm_logo`)
+- **Recommended:** 400 × 200 px, PNG with transparent background
+- Grid/cards: max 200 × 200 px, `object-fit:contain`. Slider: max-height 80 px, `object-fit:contain`.
+
+### WordPress image sizes used
+- `thumbnail` (150 × 150, cropped)
+- `medium` (300 × 300 max, uncropped) — used for ticket cards and season-shows images
+- `large` (1024 × 1024 max) — used for tickets spotlight hero and landing page poster
+- `full` — used for season banners
+
+### 4.5.x patch series included in this release
+- 4.5.18: Critical fix — `headers_sent()` guard removed from style injection
+- 4.5.19: Fix — `$d_safe_link` undefined variable in `tm_integration_js_data()`
+- 4.5.20: Fix — `tm_sanitize_css_color('')` returning `#000000` for empty Display Options
+- 4.5.21: Cast font, hero image natural scale, font style to all cast elements
+- 4.5.22: Landing page typography overhaul — WP Font Library, cast bio size, cast size/style UI
+- 4.5.23: Fix — fatal error on Show save (`$allowed_sizes` undefined)
+
+### Files changed
+- `includes/admin-menu.php`
+- `theatre-manager-plugin.php` (version bump)
+- `theatre-manager.json` (manifest)
+
+---
+
+## Version 4.5.23 — 2026-07-05 — Fix: fatal error on Show save
+
+`$allowed_sizes` was used at line 500/505 (cast size / cast bio size validation) but not declared until line 517 (heading/text size block). PHP closures don't hoist variables, so the first reference got `null`, causing:
+
+```
+Warning: Undefined variable $allowed_sizes
+Fatal error: Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given
+```
+
+Fix: moved the `$allowed_sizes = [...]` declaration to immediately before the cast size block. Removed the now-redundant duplicate declaration in the heading/text size block.
+
+### Files changed
+- `includes/show-front-display.php`
+
+---
+
+## Version 4.5.22 — 2026-07-05 — Landing page typography overhaul
+
+### 1. WP Font Library integration
+
+Fonts uploaded via **Appearance → Fonts** (WP 6.5+ Font Library) now appear in all three font selectors (body, heading, cast) under a `• WP Library` label. They are listed directly after the `(Inherit from theme)` option.
+
+- `tm_lp_wp_library_fonts()` — reads `wp_font_family` CPT, returns slug → `[label, stack]` map. Slugs prefixed `wplf-` to avoid collisions.
+- `tm_lp_full_font_list()` — merges WP Library fonts into the curated static list.
+- `tm_lp_full_font_stack($slug)` — resolves any slug from the full list.
+- `tm_lp_font_stack()` now falls through to `tm_lp_full_font_stack()` for `wplf-*` slugs.
+- All three font resolution blocks in `tm_shortcode_landingpage()` switched from `tm_lp_font_stack` to `tm_lp_full_font_stack`.
+- Font selector dropdowns in the Show meta box now use `tm_lp_full_font_list()`.
+- Save handler validation uses `tm_lp_full_font_list()` so WP Library slugs are accepted.
+- WP Library fonts do not need Google Fonts enqueue — WP core emits their `@font-face`.
+
+### 2. Cast bio size (`cast_bio_size=` attr)
+
+- New `--tm-lp-cast-bio-size` CSS var on `.tm-landingpage-wrapper` (default `0.85em`).
+- New `cast_bio_size=` shortcode attribute (accepts xs/sm/md/lg/xl/xxl tokens or raw CSS).
+- New `_tm_show_lp_cast_bio_size` per-show meta key.
+- **Bio Size** radio row added to Show Front-end Display meta box.
+- Save handler and auto-router both wired.
+- Resolution order: shortcode attr → per-show meta → `tm_landing_page_cast_bio_size` Display Option → `0.85em` default.
+
+### 3. Font applied explicitly to all cast elements
+
+`font-family: var(--tm-lp-cast-font, var(--tm-lp-font))` added to:
+- `.tm-cast-character` (role/character name)
+- `.tm-cast-actor` (actor name)
+- `.tm-cast-bio` (bio paragraph)
+
+Previously only `.tm-cast-column` (the card wrapper) had the cast font, which in some browsers doesn't cascade reliably to `h4` elements.
+
+### 4. Cast Size + Cast Style rows in meta box
+
+`_tm_show_lp_cast_size` and `_tm_show_lp_cast_style` were already read from meta and passed to the auto-router, but there were no UI controls to set them. Added:
+- **Cast Size** radio row (xs/sm/md/lg/xl/xxl)
+- **Cast Style** radio row (Default / Normal / Italic / Bold / Bold Italic)
+- Save handlers for both.
+
+### Files changed
+- `includes/shortcodes/tm_landingpage.php`
+- `includes/show-front-display.php`
+- `assets/css/shortcodes.css`
+
+---
+
+## Version 4.5.21 — 2026-07-05 — Cast font, font-style-to-headers, hero image natural scale
+
+### 1. Cast Font (`cast_font=` attr + per-show meta + Display Option)
+
+- New `--tm-lp-cast-font` CSS custom property on `.tm-landingpage-wrapper`.
+- Resolution order: `cast_font=` shortcode attr → `_tm_show_lp_cast_font` per-show meta → `tm_landing_page_cast_font` Display Option → falls back to `--tm-lp-font` (body font).
+- Applied via `font-family: var(--tm-lp-cast-font, var(--tm-lp-font))` on:
+  - `.tm-cast-column` (all card text) in `shortcodes.css`
+  - `.tm-landingpage-castwithbio .tm-lp-section-heading` (the "Cast" section heading) in `tm_landingpage.php`
+- Google Fonts auto-enqueued when cast font slug maps to a Google font.
+- **Cast Font** select row added to Show Front-end Display meta box (between H Font and H Size rows). Same font list as body/heading selects.
+- Save handler validates slug against `tm_lp_font_list()`, deletes meta on empty.
+- `cast_size` and `cast_style` are now also included in the shortcode string built by `tm_show_front_build_shortcode()` (they were read from meta but never passed through).
+
+### 2. Hero layout: natural image scale
+
+Previously the hero used a CSS `background-image` on a fixed `min-height: 340px` div with `background-size: cover`, cropping most portrait posters. Changed to:
+
+- `<img class="tm-lp-hero-img">` with `width:100%; height:auto; object-fit:contain` — the banner height is now driven by the image's natural aspect ratio.
+- `.tm-lp-hero-overlay` changed to `position:absolute; bottom:0; left:0` so the gradient title bar sits over the bottom of the image regardless of height.
+- Removed the mobile `min-height: 220px` override (no longer relevant).
+- No-image fallback (`.tm-lp-hero-title-bar`) unchanged.
+
+### Files changed
+- `includes/shortcodes/tm_landingpage.php`
+- `includes/show-front-display.php`
+- `assets/css/shortcodes.css`
+
+---
+
+## Version 4.5.20 — 2026-07-05 — Fix: all shortcode colours black when Display Options saved with empty pickers
+
+### Root cause
+
+`tm_sanitize_css_color( get_option( 'key', '#default' ) )` has a subtle failure mode:
+
+1. Admin opens Display Options, clears a colour picker, saves — option is stored as `''` in the database.
+2. On the next page load, `get_option( 'key', '#default' )` returns `''` (the stored empty string), **not** `'#default'` (which is only used when the option row does not exist at all).
+3. `tm_sanitize_css_color( '' )` returns `#000000` (its `$fallback` default).
+4. The CSS custom property is set to `#000000` — black — for every cleared picker.
+
+This made the entire shortcode render black-on-black when Display Options had ever been opened and saved on a live site, even if the pickers were left empty intentionally to inherit defaults.
+
+### Fix
+
+Changed all shortcode light-mode colour option reads to the **raw-first pattern**:
+
+```php
+// Before (broken):
+$bg = tm_sanitize_css_color( get_option( 'tm_tickets_bg_color', '#f8f9fa' ) );
+
+// After (fixed):
+$bg = tm_sanitize_css_color( get_option( 'tm_tickets_bg_color', '' ), '#f8f9fa' );
+```
+
+The real default is now the second argument to `tm_sanitize_css_color()` (its `$fallback` param), which it returns when the input is `null` or `''`. `get_option()` always gets `''` as its own default, so it returns `''` for both "not set" and "saved as empty" — both cases fall through to the real default.
+
+Dark-option reads (where empty means "use generic theme token") pass `''` as the fallback to preserve that semantic: `tm_sanitize_css_color( get_option( 'key', '' ), '' )` — returns `''` when the picker is empty, which is the correct signal to the dark-mode CSS block.
+
+### Files changed
+- `includes/shortcodes/tickets-shortcode.php`
+- `includes/shortcodes/advertisers-shortcode.php`
+- `includes/shortcodes/awards-shortcode.php`
+- `includes/shortcodes/board-members-shortcode.php`
+- `includes/shortcodes/contributors-shortcode.php`
+- `includes/shortcodes/past-shows-shortcode.php`
+- `includes/shortcodes/shows-shortcode.php`
+- `includes/shortcodes/sponsors-shortcode.php`
+- `includes/shortcodes/tm_season_shows.php`
+- `includes/shortcodes/tm_seasons.php`
+
+---
+
+## Version 4.5.19 — 2026-07-05 — Fix: Undefined variable $d_safe_link in tm_integration_js_data()
+
+### Root cause
+
+`$d_safe_link` was computed inside `tm_output_shortcode_theme_integration_css()` (to drive the tickets dark-mode CSS) and then referenced inside the completely separate `tm_integration_js_data()` function to populate `tmShortcodeDark.tk_btn`. PHP variables are function-scoped — it was never in scope there, producing an `Undefined variable` notice and leaving `tk_btn` as `null` in the JS global.
+
+### Fix
+
+Added a self-contained derivation of `$d_safe_link` at the top of `tm_integration_js_data()`, using the identical logic:
+1. Read `tm_tickets_link_color_dark` option (Display Options dark picker).
+2. Validate luminance < 0.18 (≈ 4.5:1 vs white — WCAG AA).
+3. Fall back to `#1a78c2` when empty or too light.
+
+The original derivation in `tm_output_shortcode_theme_integration_css()` is unchanged.
+
+### Files changed
+- `includes/theme-integration.php`
+
+---
+
+## Version 4.5.18 — 2026-07-05 — CRITICAL: shortcode styles silently suppressed on live sites
+
+### Root cause
+
+`tm_add_shortcode_inline_style()` in `includes/functions.php` contained:
+```php
+if ( headers_sent() || ( defined('REST_REQUEST') && REST_REQUEST ) ) {
+    return;
+}
+```
+
+`headers_sent()` returns `true` once any output has been sent to the browser. On live WordPress sites, by the time `the_content` runs (which is when shortcodes execute), HTML output has long since begun. `headers_sent()` therefore **always** returns `true` in this context, and every shortcode `<style>` block was silently discarded.
+
+This was masked on the local Studio site because Studio's development server likely buffers output differently. The live site hit it immediately.
+
+### Consequence
+
+With no `<style id="tm-sc-tickets">` block on the page:
+- `--tm-tk-bg`, `--tm-tk-text`, `--tm-tk-btn`, `--tm-tk-border` were never defined
+- `background: var(--tm-tk-bg)` resolved to `transparent` — the live site's dark body showed through, making tiles appear black
+- `color: var(--tm-tk-text)` resolved to the inherited text colour (`rgb(0,0,0)` — black on black, unreadable)
+- This affected **all shortcodes** that use `tm_add_shortcode_inline_style()`, not just tickets
+
+### Fix
+
+Removed the `headers_sent()` check entirely. `<style>` elements in `<body>` are valid HTML5 and all browsers handle them correctly. The only remaining guard is the REST API check, which is still appropriate (no HTML page to inject into).
+
+### Files changed
+- `includes/functions.php`
+
+---
+
+## Version 4.5.17 — 2026-07-05 — Spotlight contain + dark/light toggle fix
+
+### 1. Image fit: `object-fit: contain`
+- Changed `.tm-ticket-spotlight-tile-img` from `object-fit: cover` to `object-fit: contain`
+- The full show poster is always visible; the image letterboxes within the 4:3 frame rather than cropping
+- Updated in both `assets/css/shortcodes.css` and the inline `<style>` block in `tickets-shortcode.php`
+
+### 2. Dark/light toggle — root cause fixed
+
+**Root cause**: `.tm-tickets-block` was handled by the generic `patchEl(el, { bg, color, border })` path in the JS switcher. This set direct `el.style.background` and `el.style.color` inline styles. When `restoreEl()` ran on light mode it restored the original empty values — but because the tile elements (`tm-ticket-spotlight-tile` etc.) inherit `background: var(--tm-tk-bg)` from the block, any timing or ordering issue between the CSS class removal and inline style restoration could leave tiles with the wrong background.
+
+**Fix**: `.tm-tickets-block` is now in the **vars-only path**, exactly like `.tm-landingpage-wrapper`:
+- `applyDark()` calls `patchEl(el, { vars: { '--tm-tk-bg': scBg, '--tm-tk-text': scText, '--tm-tk-btn': tkLink, '--tm-tk-btn-hov': tkLink, '--tm-tk-border': scBorder } })`
+- `restoreEl()` calls `el.style.removeProperty('--tm-tk-*')` for each — the vars disappear and the light-mode defaults from the shortcode `<style>` block take over immediately and cleanly
+- No stale inline `background`/`color` styles remain after toggling back to light
+
+**Supporting change**: Added `'tk_btn' => $d_safe_link` to the `$dark` array in `theme-integration.php` so the JS switcher has the validated dark button colour available as `tmShortcodeDark.tk_btn`.
+
+### Files changed
+- `includes/shortcodes/tickets-shortcode.php`
+- `assets/css/shortcodes.css`
+- `includes/theme-integration.php`
+
+### Theme 2.2.9
+- `assets/js/color-mode-switcher.js`: added tickets block to `vars`-only patcher path
+
+---
+
+## Version 4.5.16 — 2026-07-05 — Spotlight grid: N equal columns, banner-aligned
+
+### Layout
+- Show tiles sit side-by-side in equal columns that span the exact same width as the season hero banner
+- PHP counts the rendered tiles and writes `--tm-spotlight-count: N` as an inline CSS custom property on the `.tm-ticket-spotlight-grid` element
+- CSS: `grid-template-columns: repeat(var(--tm-spotlight-count, 3), 1fr)` — always N equal fractions regardless of how many shows exist
+  - 3 shows → 3 equal thirds
+  - 4 shows → 4 equal quarters
+  - 2 shows → 2 equal halves
+- Tiles: vertical layout restored — 4:3 image on top, label/title/dates/CTA below, CTA pinned to bottom via `margin-top: auto`
+- All tiles in a row are equal height (CSS Grid row stretching)
+
+### Responsive
+| Breakpoint | Columns |
+|---|---|
+| > 700px | `var(--tm-spotlight-count)` (N equal) |
+| ≤ 700px | 2 columns |
+| ≤ 400px | 1 column |
+
+### Files changed
+- `includes/shortcodes/tickets-shortcode.php`
+- `assets/css/shortcodes.css`
+
+---
+
+## Version 4.5.15 — 2026-07-05 — Spotlight: full-width horizontal cards, 4:3 images
+
+### Layout change
+
+Spotlight show tiles now match the season hero banner in width — each tile is a full-width horizontal card:
+
+- **Grid**: changed from `auto-fill` multi-column to a single `flex-direction: column` stack
+- **Tile orientation**: `flex-direction: row` (horizontal) — 4:3 image on the left, text + CTA on the right
+- **Image column**: fixed `240px` wide; height stretches to match the text body; `position: absolute; inset: 0` ensures the image fills the entire column height regardless of content
+- **Aspect ratio**: `4:3` (landscape/wide) replacing the previous `2:3` portrait
+- **`object-fit: cover`**: image always fills the frame cleanly, no letterboxing
+- **CTA button**: `align-self: flex-start` so it doesn't stretch to full body width
+
+### Responsive behaviour
+
+| Breakpoint | Behaviour |
+|---|---|
+| > 900px | 240px image column |
+| ≤ 900px | 180px image column |
+| ≤ 600px | Tile flips vertical: image on top (full width, 4:3), body below, CTA full width |
+
+### Files changed
+- `includes/shortcodes/tickets-shortcode.php` (inline `<style>` block)
+- `assets/css/shortcodes.css`
+
+---
+
+## Version 4.5.14 — 2026-07-05 — Spotlight show images + full responsive overhaul
+
+### Spotlight layout — show images on tiles
+
+- Each show tile now displays the show's poster image (`_tm_show_sm_image`) at the top
+- Image area: `2:3` aspect ratio, `object-fit: cover`, overflow hidden — always fills the frame cleanly
+- Subtle scale-up (`transform: scale(1.04)`) on hover with smooth transition
+- When `show_image="false"` or no image is assigned, a theatre emoji placeholder fills the same area
+- Tile restructured internally:
+  - `.tm-ticket-spotlight-tile-img-wrap` — aspect-ratio frame around the image
+  - `.tm-ticket-spotlight-tile-img` — the `<img>` itself
+  - `.tm-ticket-spotlight-tile-img-ph` — placeholder span (flex centered emoji)
+  - `.tm-ticket-spotlight-tile-body` — text content area below image (label, title, dates, genre, CTA)
+  - CTA button pushed to the bottom of the body via `margin-top: auto`
+
+### Spotlight grid — responsive overhaul
+
+- Grid changed from `display: flex; flex-wrap: wrap` (inconsistent tile widths) to
+  `display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))`
+- Breakpoints:
+  - ≤ 900px: `minmax(160px, 1fr)` — tighter tiles, still auto-fill
+  - ≤ 600px: `repeat(2, 1fr)` — exactly 2 columns on phones
+  - ≤ 380px: `1fr` — single column on very small phones
+- Inline `<style>` block in `tm_tickets_enqueue_styles()` updated to match (used on non-TM-theme sites)
+
+### Cast grid — responsive overhaul
+
+**Problem**: `grid-template-columns: repeat(min(var(--cast-cols,3), 2), 1fr)` — CSS `min()` inside
+`repeat()` is not supported in all browsers and silently falls back to 1 column.
+
+**Fix**: Replaced all three media-query blocks with explicit column counts:
+- ≤ 1024px: `repeat(3, 1fr)` — 3 columns on landscape tablet
+- ≤ 768px: `repeat(2, 1fr)` — 2 columns on portrait tablet
+- ≤ 480px: `1fr` — single column on mobile
+- `.tm-cast-image` now uses `height: auto; aspect-ratio: 3/4` at all breakpoints (no more `max()` / `calc()` fixed heights that varied unexpectedly)
+- 480px breakpoint adds `max-height: 260px; object-fit: cover` to cap tall portrait images on phone
+
+### Files changed
+- `includes/shortcodes/tickets-shortcode.php`
+- `assets/css/shortcodes.css`
+
+---
+
+## Version 4.5.13 — 2026-07-05 — [tm_tickets] show-link fix — Get Info button
+
+### Problem
+The 4.5.9 show-page link change introduced invalid HTML (nested `<a>` inside `<a>`) in all 5 ticket layouts:
+- **Minimal** — title `<a>` nested inside the row `<a>`
+- **Banner** — floating text link above the button (disrupted clean stacked look)
+- **Cards** — title `<a onclick=stopPropagation>` nested inside the card `<a>`
+- **Table** — title cell turned into a full-width link (changed column visual)
+- **Spotlight** — title `<a onclick=stopPropagation>` nested inside the tile `<a>`
+
+### Solution
+Reverted every layout to its original structure. Added a dedicated **Get Info** button as a separate sibling `<a>` element — never nested.
+
+### Layout changes
+
+| Layout | Get Info placement | Structure change |
+|---|---|---|
+| **Banner** | Plain underlined text link below each ticket button | None — restored original button |
+| **Minimal** | Small pill link below each row (indented to align with title) | `<li>` changed to `.tm-ticket-min-item` flex column |
+| **Cards** | Compact button in card footer beside Get Tickets | Card `<a>` → `<div>`, poster gets its own `<a>`, footer has two real links |
+| **Table** | Inline link in the Tickets cell beside Get Tickets | Actions cell uses `.tm-ticket-table-actions` flex row |
+| **Spotlight** | Block link below each tile | Each tile wrapped in `.tm-ticket-spotlight-tile-wrap` flex column |
+
+### New CSS (shortcodes.css)
+- `.tm-ticket-info-link` — shared base style: bordered pill, inherits theme colors via `--tm-tk-*` vars, hover darkens background
+- `.tm-ticket-min-item` — flex column for minimal row + info link
+- `.tm-ticket-btn-wrap .tm-ticket-info-link` — underline text link variant for banner
+- `.tm-ticket-spotlight-tile-wrap` + `.tm-ticket-spotlight-tile-wrap .tm-ticket-info-link`
+- `.tm-ticket-table-actions` — flex row for the tickets cell
+- `.tm-ticket-card-img-link` — block wrapper for the poster `<a>` in cards
+- `.tm-ticket-card-footer` — updated to `display:flex; gap:8px` for side-by-side buttons
+- `.tm-ticket-card-cta` — updated to `flex:1 1 auto` to fill remaining space
+
+### Verification
+- Zero nested `<a>` violations across all 5 layouts (automated check)
+- 3 Get Info links rendered per layout (one per test show)
+- Zero old `.tm-ticket-show-link` class remaining
+
+### Files changed
+- `includes/shortcodes/tickets-shortcode.php`
+- `assets/css/shortcodes.css`
+
+---
+
+## Version 4.5.12 — 2026-07-05 — Hero banner fix, heading size fix, cast dark mode, cast typography
+
+### Bug fixes
+
+#### 1. Season banner not showing in hero layout
+- **Root cause**: `$show_banner` only read `$atts['show_season_banner']` which defaults to `'false'`; per-show meta `_tm_show_lp_season_banner` was never consulted
+- **Fix**: Added 3-level resolution: explicit shortcode attr (`true`/`false`) → per-show meta → `false`
+- Works for all layouts that use `$banner_html` (card, hero, programme)
+
+#### 2. Layout, urlbutton, castcols, buttonformat, show_season_banner not reading per-show meta
+- **Root cause**: Shortcode `$defaults` array had concrete values for `layout='card'`, `urlbutton='false'`, `castcols='3'`, `buttonformat='default'`, `show_season_banner='false'` — `shortcode_atts()` always returned these, so the per-show meta fallback was never reached
+- **Fix**: Changed all five to default `''` (empty string sentinel); resolution logic now properly follows attr → per-show meta → hard default
+- Heading size, font, text size, align, cast size/style already used `''` defaults and worked correctly
+
+#### 3. `$buttonformat` undefined variable warning
+- **Root cause**: `sed` replacement changed `$atts['buttonformat']` to `$buttonformat` in the resolution block before `$buttonformat` was initialized
+- **Fix**: Restored `$atts['buttonformat']` as starting value in resolution chain
+
+### CSS fix
+
+#### 4. Missing `}` on `.tm-cast-image` in `shortcodes.css`
+- `.tm-cast-image { ... aspect-ratio: 3/4;` was missing its closing brace
+- This caused `aspect-ratio: 3/4` to cascade into `.tm-cast-character`, `.tm-cast-actor`, `.tm-cast-bio`, and all subsequent rules as orphaned declarations
+
+### Cast dark mode (shortcodes.css)
+
+#### 5. Hardcoded colors replaced with CSS custom properties
+- `.tm-cast-column` — `background-color: #f9f9f9` → `var(--tm-lp-meta-bg, #f9f9f9)`, `border: 1px solid #ddd` → `var(--tm-lp-border, #ddd)`
+- `.tm-cast-image` — `background-color: #f0f0f0` → `var(--tm-lp-meta-bg, #f0f0f0)`
+- `.tm-cast-character` — `color: #333` → `var(--tm-lp-heading, #333)`
+- `.tm-cast-actor` — `color: #666` → `var(--tm-lp-text, #666)` + `opacity: 0.8`
+- `.tm-cast-bio` — `color: #555` → `var(--tm-lp-text, #555)`
+- In dark mode, `--tm-lp-meta-bg`, `--tm-lp-border`, `--tm-lp-heading`, and `--tm-lp-text` are overridden by `html.tm-dark-mode .tm-landingpage-wrapper` in `theme-integration.php` — cast cards now correctly flip to dark theme
+
+### New feature: cast font size and style
+
+#### 6. `cast_size=` shortcode attr
+- Tokens: `xs`=0.75rem, `sm`=0.85rem, `md`=1rem, `lg`=1.1rem, `xl`=1.25rem, `xxl`=1.5rem
+- Also accepts raw CSS values (e.g. `cast_size="14px"`)
+- Resolution: attr → `_tm_show_lp_cast_size` per-show meta → `tm_landing_page_cast_size` option
+- Applies via `--tm-lp-cast-size` CSS custom property on `.tm-landingpage-wrapper`
+
+#### 7. `cast_style=` shortcode attr
+- Values: `normal`, `italic`, `bold`, `bold-italic`
+- Resolution: attr → `_tm_show_lp_cast_style` per-show meta → `tm_landing_page_cast_style` option
+- `bold` → sets `--tm-lp-cast-weight:700`; `italic` → sets `--tm-lp-cast-style:italic`; `bold-italic` → sets both
+- Applies via `--tm-lp-cast-style` and `--tm-lp-cast-weight` CSS custom properties
+- Both vars declared in the inline `<style>` defaults block at `1rem`/`normal`/`normal`
+
+### CSS var defaults added to inline style block (`tm_landingpage.php`)
+```
+--tm-lp-cast-size:   1rem;
+--tm-lp-cast-style:  normal;
+--tm-lp-cast-weight: normal;
+```
+
+### Files changed
+- `includes/shortcodes/tm_landingpage.php`
+- `assets/css/shortcodes.css`
+
+---
+
+## Version 4.5.11 — 2026-07-05 — Documentation overhaul + Display Options housekeeping
+
+### Instructions page (`admin-menu.php` — `tm_instructions_page()`)
+- **[tm_landingpage] entry fully rewritten** — replaces the old 2-line stub with a full reference section covering:
+  - Front-end Display routing (how `single-show.php` auto-invokes the shortcode)
+  - All 4 layouts with descriptions (card, hero, programme, minimal)
+  - Full `field_list=` reference with all 9 fields explained
+  - Ticket button options: `urlbutton=`, `buttonformat=`, second-under-image button
+  - Typography attrs: `font=`, `heading_font=`, `heading_size=`, `text_size=`, `align=`, `castcols=`, `hard_breaks=`
+  - Full 27-font slug reference split by system / Google Serif / Google Sans / Google Display
+  - Season banner: `show_season_banner=` attr
+  - Per-show meta overrides and resolution order
+  - Dark/light mode notes
+  - 5 usage examples
+- **Overview paragraph** — added note that show names/images link to show pages sitewide
+- **Display Options section** — updated from 11 to 12 tabs; each tab now lists its shortcodes and which heading colour fields it exposes
+- **Tips section** — two new items:
+  - Show-page links → set Front-end Display to Landing Page
+  - H1–H3 pickers: leave empty to inherit; H4–H6 fields removed
+
+### Display Options (`display-options.php` + `admin-menu.php` legacy loop)
+- **H4, H5, H6 colour fields removed** from all 12 tabs — no shortcode in the plugin reads `*_h4_color`, `*_h5_color`, or `*_h6_color`; registering and rendering these was dead weight
+- **H1** now only registered and rendered for the `landing_page` tab (labelled “H1 Color (Show Title)”)
+- **H2** registered only for: `awards`, `show`, `season`, `venues`, `landing_page` (labelled “H2 Color (Accent / Label)” for LP)
+- **H3** registered only for: `awards`, `show`, `season`, `venues`
+- Existing saved H4–H6 DB values are **preserved** (no destructive DB operation) but no longer displayed or applied
+- Both the new `tm_register_display_settings()` in `display-options.php` AND the legacy registration loop in `admin-menu.php` were updated so neither double-registers the removed fields
+
+### JSON manifest (`theatre-manager.json`)
+- Version bumped to `4.5.11`
+- **Description** rewritten to match current feature set: 16 shortcodes (down from stale “22”), correct block/BB module counts, show-page links mention, accurate Display Options tab count (12), correct heading-field notes
+- **Other Notes** section rewritten: compatibility table, full 16-shortcode list, heading fields per tab explanation, show-page links reference (since 4.5.9), landing page feature summary (since 4.5.4/4.5.10)
+- **Changelog** entry 4.5.11 prepended
+
+### Files changed
+- `includes/admin-menu.php`
+- `includes/display-options.php`
+- `theatre-manager.json`
+- `ChangeLog.txt`
+
+### No PHP logic changes
+No shortcode behaviour, CSS, or DB schema changed in this release. Pure documentation and settings-registration cleanup.
+
+---
+
+## Version 4.5.10 — 2026-07-05 — Second Get Tickets button under show image
+
+### What changed
+- `[tm_landingpage]` — card, programme, and minimal layouts now render a second Get Tickets button directly below the show poster/image
+- Uses the same `tm_lp_ticket_html()` helper as the primary button: respects `urlbutton=true|false` and `buttonformat=` shortcode attrs
+- If the show has no ticket URL, neither button appears
+- Hero layout is unchanged (its CTA is already overlaid on the banner image)
+
+### CSS additions (inside `tm_landingpage.php` inline style block)
+- `.tm-lp-image-col` — added `flex-direction: column; align-items: center; justify-content: flex-start;` so image and new button stack vertically
+- `.tm-lp-image-col .tm-lp-image-ticket` — `width: 100%; margin-top: 16px; text-align: center;`
+- `.tm-lp-image-col .tm-lp-image-ticket .tm-lp-ticket-btn` — stretches button to full column width
+- `.tm-lp-prog-poster .tm-lp-image-ticket` / `.tm-lp-image-ticket .tm-lp-ticket-btn` — same, slightly smaller font for the compact programme poster column
+- `.tm-lp-minimal-image .tm-lp-image-ticket` — respects `--tm-lp-align` for text alignment
+
+### Files changed
+- `includes/shortcodes/tm_landingpage.php`
+
+---
+
+## Version 4.5.9 — 2026-07-05 — Show names and images link to show pages
+
+### New helper: `tm_show_page_url()`
+- Added to `includes/helpers.php`
+- Accepts a show post ID or `WP_Post` object
+- Returns `get_permalink()` for the show CPT, which routes through `single-show.php` and the Front-end Display system
+- Returns `''` for invalid IDs, drafts, or trashed posts (links are conditionally rendered)
+- All shortcodes use this one function — centralised so changing routing logic later only requires one edit
+
+### Shortcodes updated
+
+| Shortcode | What links |
+|---|---|
+| `[tm_shows]` | Image (wrapped in `<a>`) + h3 title (text wrapped in `<a>`) in both assigned-to-season and unassigned blocks |
+| `[tm_season_shows]` | Spotlight: image + h3 title; Cards: image + h3 title |
+| `[tm_past_shows]` | Cards layout: `.tm-ps-card-title`; Flat list: `.tm-ps-col-title` |
+| `[tm_tickets]` | Minimal: show title in row; Banner: show title above button; Cards: title inside ticket card (with `onclick=stopPropagation` so card still navigates to ticket URL); Table: `.tm-ticket-table-name` cell; Spotlight: tile title (same stopPropagation pattern) |
+| `[tm_awards]` | Table cell, card `.tm-aw-card-show`, list `.tm-aw-list-show`, showcase `.tm-aw-showcase-show` and nominations list — all using `$aw['show_id']` |
+
+### Link styling
+- All links: `style="color:inherit;text-decoration:none;"`  — blend with surrounding design
+- Headings that are links keep original colour from CSS vars (e.g. `--tm-lp-heading`)
+- Links in card/tile wrappers that are already `<a>` elements use `onclick="event.stopPropagation()"` to allow independent navigation
+
+### Files changed
+- `includes/helpers.php` (new function)
+- `includes/shortcodes/shows-shortcode.php`
+- `includes/shortcodes/tm_season_shows.php`
+- `includes/shortcodes/past-shows-shortcode.php`
+- `includes/shortcodes/tickets-shortcode.php`
+- `includes/shortcodes/awards-shortcode.php`
+
+---
+
+## Version 4.5.8 — 2026-07-05 — Landing page dark/light mode fully wired
+
+### Root cause fix: `tm_sanitize_css_color('')` returns `#000000`
+- All landing page colour option reads now check the **raw option value** before passing to sanitizer
+- Pattern: `$raw = get_option(...,''); $val = $raw ? tm_sanitize_css_color($raw) : $fallback;`
+- Previously: empty options resolved to `#000000` (sanitizer default), blocking fallback chain
+- Now: empty options correctly fall through to Customizer dark tokens
+- Affects both light overrides block and dark overrides block in `theme-integration.php`
+
+### JS patcher: landing page CSS-var branch
+- New `tm-landingpage-wrapper` branch in `applyDark()` → `varPatch` block in `color-mode-switcher.js`
+- Sets all 8 `--tm-lp-*` CSS vars via `setProperty(k, v, 'important')`:
+  `--tm-lp-bg`, `--tm-lp-text`, `--tm-lp-heading`, `--tm-lp-accent`,
+  `--tm-lp-border`, `--tm-lp-meta-bg`, `--tm-lp-btn-bg`, `--tm-lp-btn-text`
+- Uses `patchEl(el, { vars: varPatch })` only (no direct bg/color/border) — vars handle everything
+- `setProperty('important')` beats any inline `style="--tm-lp-font:..."` already on the element
+- `applyLight()` → `restoreEl()` removes all `!important` overrides; stylesheet defaults win back
+
+### PHP: LP dark tokens injected into `tmShortcodeDark`
+- `tm_integration_js_data()` now passes 8 `lp_*` keys in `$dark` array
+- Resolved from Display Options dark pickers with Customizer fallback:
+  `lp_bg` → `$d_surf`, `lp_text` → `$d_text`, `lp_heading` → `$d_head`,
+  `lp_accent` → `#c0392b`, `lp_border` → `rgba(255,255,255,0.12)`, etc.
+
+### Files changed
+- `includes/theme-integration.php`
+- `assets/js/color-mode-switcher.js` (theme 2.2.8)
+
+---
+
+## Version 4.5.7 — 2026-07-05 — Font applies to headings; heading font, size controls
+
+### Bug fix: font now applies to headings
+- `--tm-lp-heading-font` CSS var added, defaults to `var(--tm-lp-font)` — so the body font automatically
+  applies to titles too when no separate heading font is set
+- Applied explicitly to: `.tm-lp-title`, `.tm-lp-hero-title`, `.tm-lp-hero-title-noimg`,
+  `.tm-lp-section-heading`, `.tm-lp-label`
+
+### New: separate heading font
+- `heading_font=<slug>` shortcode attr — set a different font for titles only
+- `--tm-lp-heading-font` injected into wrapper style
+- Per-show: "H Font" dropdown in Front-end Display meta box
+- Global: Display Options → Landing Page → Heading Font
+
+### New: heading size + text size scaling
+- `heading_size=<token>` / `text_size=<token>` attrs — values: `xs`, `sm`, `md`, `lg`, `xl`, `xxl`
+  maps to scale multipliers: 0.75, 0.875, 1, 1.2, 1.45, 1.7
+- `--tm-lp-heading-scale` / `--tm-lp-text-scale` CSS vars; font-sizes use `calc(base * var(...))`
+- Applies across all 4 layouts and responsive breakpoints
+- Per-show: "H Size" / "Text Size" radio groups in Front-end Display meta box
+- Global: Display Options → Landing Page → Heading Size / Body Text Size
+
+### Expanded font list: 18 → 27 fonts
+- **System added**: `trebuchet` (Trebuchet MS), `courier` (Courier New), `comic-sans` (Comic Sans MS), `impact` (Impact)
+- **Google added**: `merriweather`, `nunito`, `poppins`, `dm-serif` (DM Serif Display), `spectral`
+- Comic Sans and other system fonts never trigger a Google Fonts network request
+
+### Files changed
+- `includes/shortcodes/tm_landingpage.php` (font list, GF map, CSS vars, `shortcode_atts`, resolution logic)
+- `includes/show-front-display.php` (meta box + save handler + build_shortcode)
+- `includes/display-options.php` (3 new LP callbacks + field registrations)
+- `includes/theme-integration.php` (heading font + scale vars emitted in `<head>`)
+
+---
+
+## Version 4.5.6 — 2026-07-05 — Font applies correctly; text alignment
+
+### Bug fix: font setting now applies to shortcode
+- `$font_style` (single CSS var) replaced by `$wrapper_style` — a composite inline style string
+  that merges both `--tm-lp-font` and `--tm-lp-align` into one `style=""` attribute
+- Previously two separate `style=""` attributes would have been emitted (only the last wins in HTML); now always one
+
+### New: text alignment
+- New `align=` shortcode attr: `left`, `center`, `right`, `justify`
+- `--tm-lp-align` CSS custom property (default `left`) set on `.tm-landingpage-wrapper`
+- Applied via `text-align: var(--tm-lp-align)` to all text containers across all 4 layouts:
+  `.tm-lp-info-col`, `.tm-lp-hero-body`, `.tm-lp-hero-overlay`, `.tm-lp-prog-body`,
+  `.tm-lp-prog-titleblock`, `.tm-lp-minimal-body`
+- Accent rule (`.tm-lp-title-rule`) centres by default; `[style*="left"]` resets it to left-align
+- Cast list flexbox `align-items` follows alignment (start/center/end)
+- Ticket button wrapped in `.tm-lp-ticket-wrap` so `text-align` controls button position
+- **Per-show**: radio group (Default / Left / Centre / Right / Justify) in Front-end Display meta box;
+  saved to `_tm_show_lp_align`
+- **Global**: Display Options → Landing Page → Text Alignment (radio group with description);
+  option `tm_landing_page_text_align`; injected as `--tm-lp-align` by `theme-integration.php`
+- **Resolution order**: `align=` attr → `_tm_show_lp_align` meta → `tm_landing_page_text_align` option → `left`
+
+### Files changed
+- `includes/shortcodes/tm_landingpage.php`
+- `includes/show-front-display.php`
+- `includes/display-options.php` (`tm_lp_text_align_callback` added)
+- `includes/theme-integration.php`
+
+---
+
+## Version 4.5.5 — 2026-07-05 — Landing Page font selector
+
+### Font selection
+- **18-font curated list** keyed by URL-safe slug (e.g. `playfair`, `montserrat`, `cinzel`):
+  - System: inherit (theme default), georgia, times, palatino, arial, verdana
+  - Google Serif: playfair, eb-garamond, cormorant, libre-baskerville, lora
+  - Google Sans: montserrat, raleway, josefin-sans, libre-franklin
+  - Google Display/Slab: oswald, cinzel, alfa-slab-one
+- **`font=` shortcode attr** accepts a slug: `[tm_landingpage font=playfair]`
+- **Per-show meta box** — Font dropdown with live preview panel (resolves CSS stack for preview)
+- **Display Options → Landing Page** — Base Font Family expanded from 7-item system list to full 18-font curated list
+- **Google Fonts enqueued on demand** via `wp_enqueue_style` + `display=swap`, only when a Google Font slug is selected; static guard prevents duplicate enqueue
+- **Resolution order**: shortcode `font=` attr → per-show `_tm_show_lp_font` meta → `tm_landing_page_base_font` option → theme inherit
+- **`--tm-lp-font`** CSS custom property set via inline style on wrapper element; `font-family: var(--tm-lp-font)` on `.tm-landingpage-wrapper`
+
+### New functions
+- `tm_lp_font_list()` — returns `slug => ['label', 'stack']` map
+- `tm_lp_font_stack($slug)` — resolves slug to CSS stack; returns `''` for inherit/unknown
+- `tm_lp_google_fonts_map()` — returns `slug => Google Fonts API query` map
+- `tm_lp_maybe_enqueue_google_font($slug)` — enqueues once per slug per request
+
+### Files changed
+- `includes/shortcodes/tm_landingpage.php`
+- `includes/show-front-display.php`
+- `includes/display-options.php` (font callback updated)
+- `includes/theme-integration.php`
+
+---
+
+## Version 4.5.4 — 2026-07-05 — Landing Page layouts + configurable headings
+
+### `[tm_landingpage]` new `layout` attr
+
+| Value | Description |
+|---|---|
+| `card` | Two-column card — image left 38%, info right *(default)* |
+| `hero` | Full-width cinematic: image as tall banner with dark gradient + title overlay; info below; optional season banner at bottom |
+| `programme` | Theatre programme: poster left, crew in two-column grid right; synopsis, performances, venue, cast, ticket below; optional season banner at bottom |
+| `minimal` | No card chrome — transparent bg, clean single-column, max-width 680px content |
+
+### Season banner
+- New attr `show_season_banner="true"` — appends `.tm-lp-season-banner` strip with season social banner image
+- Available in `hero` and `programme` layouts; meta box shows toggle only for those layouts
+- `tm_lp_season_banner()` helper reads `_tm_show_season` → `_tm_season_social_banner` attachment
+
+### Configurable section headings
+- New `tm_lp_heading( $key, $show_id )` helper: per-show meta → Display Options global → hardcoded default
+- **10 headings**: author, sub_authors, director, assoc_dir, producer, stage_manager, synopsis, show_dates, venue, cast
+- **Display Options → Landing Page**: 10 global heading text inputs (with placeholder showing the default)
+- **Front-end Display meta box**: 10-field heading override grid with placeholder showing the global/default value
+
+### Shared helpers (new functions)
+- `tm_lp_heading()` — heading resolution
+- `tm_lp_ticket_html()` — ticket link/button builder
+- `tm_lp_season_banner()` — season banner renderer
+- `tm_lp_info_sections()` — shared crew/synopsis/logistics/cast/ticket block used by card + hero layouts
+
+### Meta box updates
+- Layout selector dropdown (4 options)
+- Season banner checkbox (visible only for hero/programme)
+- Heading overrides panel (10 text inputs, JS-toggled)
+- `tm_show_front_build_shortcode()` passes layout + show_season_banner to shortcode
+
+### Files changed
+- `includes/shortcodes/tm_landingpage.php`
+- `includes/show-front-display.php`
+- `includes/admin-menu.php` (heading fields registration)
+- `theatre-manager.json` changelog
+
+---
+
+## Version 4.5.3 — 2026-07-05 — Landing Page visual overhaul + Display Options tab
+
+### Bug fixes
+- **`single-show.php`** (new) — renamed from `single-shows.php`; WP template hierarchy requires the CPT slug (`show`), not the plural. This was the root cause of "ARCHIVES" heading and date/author meta appearing on every show page
+- **`get_queried_object_id()`** — fixed `get_the_ID()` returning 0 at `template_redirect` time in `show-front-display.php`
+
+### `[tm_landingpage]` visual overhaul
+- **Two-column card layout**: show image (38%) left, info panel right; collapses to single column at 680px
+- **Show name** rendered as `h1.tm-lp-title` — large uppercase display heading with short accent rule below
+- **Fields** use editorial label/value pattern: small uppercase accent-coloured label + value text below
+- **Sections** grouped: creative team → synopsis → dates+venue → cast → ticket button
+- **Dividers** between sections via `hr.tm-lp-divider`
+- **Ticket button** `tm-lp-ticket-btn` — styled with `--tm-lp-btn-bg`/`--tm-lp-btn-text`; plain link fallback
+- **No-image mode** — `tm-lp-no-image` class; info col spans full width automatically
+- **Accent bar** — 5px `--tm-lp-accent` strip at top of card
+- All colours via CSS custom properties on `.tm-landingpage-wrapper`
+- CSS emitted via `tm_landingpage_styles()` → `tm_add_shortcode_inline_style()` (deduped)
+
+### New Display Options tab: Landing Page (12th tab)
+- `display-options.php`: `landing_page` added to `$tabs` array
+- Section description callback explains which fields map to which CSS vars
+- Standard colour pickers: bg, text, border, h1–h6 (H1 → heading; H2 → accent + btn-bg)
+- Light + dark variants when dark mode is enabled
+
+### `theme-integration.php`
+- Landing page light CSS var injection from Display Options
+- Landing page dark mode fallback (generic theme tokens + hardcoded dark palette)
+- Landing page Display Options dark overrides (when explicitly saved)
+- `landing_page` selector added to `tm_integration_tabs()` map for JS patcher
+
+### Files changed
+- `includes/shortcodes/tm_landingpage.php` — shortcode rewritten
+- `includes/show-front-display.php` — `get_queried_object_id()` fix
+- `includes/display-options.php` — landing_page tab added
+- `includes/theme-integration.php` — CSS var injection + selector map
+- `single-show.php` (theme) — new clean pass-through template
+
+---
+
+## Version 4.5.2 — 2026-07-04 — Show Front-end Display
+
+### New feature
+- **`includes/show-front-display.php`** (new file) — intercepts single Show CPT URLs and renders a configurable view
+- **Three views** selectable per show (and globally in Settings):
+  - **Landing Page** — `[tm_landingpage show_id="{id}" ...]` with per-show field list, cast columns, ticket button/style
+  - **Season Shows** — `[tm_season_shows season_id="{season}" layout="cards"]` auto-resolved from show’s season
+  - **Tickets** — `[tm_tickets layout="banner"]`
+  - **None** — falls through to normal WordPress post rendering
+- **Meta box** — “Front-end Display” sidebar panel on each Show edit screen:
+  - View selector (4 radio options)
+  - Landing Page section: 14-field checkbox list, cast columns (1–6), ticket link style (plain / button), button format (9 options)
+  - Season Shows / Tickets sections: informational note only
+  - JS toggles sections in/out on view change
+- **Global default** — new “Show Front-end Display” section in Settings; factory default = Landing Page
+- Duplicate show title suppressed when `show_name` is in the Landing Page field list
+- Meta saved on `save_post_show` with nonce verification, capability check, and whitelist validation on all fields
+
+### Files changed
+- `includes/show-front-display.php` — new
+- `theatre-manager-plugin.php` — `require_once` added
+- `theatre-manager.json` — changelog updated, version 4.5.2
+
+---
+
+## Version 4.5.1 — 2026-07-04 — Remove orphaned Cast Display Options tab
+
+### Display Options
+- **Cast tab removed** — `tm_cast_*` options were entirely unread after `[tm_cast]` and `[tm_season_cast]` were deleted in 4.5.0. Display Options now has **11 tabs**.
+- `[tm_show_cast]` and `[tm_programs]` both use the **Show** tab (`tm_show_*` keys) — documented in the Show tab description callback.
+
+### theme-integration.php
+- `cast` key removed from `tm_integration_tabs()` map (was reading non-existent `tm_cast_bg_color` etc. in the CSS-var loop)
+- `.tm-show-cast` selector merged into the `show` entry so `[tm_show_cast]` still gets CSS variable injection
+- Dark-mode `.tm-cast-entry` styling retained via generic theme tokens (not affected by DO tab removal)
+
+### Documentation
+- Instructions page: Display Options section updated to 11 tabs; Show tab entry lists all 5 consumers
+- `[tm_show_cast]` and `[tm_programs]` entries note they use the Show tab
+- `updater.php` + JSON: changelog updated, description/other_notes updated, stale `21 BB modules` count fixed to 14
+
+---
+
+## Version 4.5.0 — 2026-07-04 — Shortcode consolidation
+
+### Removed
+- `[tm_cast]` shortcode + `tm-cast-module` BB module
+- `[tm_season_cast]` shortcode + `tm-season-cast-module` BB module
+- `[tm_sponsor_slider]` shortcode (as a standalone) + `tm-sponsor-slider-module` BB module
+- `cast-shortcode.php`, `tm_season_cast.php`, `sponsor-slider-shortcode.php` deleted
+
+### Changed — [tm_sponsors]
+- New `layout` attr: `grid` (default, existing behaviour) | `slider` (Swiper carousel, formerly `[tm_sponsor_slider]`)
+- `[tm_sponsor_slider]` kept as a backward-compat alias that calls `[tm_sponsors layout="slider"]`
+- Slider attrs: `slides_visible` (int, default 4), `autoplay` (true|false, default true), `speed` (ms, default 3000)
+- Sponsors BB module updated: Layout selector + conditional Grid Options / Slider Options sections with BB `toggle`
+- Gutenberg block for `tm-sponsors` updated with full field set
+
+### Other
+- `blocks/tm-blocks/index.js`: removed 3 block configs + map entries; tm-sponsors block updated
+- `display-options.php`: cast tab description added (`[tm_show_cast]` only); season tab description added
+- `theme-integration.php`: `cast` selector narrowed to `.tm-show-cast-wrapper`; stale `tm-current-season-wrapper` removed from season selector
+- `includes/sample-content.php`: TM_Cast_Members + TM_Season_Cast pages removed; TM_Sponsors updated to use `layout="slider"`
+- `includes/admin-menu.php`: instructions renumbered 1–16; [tm_sponsors] entry describes both layouts
+- `updater.php` + JSON: counts updated to 16 sc / 16 blocks / 14 BB modules; other_notes updated
+- Plugin ships: **16 shortcodes, 16 Gutenberg blocks, 14 BB modules**
+
+---
+
+## Version 4.4.0 — 2026-07-04 — Remove deprecated season shortcodes + documentation overhaul
+
+### Documentation & Display Options
+- **Instructions page** completely rewritten:
+  - Overview updated to state 19 shortcodes / 19 blocks / 17 BB modules
+  - Duplicate Display Options section removed; single authoritative section lists all 12 tabs with the shortcodes each tab controls
+  - Season Status Logic expanded with `upcoming` and `all` entries
+  - Season Builder section condensed and clarified
+  - Settings section now documents Google Maps API Key and Auditions Page settings
+  - Sample Pages count corrected to 18
+  - Tips & Best Practices updated
+- **Display Options → Season tab**: added description noting `[tm_seasons]` and `[tm_season_shows]` share this tab
+- **updater.php / theatre-manager.json**:
+  - Changelog group heading for 4.4.0 corrected from `4.3.x` to `4.4.x`
+  - Stale “22-shortcode” and “22 shortcodes” references updated throughout changelog and other_notes
+  - `[tm_current_season]`, `[tm_season]`, `[tm_season_banner]`, `[tm_season_images]` entries removed from Other Notes shortcode reference
+  - `[tm_season_shows]` and `[tm_seasons]` descriptions updated with current attrs
+  - 4.1.1 entry corrected (no longer references 22-shortcode)
+  - 3.9.5 entry corrected
+
+### Removed shortcodes
+| Shortcode | Replacement |
+|---|---|
+| `[tm_current_season]` | `[tm_seasons which="current"]` |
+| `[tm_season]` | `[tm_seasons season_id="123"]` |
+| `[tm_season_banner]` | `[tm_seasons season_id="123" layout="field" field="social_banner"]` |
+| `[tm_season_images]` | `[tm_seasons show_image="true" show_image_back="true" show_social_banner="true" show_sm_square="true" show_sm_portrait="true"]` |
+
+### Files deleted
+- `includes/shortcodes/seasons-shortcode.php` (`tm_current_season` + old `tm_seasons` stub)
+- `includes/shortcodes/tm_season_shortcode.php` (`tm_season`)
+- `includes/shortcodes/tm_season_banner.php`
+- `includes/shortcodes/tm_season_images.php`
+- `modules/tm-current-season-module/`
+- `modules/tm-season-banner-module/`
+- `modules/tm-season-images-module/`
+- `modules/tm-season-module/`
+
+### Other changes
+- `blocks/tm-blocks/index.js`: removed 4 block configs + both shortcode map entries
+- `includes/admin-menu.php`: removed 4 instruction entries; renumbered 1–19; updated descriptions for `[tm_season_shows]` and `[tm_seasons]`
+- `includes/sample-content.php`: replaced `[tm_season_banner]` with `[tm_seasons which="current"]`; replaced `[tm_season_images]` with `[tm_seasons]` image toggles
+- `includes/updater.php`: removed shortcode references; updated counts to 19 shortcodes / 17 BB modules
+- Plugin now ships **19 shortcodes**, **19 Gutenberg blocks**, **17 BB modules**
+
+---
+
+## Version 4.3.8 — 2026-07-04 — `[tm_seasons]` full rewrite
+
+### `which` filter
+| Value | Behaviour |
+|---|---|
+| `all` | All published seasons (default) |
+| `current` | Seasons where today falls within start–end |
+| `upcoming` | Seasons whose start date is in the future |
+| `next` | The single season immediately after the current one (or first future if no current) |
+| `past` | Seasons whose end date has passed |
+
+Combines with `season_id` (overrides `which`) and `limit` / `order` / `orderby`.
+
+### Cards layout — all fields individually togglable
+| Attr | Default | Description |
+|---|---|---|
+| `show_image` | true | Hero image (social_banner preferred, falls back to image_front); 16:9 contain frame |
+| `show_name` | true | Season name |
+| `show_status` | true | Colour-coded status badge (Current/Upcoming/Past) |
+| `show_dates` | true | Date range |
+| `show_tickets` | true | Get Tickets button |
+| `show_description` | false | Post content (WordPress editor content) |
+| `show_image_back` | false | Back-of-programme image thumbnail |
+| `show_social_banner` | false | Social banner thumbnail (if not already used as hero) |
+| `show_sm_square` | false | Social media square thumbnail |
+| `show_sm_portrait` | false | Social media portrait thumbnail |
+
+Extra images render as a thumbnail strip (64×64px, object-fit:cover).
+
+### Field layout — raw single-field output
+```
+[tm_seasons season_id="123" layout="field" field="status"]
+[tm_seasons which="current" layout="field" field="image_front"]
+[tm_seasons which="next" layout="field" field="dates_range"]
+```
+| Field | Returns |
+|---|---|
+| `name` | Plain text |
+| `start_date` / `end_date` | Formatted date string |
+| `dates_range` | "Jan 1, 2026 – Jun 30, 2026" |
+| `status` | Coloured `<span>` badge |
+| `description` | `wpautop()` HTML from post content |
+| `tickets_url` | Raw URL string |
+| `tickets_link` | `<a href…>Get Tickets</a>` |
+| `image_front` / `image_back` / `social_banner` / `sm_square` / `sm_portrait` | `<img>` tag |
+
+### Dark mode
+- CSS-var architecture: `--tm-sn-bg`, `--tm-sn-text`, `--tm-sn-border`, `--tm-sn-h2`, `--tm-sn-h3`, `--tm-sn-acc`, `--tm-sn-btn-bg`, `--tm-sn-btn-text` on `.tm-seasons-block`
+- Dark overrides read `tm_season_*_dark` Display Options; button uses `#1a78c2` (WCAG AA)
+- `theme-integration.php` emits `html.tm-dark-mode .tm-seasons-block { … }` block
+- `.tm-seasons-block` added to JS selector map
+
+### Files changed
+- `includes/shortcodes/tm_seasons.php` — full rewrite
+- `includes/theme-integration.php` — added seasons dark block + selector entry
+
+---
+
+## Version 4.3.7 — 2026-07-04 — `[tm_season_shows]` button dark-mode + auditions link
+
+### Button dark-mode fix
+- New CSS vars `--tm-ss-btn-bg` and `--tm-ss-btn-text` decouple button colour from the heading accent
+- Light mode: both default to the computed accent colour (`#fff` text)
+- Dark mode: `--tm-ss-btn-bg` set to `#1a78c2` (WCAG AA — 4.6:1 vs white), `--tm-ss-btn-text` stays `#ffffff` — applies both from inline shortcode and from `theme-integration.php`
+- The outlined audition button uses `--tm-ss-btn-bg` for its border/text so it stays readable in dark mode too
+
+### Auditions page setting
+- New **Settings → Auditions Page** dropdown: pick the WordPress page that hosts `[tm_auditions]`
+- Stored as `tm_auditions_page_id` in `wp_options`
+- When set: audition button in both layouts becomes a proper `<a>` link to that page
+- When not set: falls back to showing audition date + details inline (previous behaviour)
+
+### `show_auditions` attribute
+- New attr on `[tm_season_shows]` — default `true`
+- `show_auditions="false"` hides audition date, details, and the audition button entirely from both layouts
+- Example: `[tm_season_shows layout="spotlight" show_auditions="false"]`
+
+### Files changed
+- `includes/shortcodes/tm_season_shows.php`
+- `includes/admin-menu.php` (new Auditions Page section + callbacks)
+- `includes/theme-integration.php` (`--tm-ss-btn-bg`/`--tm-ss-btn-text` in dark block)
+
+---
+
+## Version 4.3.6 — 2026-07-04 — `[tm_season_shows]` display fixes + dark mode
+
+### Spotlight layout
+- Image area: `4/3` aspect-ratio with `object-fit:contain` (image fits inside frame, no cropping)
+- Per-show **Get Tickets** button added (reads `_tm_show_tickets_url`) — appears below crew credits
+
+### Cards layout
+- Redesigned as **full-width stacked list** (one card per row)
+- Layout: image panel (left, 280px wide, 4:3 contain) + details panel (right, fills remaining width)
+- Responsive: stacks to single column at ≤700px
+- Padding and font sizes increased to use available width
+
+### Dark mode
+- `theme-integration.php`: reads `tm_show_*_dark` Display Options → emits `html.tm-dark-mode .tm-season-shows-block { --tm-ss-* }` block with luminance guards
+- Selector map extended: `'season_shows' => '.tm-season-shows-block'`
+- Shortcode also applies inline dark overrides directly (fallback for pages without TM theme)
+- `$acc` bug fixed: was reading `tm_show_h2_color` twice; now correctly derives accent from h2
+
+### Files changed
+- `includes/shortcodes/tm_season_shows.php`
+- `includes/theme-integration.php`
+
+---
+
+## Version 4.3.5 — 2026-07-04 — `[tm_season_shows]` + `[tm_seasons]` full rewrites
+
+### `[tm_season_shows]` — full rewrite
+
+**Two layouts** (attr: `layout`), **three season selectors** (attr: `which`: `current` default / `next` / `all`), or by `season_id`.
+
+Both layouts emit a **season banner** (social_banner or image_front as a `background-image` div, season name, date range, Get Tickets button) above the show grid.
+
+| Layout | Show card fields |
+|---|---|
+| `spotlight` (default) | Image (3:4 portrait), Slot label, Title, Dates, Author, Music/Lyrics/Book, Directed by (+Assoc.), Produced by, Stage Managed by |
+| `cards` | Image, Slot, Title, Genre, Dates, Author, Music/Lyrics/Book, Directed by, Produced by, Stage Managed by, Synopsis, Venue name+link, Get Tickets button, Audition date+details |
+
+Shows sorted **ascending** Fall→Winter→Spring within each season.
+
+### `[tm_seasons]` — full rewrite
+
+**Two layouts** (attr: `layout`):
+
+| Layout | Description |
+|---|---|
+| `cards` (default) | Auto-fill grid of season cards. Each card: image, status badge, name, date range, Get Tickets button. Every element togglable via `show_image/name/status/dates/tickets`. |
+| `field` | Returns raw/minimal HTML for a single named field of one season (requires `season_id`). |
+
+**`field` layout values:**
+| Value | Returns |
+|---|---|
+| `name` | Plain text season name |
+| `start_date` / `end_date` | Human-formatted date string |
+| `status` | Coloured status badge span |
+| `tickets_url` | Anchor tag |
+| `image_front` / `image_back` / `social_banner` / `sm_square` / `sm_portrait` | `<img>` tag (resolves numeric attachment ID or raw URL) |
+
+**Filter attrs:** `which` (all/current/upcoming/past), `season_id`, `order` (ASC/DESC), `orderby` (start_date/end_date/title), `limit`.
+
+### Files changed
+- `includes/shortcodes/tm_season_shows.php` — full rewrite
+- `includes/shortcodes/tm_seasons.php` — full rewrite
+
+---
+
+## Version 4.3.4 — 2026-07-04 — Cards sort fix + Display Options note
+
+- **`[tm_past_shows]` cards layout** — shows now sorted **ascending** Fall → Winter → Spring (`ksort`). Chronological order makes sense inside a season card where you read top-to-bottom.
+- **`[tm_past_shows]` list layout** — unchanged, still **descending** Spring → Winter → Fall (`krsort`) for a reverse-chronological reading order down the page.
+- **Display Options → Show tab** — added section description noting that `[tm_shows]`, `[tm_season_shows]`, and `[tm_past_shows]` all share these settings.
+
+---
+
+## Version 4.3.3 — 2026-07-04 — `[tm_past_shows]` PDF icon + cards layout
+
+### New features
+
+**Inline SVG PDF icon** on programme links
+- Replaces `&#128196;` emoji with a crisp inline red SVG (red document body, white fold, white "PDF" label)
+- Scales with text via `width/height: 18px`; `aria-hidden` so screen readers skip it
+- Visible in both light and dark mode without colour adjustment
+
+**`layout="cards"` — season card layout**
+- One card per past season; season name in a coloured header bar (uses `--tm-ps-h2` colour; dark mode falls back to translucent white tint)
+- Each show is a row inside the card: **Slot** (Fall/Winter/Spring) | **Title + Author** (truncated with ellipsis) | **PDF icon + award badges**
+- Cards in a CSS `auto-fill` grid with `minmax(280px, 1fr)` — responsive without media queries
+- Collapses to single column on mobile (≤480px)
+
+### Refactoring
+- Extracted shared helpers: `tm_ps_prog_link()`, `tm_ps_badges()`, `tm_ps_author_str()` — used by both layouts
+- `layout` attr added to shortcode (`list` default, `cards` new)
+
+### Files changed
+- `includes/shortcodes/past-shows-shortcode.php` — PDF SVG icon, cards layout, shared helpers
+- `includes/admin-menu.php` — Instructions entry 22 updated with layout and PDF icon docs
+
+---
+
+## Version 4.3.2 — 2026-07-04 — `[tm_past_shows]` layout overhaul
+
+- **Flat column list** — no season headings or slot headings; one row per show
+- **Columns**: Season | Slot | Show Name | Author | Programme | Awards
+- **Descending slot order within each season**: Spring → Winter → Fall (`krsort` on slot index 2→1→0)
+- Season name printed on first row of each season only; subsequent rows blank in that column
+- Alternating row tint between seasons (light: `rgba(0,0,0,.025)`, dark: `rgba(255,255,255,.04)`)
+- CSS-grid layout (`display:contents` rows) — no `<table>` element, reflows naturally
+- Mobile ≤640px: hides Season, Slot, Author columns — shows Title + Programme + Awards only
+
+---
+
+## Version 4.3.1 — 2026-07-04 — New `[tm_past_shows]` shortcode (Plugin 4.3.1, Theme 2.2.7)
+
+### New
+
+**`[tm_past_shows]` shortcode** — purpose-built past-season show list:
+- Seasons ordered newest-first (by `_tm_season_start_date`); shows within each season in Fall → Winter → Spring slot order
+- Current and upcoming seasons automatically excluded using the same inclusive end-of-day timestamp logic as the rest of the plugin
+- Per-show row: **title**, **author / sub-author**, **📄 Programme** PDF link, **⭐ Winner** badge, **🎭 Nominated** badge
+- Badges only appear when a show has award CPT records; programme link only appears when a programme is uploaded
+- CSS-var-first architecture `--tm-ps-*` on `.tm-past-shows-block` (shares Show Display Options colours)
+- Dark mode: `theme-integration.php` emits `html.tm-dark-mode .tm-past-shows-block { --tm-ps-* }` after the awards block (closures in scope); JS patcher extended with `--tm-ps-*` var patch in `color-mode-switcher.js`
+- Luminance-guarded DO dark picker override suppresses near-black `#000000` DB values
+- Author column hidden on mobile (< 560 px)
+
+**Attrs:** `limit` (default -1), `show_author` (true), `show_program` (true), `show_awards` (true)
+
+### Files changed
+- `includes/shortcodes/past-shows-shortcode.php` — new file
+- `includes/theme-integration.php` — `.tm-past-shows-block` dark block; `past_shows` selector map entry
+- `assets/js/color-mode-switcher.js` (Theme 2.2.7) — `--tm-ps-*` var patch branch
+- `includes/admin-menu.php` — Instructions entry 22 (renumbered landingpage to 23)
+
+---
+
+## Version 4.3.0 — 2026-07-04 — Awards overhaul: 4 layouts, dark/light, responsive (Plugin 4.3.0, Theme 2.2.6)
+
+### New features
+
+**4 display layouts for `[tm_awards]`**
+
+| Layout | Description | Best for |
+|---|---|---|
+| `table` (default) | Responsive scrollable table per category — Award, Recipient, Show, Status badge. Gold row highlight on winners. | Complete award history |
+| `cards` | Auto-fill grid of award cards. Trophy for winners, theatre mask for nominations. | Visual highlights section |
+| `list` | Compact single-line rows: badge, award name, recipient, show. Show column hidden on mobile. | Long lists, sidebar |
+| `showcase` | Winners as prominent gold-bordered hero cards at the top; nominations as a compact sub-list beneath. | Dedicated awards page |
+
+**New attributes:**
+- `layout` — `table` | `cards` | `list` | `showcase`
+- `show_season` — toggle season heading (default `true`)
+- `show_category` — toggle category sub-heading (default `true`)
+- `winners_only` — hide nominations (default `false`)
+
+**`season_id` filter bug fixed** — was accepted in `shortcode_atts` but never applied to the query.
+
+### Architecture
+
+**CSS-var-first** (`--tm-aw-bg`, `--tm-aw-text`, `--tm-aw-border`, `--tm-aw-h2`, `--tm-aw-h3`) on `.tm-awards-block`. All four layouts inherit from these vars — one dark-mode override block covers everything.
+
+**`theme-integration.php`** dark block rewritten: uses `$safe_surface`/`$safe_text`/luminance-border same as board-members; old `.tm-awards-table` selector replaced with `.tm-awards-block --tm-aw-*` vars.
+
+**`color-mode-switcher.js`** (Theme 2.2.6): `.tm-awards-block` now receives `--tm-aw-bg`, `--tm-aw-text`, `--tm-aw-border`, `--tm-aw-h2`, `--tm-aw-h3` via `patchEl()` `vars` object.
+
+**Display Options** dark pickers for `tm_awards_bg_color_dark`, `tm_awards_text_color_dark`, `tm_awards_border_color_dark`, `tm_awards_h2_color_dark`, `tm_awards_h3_color_dark` now read and emitted by both the shortcode and `theme-integration.php`.
+
+**Responsive:** Table wraps in a scrollable `div` with `min-width:360px`; cards/showcase grids collapse to 1 column on mobile; list hides the show column on narrow viewports.
+
+### Files changed
+- `includes/shortcodes/awards-shortcode.php` — full rewrite
+- `includes/theme-integration.php` — CSS-var dark block; selector map updated
+- `assets/js/color-mode-switcher.js` (Theme 2.2.6) — awards CSS var patching
+- `modules/tm-awards-module/tm-awards-module.php` — layout/show_season/show_category/winners_only fields
+- `modules/tm-awards-module/includes/frontend.php` — forwards new attrs
+- `blocks/tm-blocks/index.js` — block config updated
+- `includes/admin-menu.php` — Instructions entry 14 fully documented
+
+---
+
+## Version 4.2.3 — 2026-07-04 — Bio dark mode: JS patcher extended for CSS custom properties
+
+### Bug fix — Theme 2.2.5, Plugin 4.2.3
+
+Bio text in grid, list, and spotlight layouts was invisible in dark mode.
+All previous fixes (PHP luminance validation, `!important` on child selectors)
+were correct but couldn't help because the **JS dark mode patcher** was the
+actual source of the problem.
+
+**Root cause (definitive):**
+The `applyDark()` patcher in `color-mode-switcher.js` calls `patchEl()` on
+`.tm-board-members-block`, writing `background`, `color`, and `border` as
+ordinary inline style properties. But `.tm-bm-card`, `.tm-bm-bio` and other
+child elements use `var(--tm-bm-bg)` and `var(--tm-bm-text) !important` —
+CSS custom properties. Because the JS never set `--tm-bm-text` on the block,
+the `var()` call resolved to the **light-mode value** from the shortcode's
+`<style>` block, regardless of what `color` the wrapper had.
+
+**Fix (`color-mode-switcher.js` → Theme 2.2.5):**
+- `patchEl()` extended with an optional `vars` object. When present, each
+  key is set via `el.style.setProperty(k, v, 'important')`.
+- `tagEl()` now initialises a `vars: {}` tracking object in `originals[idx]`.
+- `patchEl()` records which custom properties it sets into `originals[idx].vars`.
+- `restoreEl()` calls `el.style.removeProperty(k)` for each tracked var,
+  returning the element to its stylesheet value on light-mode restore.
+- In `applyDark()`, `.tm-board-members-block` elements now receive:
+  ```js
+  vars: { '--tm-bm-bg': scBg, '--tm-bm-text': scText, '--tm-bm-border': scBorder }
+  ```
+- Stale selector `.tm-board-members-grid h3, h4` updated to `.tm-board-members-block h3, h4`.
+- Stale selector `.tm-board-member-card p` (old class name) replaced with
+  the three new layout-scoped selectors covering `.tm-bm-bio` in grid, list,
+  and spotlight.
+
+---
+
+## Version 4.2.2 — 2026-07-04 — Board Members dark mode: root cause fixed in luminance validator
+
+### Bug fix
+
+Bio text (and all board member text) was still dark (`#000000`) in dark mode
+despite the 4.2.1 `!important` child-selector fix. Confirmed by `inspect_design`:
+`--tm-bm-text` was resolving to `#000000` on `.tm-board-members-block` itself.
+
+**Root cause 1 — `$safe_text` only rejected near-white, not near-black.**
+`$safe_text` returned `$default` when `lum > 0.85` (near-white). But
+`#000000` has luminance = 0, which passes `> 0.85` and was returned unchanged.
+In dark mode, body text should be light — black text is just as wrong as white.
+Fixed: `$safe_text` now rejects both extremes:
+```php
+return ( $lum > 0.85 || $lum < 0.04 ) ? $default : $value;
+```
+This fix also improves ticket dark mode resilience (same validator used there).
+
+**Root cause 2 — board-members dark block placed before closures were defined.**
+The block was emitted at line ~268 in `theme-integration.php`, before the
+`$safe_surface`/`$safe_text` closures and `$d_safe_bg`/`$d_safe_text` were
+defined (~line 319). It fell back to raw `$dark['surface_bg']` etc., which
+are the Customizer values — `#000000` on this site.
+
+Fixed: removed the early emit, added the board-members CSS block immediately
+after `$d_safe_bg`/`$d_safe_text` are computed, using those validated values
+as fallbacks.
+
+**Root cause 3 — `$dark['border']` was also `#000000`.**
+A near-black border is invisible on a dark card. Added an inline luminance
+check: if the resolved border colour has lum < 0.04, fall back to
+`rgba(255,255,255,0.15)` (a subtle white-alpha rule that works on any dark bg).
+
+**Result (verified by screenshot):**
+- Dark cards: `#1e1e1e` background
+- Text: `#e0e0e0` — clearly readable
+- Border: `rgba(255,255,255,0.15)` — subtle separator
+- Bio text in grid, list, spotlight: inherits `--tm-bm-text` correctly
+
+---
+
+## Version 4.2.1 — 2026-07-04 — Board Members bio invisible in dark mode
+
+### Bug fix
+
+Bio text in `grid`, `list`, and `spotlight` layouts was not changing colour in
+dark mode, making it invisible against the dark card background.
+
+**Root cause:** The theme's `.entry-content p { color: var(--tm-body-text) }`
+rule has higher specificity than the `.tm-bm-bio { color: var(--tm-bm-text) }`
+rule when the shortcode is placed inside an `.entry-content` zone. In light
+mode both vars resolve to dark text, so it wasn't noticed. In dark mode
+`--tm-body-text` switches to light text correctly, but `--tm-bm-text` on
+`.tm-board-members-block` also switches — the problem is that any `<p>` or
+`<li>` tags produced by `wp_kses_post()` inside `.tm-bm-bio` match the theme's
+`.entry-content p` rule first, ignoring the inherited `--tm-bm-text`.
+
+**Fix:** Added explicit child-element rules with `!important` to all three
+affected layout blocks:
+```css
+.tm-bm-card .tm-bm-bio p,
+.tm-bm-card .tm-bm-bio li,
+.tm-bm-card .tm-bm-bio span,
+.tm-bm-card .tm-bm-bio a { color: var(--tm-bm-text) !important; }
+```
+Same pattern applied to `.tm-bm-list-row .tm-bm-bio` and
+`.tm-bm-spotlight-card .tm-bm-bio`.
+
+The `table` layout is unaffected — its bio lives inside `<td>` which already
+has `color: var(--tm-bm-text)` directly on the `td` rule.
+
+---
+
+## Version 4.2.0 — 2026-07-04 — Board Members overhaul: 4 layouts, dark/light, bio field, photo upload fix
+
+### New features
+
+**4 display layouts for `[tm_board_members]`**
+
+| Layout | Description | Best for |
+|---|---|---|
+| `grid` (default) | Circular headshot cards in responsive columns | Portrait photos |
+| `list` | Horizontal rows — thumbnail left, name/position right | Long rosters |
+| `table` | Compact two-column table (photo, Name, Position) | Formal/dense lists |
+| `spotlight` | Tall 3:4 portrait cards with name/position overlay | Featured leadership |
+
+**New `show_bio` attribute** (`true`|`false`, default `false`) — shows the new
+Bio textarea field from the Board Member CPT below the position in all layouts.
+
+**Bio field added to Board Member CPT** — new `_tm_bio` meta field with a
+4-row textarea in the admin meta box. Saved via `sanitize_textarea_field()`.
+
+### Bug fixes
+
+**Photo upload broken in Board Member CPT.**
+The `Select Photo` button had no JS wired to it — `admin-media.js` listens
+for `.tm-media-upload` class but the button had `id="tm_photo_button"` with
+no class and no `data-target`. The media library frame never opened.
+
+Fix:
+- New dedicated `assets/js/board-member-media.js` loaded only on board_member
+  edit screens via `tm_board_member_enqueue_media()`. Opens `wp.media()`,
+  stores the **attachment ID** (not URL) in the hidden input so WordPress
+  can serve correctly-sized image variants via `wp_get_attachment_image_src()`.
+- Meta box buttons renamed to `#tm-bm-photo-select` / `#tm-bm-photo-remove`
+  with proper show/hide logic.
+- Save handler updated to store `absint($photo)` when value is numeric,
+  `esc_url_raw()` when it is a legacy URL string.
+
+**Dark/light mode: CSS-var-first architecture.**
+Previous implementation wrote `style="background-color:#hex; color:#hex"`
+inline on each `.tm-board-member-card`. Inline styles have `(1,0,0,0)`
+specificity — no CSS `!important` from `theme-integration.php` could beat
+them without resorting to `!important` on every rule.
+
+Fix: All colours now declared as CSS custom properties (`--tm-bm-bg`,
+`--tm-bm-text`, `--tm-bm-border`, `--tm-bm-radius`, `--tm-bm-shadow`,
+`--tm-bm-font`) on `.tm-board-members-block`. All element rules use
+`var(--tm-bm-*)`. Dark-mode overrides from `theme-integration.php` set
+these vars on `html.tm-dark-mode .tm-board-members-block` — a single
+rule that cascades to all four layouts automatically.
+
+**Display Options `_dark` pickers now respected.**
+`tm_board_member_bg_color_dark`, `tm_board_member_text_color_dark`, and
+`tm_board_member_border_color_dark` are now read by both the shortcode (for
+an immediate inline `<style>` emit) and by `theme-integration.php` (as the
+preferred dark value with theme-token fallback). Previously the shortcode
+read no dark values at all.
+
+**Selector map updated in `theme-integration.php`:**
+`'.tm-board-members-grid, .tm-board-member-card'` → `'.tm-board-members-block'`
+(the new single wrapper class).
+
+### Files changed
+- `cpt/board-members.php` — bio field, photo upload JS hook, improved meta box UI
+- `assets/js/board-member-media.js` (new) — WP media library for board member photos
+- `includes/shortcodes/board-members-shortcode.php` — full rewrite: 4 layouts, CSS-var arch
+- `includes/theme-integration.php` — CSS-var dark override; selector map updated
+- `modules/tm-board-members-module/tm-board-members-module.php` — layout + show_bio fields
+- `modules/tm-board-members-module/includes/frontend.php` — forwards new attrs
+- `blocks/tm-blocks/index.js` — block config updated to match shortcode attrs
+- `includes/admin-menu.php` — Instructions entry 16 fully documented
+- `theatre-manager.json` — version, download_url, changelog updated
+
+---
+
+## Version 4.1.5 — 2026-07-04 — `tested` field fix; WP/PHP matrix in Other Notes
+
+### Bug fix
+
+**`tested` must be a single version string.** WordPress core does two things
+with this field:
+1. Displays it verbatim as "Compatible up to: {value}" in the modal header.
+2. Runs `version_compare( get_bloginfo('version'), $api->tested, '<=' )` to
+   determine whether to show a compatibility warning.
+
+The previous value `"6.8.2, 7.0, 7.4"` would display literally (ugly) and
+cause `version_compare()` to fail, potentially flagging the plugin as
+incompatible on all sites. Fixed to `"6.8.2"` (the highest tested version).
+
+The full compatibility list (WP 6.8 – 6.8.2, PHP 7.4 – 8.2) is now in the
+**Other Notes** tab under the Requirements & Compatibility heading, where
+it can list as many versions as needed without affecting the comparison logic.
+
+Same fix applied to the `updater.php` inline fallback comment.
+
+---
+
+## Version 4.1.4 — 2026-07-04 — Manifest URL moved into /updates/theatre-manager/
+
+### Maintenance
+
+The update manifest URL has moved from:
+  `https://hsctjourney.com/updates/theatre-manager.json`
+to:
+  `https://hsctjourney.com/updates/theatre-manager/theatre-manager.json`
+
+All update-related assets now live under a single directory:
+```
+https://hsctjourney.com/updates/theatre-manager/
+  theatre-manager.json        ← manifest (moved here)
+  theatre-manager.zip
+  theatre-manager-changelog.html
+  banner-772x250.svg
+  icon-128x128.svg
+  icon-256x256.svg
+  screenshots/
+    screenshot-1.jpg … screenshot-6.jpg
+```
+
+Files changed:
+- `theatre-manager-plugin.php` — `Update URI` header updated
+- `includes/updater.php` — `TM_UPDATE_MANIFEST_URL` constant, error message
+  string, and inline fallback text in `installation` and `faq` sections updated
+- `theatre-manager.json` — manifest URL references in `installation` and `faq`
+  section text updated
+
+**Action required on server:** move (or re-upload) `theatre-manager.json` from
+`/updates/` to `/updates/theatre-manager/`. The old URL will no longer be
+checked by any installed version of the plugin after this update.
+
+---
+
+## Version 4.1.3 — 2026-07-04 — Asset URLs moved to /updates/theatre-manager/ subdirectory
+
+### Maintenance
+
+All asset URLs updated from `https://hsctjourney.com/updates/` to
+`https://hsctjourney.com/updates/theatre-manager/` in both
+`includes/updater.php` and `theatre-manager.json`.
+
+The manifest URL itself remains at `https://hsctjourney.com/updates/theatre-manager.json`
+(the `Update URI` plugin header must match this exactly and does not change).
+
+Assets now under `/updates/theatre-manager/`:
+- `theatre-manager.zip` — plugin download
+- `theatre-manager-changelog.html` — details URL
+- `banner-772x250.svg` — details popup banner
+- `icon-128x128.svg` / `icon-256x256.svg` — details popup icon
+- `screenshots/screenshot-{1-6}.jpg` — Screenshots tab
+
+Duplicate `4.1.1`/`4.1.0` entries in the JSON changelog section also removed.
+
+---
+
+## Version 4.1.2 — 2026-07-04 — Plugin details: banner, icon + real screenshots
+
+### Maintenance
+
+**6 real screenshots** captured from the live local site and saved to
+`assets/screenshots/` (included in the plugin zip):
+
+| File | Screen | Dimensions |
+|---|---|---|
+| screenshot-1.jpg | Admin Dashboard — status panel + card grid | 1040×800 |
+| screenshot-2.jpg | Season Builder — full season/show/cast editor | 1040×900 |
+| screenshot-3.jpg | Display Options — Tickets tab, Light/Dark pickers | 1040×900 |
+| screenshot-4.jpg | [tm_tickets] — all 5 layouts in light mode | 1040×900 |
+| screenshot-5.jpg | Dark mode — all 5 ticket layouts inverted | 1040×900 |
+| screenshot-6.jpg | Gutenberg editor — TM blocks in block editor | 1040×900 |
+
+All screenshot URLs in `theatre-manager.json` and the `updater.php` fallback
+updated from placeholder `.jpg` names to real `.jpg` names under
+`https://hsctjourney.com/updates/screenshots/`.
+
+Also in this version (carried from banner/icon work above):
+- `assets/banner.svg` — stage curtains banner (772×250 SVG)
+- `assets/icon.svg` — comedy/tragedy masks icon (256×256 SVG)
+
+### Maintenance
+
+**Banner** (`assets/banner.svg`) — 772×250 SVG for the plugin details modal header.
+Design: dark navy stage backdrop, deep-red draped curtains with fold shading on
+both sides, gold valance bar across the top with gold tassels, two blue spotlight
+wash gradients, subtle stage floor lines, "Theatre Manager" in serif white, blue
+subtitle and tagline.
+
+**Icon** (`assets/icon.svg`) — 256×256 SVG for the icon circle in the details modal.
+Design: comedy mask (gold, smiling, crown) overlapping tragedy mask (blue, frowning,
+tear drops) on a dark navy circle with a thin blue ring.
+
+Both SVGs are served from `https://hsctjourney.com/updates/`:
+- `banner-772x250.svg` — used for both `banners.low` and `banners.high`
+  (SVG is resolution-independent; no need for separate @2x raster)
+- `icon-128x128.svg` — `icons.1x`
+- `icon-256x256.svg` — `icons.2x`
+
+`includes/updater.php` updated: `icons` array now has `1x`/`2x` fallback URLs;
+`banners` array fallback added (was previously empty `array()`).
+
+---
+
+## Version 4.1.1 — 2026-07-04 — Plugin details: Installation, FAQ, Screenshots, Other Notes tabs
+
+### Maintenance
+
+Added four new sections to the plugin details modal (the "View details" popup
+on the Plugins screen). Each section is served from `theatre-manager.json`
+when the update server is reachable, with identical content as the PHP inline
+fallback in `includes/updater.php` when it is not.
+
+**Installation** — Requirements (WP 6.8+, PHP 7.4+), step-by-step install
+instructions, notes on the optional Theatre Manager Theme, Beaver Builder
+integration, and the self-hosted updater.
+
+**FAQ** — Ten questions covering: theme compatibility, Beaver Builder
+requirements, setting the current season, why tickets are not showing,
+cache/force-update-check, screenshots setup, Display Options without TM Theme,
+Season Builder overview, PHP 8.x compatibility, and how the self-hosted
+updater works.
+
+**Screenshots** — Six entries pointing to
+`https://hsctjourney.com/updates/screenshots/screenshot-{1-6}.jpg`
+(placeholder URLs — upload images to activate this tab visually):
+1. Admin Dashboard  2. Season Builder  3. Display Options colour pickers
+4. [tm_tickets] all five layouts  5. Dark mode  6. Gutenberg block inserter
+
+**Other Notes** — Requirements & compatibility table (WP, PHP, TM Theme,
+BB, CF7), REST API notes, known CSS conflicts, then the full 22-shortcode
+reference with parameters and examples for every shortcode.
+
+`theatre-manager.json` updated to version 4.1.1 with all six section keys.
+Rebuilt `theatre-manager.zip` (248 KB, 141 files) in Downloads folder.
+
+---
+
+## Version 4.1.0 — 2026-07-04 — Plugin details popup: full description + changelog
+
+### Maintenance
+
+**`includes/updater.php`** — the "View details" modal on the Plugins screen now
+shows real content in both offline (manifest unreachable) and online modes.
+
+- **Description fallback** rewritten from the one-liner placeholder to a full
+  HTML description covering: what Theatre Manager is for, all 10 CPTs, 22
+  shortcodes, Gutenberg blocks & Beaver Builder modules, Season Builder,
+  Display Options & dark/light mode, and the self-hosted updater.
+- **Changelog fallback** rewritten from "see update server" to a grouped
+  version history covering 4.0.x through 1.0, derived from ChangeLog.txt.
+- **`requires` fallback** changed from empty string to `'6.8'`.
+- **`tested` fallback** changed from empty string to `'6.8.2'`.
+- **`requires_php` fallback** changed from empty string to `'7.4'`.
+- **`last_updated` fallback** changed from empty string to `'2026-07-04'`.
+- **`author` fallback** now includes a hyperlink to `https://hsctjourney.com`.
+
+The manifest already pulls all these fields from the server JSON when reachable;
+the fallbacks are shown when the server is temporarily unavailable.
+
+**`theatre-manager.json`** (new file in plugin root) — the canonical server
+manifest for deployment to `https://hsctjourney.com/updates/theatre-manager.json`.
+Contains all fields: `name`, `slug`, `version`, `author`, `homepage`,
+`requires`, `tested`, `requires_php`, `last_updated`, `download_url`,
+`details_url`, `banners`, `sections.description`, `sections.changelog`.
+Copy this file to the server after each release.
+
+---
+
+## Version 4.0.9 — 2026-07-04 — HTTPS URLs throughout
+
+### Maintenance
+
+All embedded `http://hsctjourney.com` URLs upgraded to `https://`:
+- Plugin file header: `Update URI`
+- `includes/updater.php`: `TM_UPDATE_MANIFEST_URL` constant and the
+  error-message string shown on the Plugins screen
+- `ChangeLog.txt`: historical references updated for consistency
+
+No functional change — WordPress's HTTP API follows redirects, but using
+`https://` directly avoids an unnecessary redirect round-trip and removes a
+mixed-content warning if the site itself runs on HTTPS.
+
+---
+
+## Version 4.0.8 — 2026-07-04 — Spotlight hero text + tile hover blur
+
+### Bug fixes
+
+**Spotlight hero text invisible in light mode**  
+`.tm-ticket-spotlight-hero` set `color:#fff` but without `!important`. The theme's
+`main a { color: var(--tm-link) }` rule (which has equal or higher effective
+specificity on anchor elements inside `main`) overrode it with `#0073aa` — the
+same blue as the hero background. Result: label, title, and dates were all
+blue-on-blue and completely invisible at rest (only readable if a hover state
+changed something).  
+Fix: added `!important` to the hero anchor `color` rule, and added explicit
+`color: #fff !important` rules on `.tm-ticket-spotlight-hero-label`,
+`.tm-ticket-spotlight-hero-title`, and `.tm-ticket-spotlight-hero-dates` so no
+theme cascade can reach those elements.
+
+**Spotlight tile hover causes text blur**  
+`.tm-ticket-spotlight-tile:hover` applied `transform: translateY(-2px)` which
+triggers GPU layer promotion and subpixel anti-aliasing on non-retina displays,
+causing text to appear slightly blurry during and after the hover transition.  
+Fix: removed the `translateY` from the tile hover rule. Hover feedback is now
+provided solely by `box-shadow: 0 4px 14px rgba(0,0,0,.15)` — visually clear
+without any compositing side-effects.
+
+---
+
+## Version 4.0.7 — 2026-07-04 — Tickets: spotlight tile bg + dark banner contrast
+
+### Bug fixes
+
+**Spotlight tile invisible at rest (light mode)**  
+`.tm-ticket-spotlight-tile` had no background-color, making it transparent and
+indistinguishable from the page background. Only the hover `box-shadow` made it
+visible. Fixed by adding `background-color: var(--tm-tk-bg)` to the tile rule in
+`tickets-shortcode.php` so tiles always show the `#f8f9fa` light-grey card fill.
+
+**Banner button text invisible in dark mode**  
+The dark-mode `--tm-tk-btn` resolved to `#90caf9` (a very light blue ~1.9:1
+contrast against white text — far below WCAG AA's 4.5:1 minimum). The banner
+buttons rendered as flat light-blue rectangles with no legible text.  
+Fixed in `theme-integration.php`: replaced the static `'#90caf9'` dark fallback
+with `'#1a78c2'` (a deeper blue, 4.6:1 vs white — WCAG AA pass). Added a
+luminance guard: if an admin has explicitly saved a dark link colour it is only
+accepted when its luminance is < 0.18 (dark enough to contrast white button
+text); otherwise the safe `#1a78c2` default is used. Also added `--tm-tk-btn-hov`
+to the dark `.tm-tickets-block` override block (was previously omitted).
+
+---
+
+## Version 4.0.6 — 2026-07-04 — Tickets dark-mode: Customizer validation + explicit overrides
+
+### Bug fixes
+
+All 5 ticket layouts were still broken in dark mode despite the CSS-var-first
+architecture added in 4.0.2. Two cascading root causes:
+
+**Root cause 1 — CSS `var()` fallback doesn’t catch wrong values, only missing ones.**
+The dark override block set `--tm-tk-bg: var(--tm-surface-bg, #1e1e1e)`.  The
+fallback `#1e1e1e` only activates when `--tm-surface-bg` is *not defined at
+all*.  On this site `--tm-surface-bg` is defined on `html.tm-dark-mode :root`
+but holds the wrong value `#000000` (a Customizer misconfiguration), so the
+CSS fallback never triggered and cards rendered black-on-black.
+
+**Root cause 2 — Theme `main a { color }` override.**
+The theme's dark-mode CSS sets `html.tm-dark-mode main a { color: var(--tm-link) }`.
+Because all five ticket layout entry points are `<a>` elements (`.tm-ticket-btn`,
+`.tm-ticket-card`, `.tm-ticket-min-row`, `.tm-ticket-spotlight-tile`), they
+all inherited the link colour as their text colour, overriding the intended
+body text colour.
+
+### Fix (`includes/theme-integration.php`)
+
+**PHP-level Customizer validation:**
+Added `$safe_surface()` and `$safe_text()` closures that evaluate the
+luminance of each saved Customizer dark value before using it:
+- `$safe_surface`: rejects values with luminance < 4% (catches #000000 and
+  near-blacks that would be invisible as a card background). Falls back to
+  `#1e1e1e`.
+- `$safe_text`: rejects values with luminance > 85% (catches near-white values
+  that would be invisible on a dark background). Falls back to `#e0e0e0`.
+
+This validation happens in PHP *before* any CSS is written, so the browser
+never receives a colour that would produce invisible content.
+
+**Explicit per-element colour overrides:**
+Replaced the single `.tm-tickets-block` CSS-var redefinition with a full set
+of explicit per-element `color:` and `background-color:` rules covering all
+five layouts. These use the PHP-validated resolved values directly as hex
+literals, not CSS var() chains, so there is no cascade path back to a bad
+Customizer value.
+
+Added explicit `color: {d_safe_text}` override on `.tm-ticket-btn`,
+`.tm-ticket-card`, `.tm-ticket-min-row`, `.tm-ticket-spotlight-tile` to
+neutralise the `html.tm-dark-mode main a { color: var(--tm-link) }` theme rule.
+Buttons and CTAs continue to use `color: #ffffff` so white text on the accent
+background is preserved.
+
+---
+
+## Version 4.0.5 — 2026-07-04 — Updater slug fix ("invalid plugin slug" resolved)
+
+### Bug fix
+Clicking **View details** on the Plugins screen showed "invalid plugin slug".
+
+**Root cause:** WordPress normalises plugin slugs using `sanitize_title()`
+before passing them to the `plugins_api` filter. `sanitize_title('Theatre Manager')`
+returns `theatre-manager` (lowercase, hyphenated). Our updater was comparing
+against `'Theatre-Manager'` (mixed-case, matching the folder name) so the slug
+never matched and WordPress fell through to its own handler, which returned an
+"invalid plugin slug" error because `Theatre-Manager` is not on WordPress.org.
+
+**Fix (`includes/updater.php`):**
+- Changed `slug` in `$transient->response[]` from `'Theatre-Manager'` to `'theatre-manager'`.
+  This is what causes WP to build the correct `?plugin=theatre-manager` URL for the
+  "View details" thickbox link.
+- Changed `slug` in `$transient->no_update[]` to `'theatre-manager'` for consistency.
+- Changed the `plugins_api` slug comparison from
+  `'Theatre-Manager' !== \$args->slug` to
+  `'theatre-manager' !== strtolower( \$args->slug )` so it matches case-insensitively
+  regardless of how the slug arrives.
+- Updated the manifest documentation comment slug to `'theatre-manager'` — the
+  `slug` field in your server JSON should also use lowercase.
+
+---
+
+## Version 4.0.4 — 2026-07-04 — Self-hosted update URL
+
+### New feature — self-hosted plugin updater
+
+The plugin now checks `https://hsctjourney.com/updates/theatre-manager.json`
+for new versions and integrates with WordPress's built-in update pipeline.
+Updates appear on **Dashboard → Updates** and the Plugins screen, and can be
+installed with one click — exactly like a WordPress.org plugin.
+
+**`theatre-manager-plugin.php`**
+- Added `Update URI: https://hsctjourney.com/updates/theatre-manager.json`
+  plugin header (WordPress 5.8+ standard). WordPress uses this header to
+  route update checks to our custom handler instead of wordpress.org.
+- `Theatre_Manager::init()` now `require_once`s `includes/updater.php`.
+
+**`includes/updater.php`** (new file)
+- `TM_UPDATE_MANIFEST_URL` constant — points to the JSON manifest.
+- `TM_UPDATE_TRANSIENT` / `TM_UPDATE_CACHE_TTL` — 12-hour manifest cache.
+- `tm_updater_fetch_manifest( $force )` — fetches + caches the manifest via
+  `wp_remote_get()`; returns false on network error (short 30-min negative cache
+  so a transient failure never hammers the remote server).
+- `tm_updater_check()` on `pre_set_site_transient_update_plugins` — injects an
+  update entry when the remote version is newer, or a `no_update` entry when
+  already current.
+- `tm_updater_plugin_info()` on `plugins_api` — returns the rich info object
+  (name, version, description, changelog, banners) for the "View details"
+  thickbox modal.
+- `tm_updater_purge_cache()` on `upgrader_process_complete` — deletes the
+  cached manifest after a successful update so the next check sees fresh data.
+- `tm_updater_action_links()` — adds a **"Force update check"** link on the
+  Plugins screen for immediate re-fetch during development.
+- `tm_updater_handle_force_check()` / `tm_updater_force_check_notice()` —
+  handle the force-check request (nonce-protected, capability-checked) and
+  display a success/failure admin notice with the fetched version number.
+
+### Required server-side setup
+
+Create `https://hsctjourney.com/updates/theatre-manager.json` with at minimum:
+
+```json
+{
+  "version":      "4.0.4",
+  "download_url": "https://hsctjourney.com/updates/theatre-manager.zip"
+}
+```
+
+Full supported fields: `name`, `slug`, `version`, `requires`, `tested`,
+`requires_php`, `author`, `download_url`, `details_url`, `last_updated`,
+`sections.description`, `sections.changelog`, `banners.low`, `banners.high`.
+
+---
+
+## Version 4.0.3 — 2026-07-04 — Colour picker "clear to default" button
+
+### New feature
+Every colour picker in the Display Options pages now has a small **× clear
+button** that resets the field to empty (saving blank = fall back to the
+theme / shortcode default). Previously the only way to "unset" a colour was
+to delete the hex value by hand and re-save, or go into the database.
+
+### Files changed
+
+**`includes/display-options.php`**
+- New helper `tm_render_color_picker( $id, $name, $value, $extra_class )` that
+  wraps every colour `<input>` in a `.tm-color-picker-wrap` `<div>` alongside
+  a `<button class="tm-color-clear" data-target="{id}">` button.
+- `tm_color_pair_callback()` now calls `tm_render_color_picker()` for both the
+  Light and Dark picker cells instead of emitting raw `<input>` tags.
+- `tm_color_picker_callback_legacy()` also updated.
+
+**`assets/css/admin.css`**
+- `.tm-color-picker-wrap` — `inline-flex` container that holds the picker and
+  the clear button in a row.
+- `.tm-color-clear` — small circular button (20px), starts `opacity:0`, fades
+  to `opacity:1` on three triggers:
+    1. Hover anywhere on the `.tm-color-picker-wrap` parent.
+    2. When `.has-value` class is present on the wrap (set by JS when the input
+       has a non-empty value — so a saved colour always shows its clear button).
+    3. When focus is inside the wrap (keyboard / tab navigation).
+  Turns red (`#b32d2e`) on hover. `all:unset` + explicit reset ensures the
+  button looks consistent across WP admin themes.
+
+**`assets/js/admin.js`**
+- `tmSyncClearVisibility( $input )` — sets/removes `.has-value` on the wrap
+  depending on whether the input has a value.
+- `wpColorPicker()` init now passes `change` and `clear` callbacks that call
+  `tmSyncClearVisibility` (with a 10 ms delay to let iris update the input).
+- Page-load loop sets initial `.has-value` state on all pickers.
+- Delegated click handler on `.tm-color-clear`:
+    1. Empties the `<input>` value.
+    2. Calls `wpColorPicker('color', '')` on the iris instance.
+    3. Collapses the picker popover, clears the swatch button background, and
+       resets the swatch label to "Select Color".
+    4. Removes `.has-value` from the wrap.
+- Removed duplicate `$('.tm-color-picker').wpColorPicker()` no-op call.
+
+---
+
+## Version 4.0.2 — 2026-07-04 — Tickets dark-mode: CSS-var-first architecture
+
+### Summary
+With no Display Options saved for the `[tm_tickets]` shortcode, dark mode was
+broken on all layouts except the default banner. Root causes:
+
+1. **`tm_tickets_enqueue_styles()`** embedded resolved PHP hex values directly
+   in CSS selectors (`color: #333333`, `background: #0073aa`, etc.). The
+   dark-mode `!important` overrides in `theme-integration.php` have equal
+   specificity to the shortcode inline style, but the `tm-sc-tickets` body
+   `<style>` tag fires *after* the head `tm-sc-integration-dark` block, so
+   the light-mode values won the cascade even in dark mode.
+
+2. **Banner renderer** injected `style="background:#0073aa;color:#fff;"` on
+   every `<a.tm-ticket-btn>`. Inline styles have `(1,0,0,0)` specificity—
+   no CSS `!important` can override them.
+
+3. **`theme-integration.php` tickets dark block** was resolving PHP
+   Customizer dark values at the time of rendering. If `tm_color_surface_bg_dark`
+   had been saved as `#000000` (a misconfiguration on this local site), card
+   backgrounds became black-on-black.
+
+### Fix: CSS-var-first architecture
+
+**`includes/shortcodes/tickets-shortcode.php`**
+- `tm_tickets_enqueue_styles()` now declares all colour tokens as CSS custom
+  properties on `.tm-tickets-block`:
+  `--tm-tk-bg`, `--tm-tk-text`, `--tm-tk-btn`, `--tm-tk-btn-hov`,
+  `--tm-tk-border`, `--tm-tk-font`, `--tm-tk-radius`, `--tm-tk-shadow`.
+  Every selector rule references `var(--tm-tk-*)` instead of a hex literal.
+- Removed the duplicate Display-Options dark override block from
+  `tm_tickets_enqueue_styles()` — dark mode is handled entirely by
+  `theme-integration.php`.
+- `tm_tickets_render_banner()`: removed `style="background:...;color:#fff;"`
+  inline attributes from all `.tm-ticket-btn` elements. Colour now comes from
+  `var(--tm-tk-btn)` defined on the CSS class.
+- `tm_tickets_render_spotlight()`: removed `style="background:...; "` and
+  `style="color:...;"` from hero element and spotlight CTA. Added
+  `.tm-ticket-spotlight-hero--color` modifier class for no-image fallback;
+  added `.tm-ticket-spotlight-hero-dates` class.
+
+**`includes/theme-integration.php`**
+- Tickets dark-mode block rewritten to a single-selector CSS-var redefinition:
+  ```css
+  html.tm-dark-mode .tm-tickets-block {
+      --tm-tk-bg:     var(--tm-surface-bg) !important;
+      --tm-tk-text:   var(--tm-body-text)  !important;
+      --tm-tk-btn:    var(--tm-link)       !important;
+      --tm-tk-border: rgba(255,255,255,0.15) !important;
+  }
+  ```
+  All element rules automatically update because they use `var(--tm-tk-*)`.
+  Per-element exception overrides added only for elements outside the
+  `.tm-tickets-block` scope (table row hover, badge backgrounds).
+- Display Options dark pickers now override `--tm-tk-*` vars on the same
+  selector block instead of per-element selectors.
+- Removed dependency on resolved PHP Customizer hex values in the fallback
+  path — no longer possible to get `#000000` card backgrounds from a
+  misconfigured `tm_color_surface_bg_dark`.
+
+---
+
+## Version 4.0.1 — 2026-07-04 — Global link colour bleed + unscoped selector fix
+
+### Summary
+Two related bugs were causing link colours to bleed site-wide — into the
+header navigation, logo, and WP admin bar — and were affecting the admin
+interface:
+
+1. **Theme: bare `a { color }` global rule** in `tm_inject_customizer_css_variables()`
+   was setting every `<a>` on the page to `var(--tm-link)` (#0073aa = blue).
+   The nav had `!important` overrides, but the logo link, admin bar links,
+   and any `<a>` outside explicitly-overridden zones were turning blue.
+
+2. **Plugin: unscoped CSS selectors in `theme-integration.php`** — the generic
+   fallback dark-mode block and per-tab dark blocks used `str_replace` to
+   prefix comma-separated selectors. This failed silently when a tab value
+   contained multiple selectors separated by `", "` (comma-space): e.g.
+   `'.tm-board-members-grid, .tm-board-member-card'` became
+   `.tm-board-members-grid` (prefixed) + `.tm-board-member-card` (bare global).
+   The bare selectors applied `--tm-sc-text` CSS variables globally, which
+   then inherited into `var(--tm-link)` in some browsers.
+
+3. **Both: no `is_admin()` guard** — the theme's CSS variable injection and
+   the plugin's dark-mode integration CSS were running on WP admin pages
+   (including the admin bar), stamping frontend colour tokens onto admin UI.
+
+### Fixes applied
+
+**`includes/theme-integration.php` (Plugin 4.0.0 → 4.0.1)**
+- Added `tm_prefix_selectors( $selectors_string, $prefix )` helper that
+  splits on ANY comma (regardless of whitespace), trims, prefixes every
+  part individually, and rejoins. Replaced ALL three `str_replace` usages
+  with this helper (generic fallback block, per-tab block, wrapper block).
+- Added `if ( is_admin() ) { return; }` guard to both
+  `tm_output_shortcode_theme_integration_css()` and `tm_integration_js_data()`.
+
+**`functions.php` (Theme 2.2.2 → 2.2.3)**
+- Replaced bare `a { color: var(--tm-link); }` with a set of content-scoped
+  selectors:
+  ```css
+  .entry-content a, .widget-area a, .wp-block-group a,
+  .wp-block-column a,
+  main a:not(.site-header a):not(.site-footer a):not(.wp-block-button__link)
+  ```
+  This targets body-copy links only and leaves header/footer/admin-bar
+  links unaffected.
+- Added `.site-header .site-branding a`, `.site-header .custom-theme-logo-link`,
+  and `.site-header .tm-logo-wrap` to the header text-colour override block
+  so the logo link colour matches nav links instead of the body-link colour.
+- Dark-mode bare `a` rule extended with `:not(.site-header a)` to prevent
+  overriding header link colours in dark mode.
+- Added `if ( is_admin() && ! is_customize_preview() ) { return; }` guard to
+  `tm_inject_customizer_css_variables()` and `tm_output_dark_mode_css()` so
+  neither function runs on wp-admin pages (Customizer preview is preserved).
+- `_S_VERSION` constant updated to `2.2.3` (was stuck at `2.1.10`, causing
+  stale cache serving of `style.css`).
+
+---
+
+## Version 4.0.0 — 2026-07-04 — [tm_tickets] Display Options + Dark/Light mode integration
+
+### Summary
+The `[tm_tickets]` shortcode is now fully integrated with Theatre Manager's
+Display Options (Tickets tab) and participates in the site-wide dark/light
+mode toggle when the Theatre Manager Theme is active.
+
+### Changes
+
+**`includes/display-options.php`**
+- Tickets tab: `button_color` field label updated to "Button / Accent Color"
+  for clarity (the same value controls cards CTA, table link, minimal arrow,
+  spotlight tile CTA, and all accent uses).
+- All `_dark` variants for `button_color` and `button_hover_color` are now
+  auto-registered via the colour-fields loop (same as every other tab). Previously
+  they were registered but the loop comment implied they might not be.
+
+**`includes/theme-integration.php`**
+- Fixed wrong selector: `tickets` tab was mapped to `.tm-tickets-wrapper`
+  (which no ticket renderer ever emits); corrected to `.tm-tickets-block`
+  (the actual wrapper class used by all five layouts).
+- Added a full dedicated dark-mode block for `[tm_tickets]` inside
+  `tm_output_shortcode_theme_integration_css()` (Block B). Covers:
+  - `.tm-tickets-block` — container text colour
+  - `.tm-ticket-btn` — background + white text
+  - `.tm-ticket-card` — bg / border / text
+  - `.tm-ticket-card-label`, `.tm-ticket-card-cta`, `.tm-ticket-card-genre`
+  - `.tm-tickets-table` — thead, tbody td, hover row, season row
+  - `.tm-ticket-table-tag`, `.tm-ticket-table-badge`, `.tm-ticket-table-link`
+  - `.tm-tickets-minimal li`, `.tm-ticket-min-row`, `.tm-ticket-min-type`,
+    `.tm-ticket-min-title`, `.tm-ticket-min-arrow`
+  - `.tm-ticket-spotlight-tile`, `.tm-ticket-spotlight-tile-label/title/cta`
+  - Resolves Display Options dark pickers first; falls back to theme Customizer
+    dark tokens (`surface_bg`, `body_text`, `link`, `border`).
+
+**`includes/shortcodes/tickets-shortcode.php`**
+- `tm_tickets_shortcode()`: reads five `_dark` Display Option values
+  (`bg_color_dark`, `text_color_dark`, `button_color_dark`,
+  `button_hover_color_dark`, `border_color_dark`) only when
+  `tm_dark_mode_admin_enabled()` returns true.
+- `tm_tickets_enqueue_styles()`: signature extended with five optional
+  `$dark_*` parameters (default empty string = use theme tokens).
+  When any dark picker is set, a second `tm_add_shortcode_inline_style()`
+  call emits a minified `<style id="tm-sc-tickets-dark">` block that
+  pins the user's chosen colours on the `html.tm-dark-mode` scope,
+  overriding the theme-token fallbacks from `theme-integration.php`.
+
+### Result
+- Light mode: all colours flow from Display Options → Tickets tab
+  (bg, text, button, hover, border, font, radius, shadow).
+- Dark mode (TM theme + switcher enabled): all five layouts invert
+  correctly — dark surface cards, light text, accent-coloured buttons
+  and labels — using either the Display Options dark pickers or the
+  theme’s Customizer dark palette as fallback.
+- Display Options → Tickets tab now shows Light ☣ / Dark 🌙 side-by-side
+  colour pickers for all 11 colour fields (bg, text, border, h1–h6,
+  button, button hover) when the TM theme switcher is active.
+
+---
+
+## Version 3.9.9 — 2026-07-04 — [tm_tickets] full visual overhaul + CSS delivery fix
+
+### Summary
+The `[tm_tickets]` shortcode rendered as an unstyled list of plain links. Root
+causes identified and fixed:
+
+1. **CSS never reached the browser** — `wp_add_inline_style()` is silently
+   ignored when called after `wp_head` has fired. Shortcodes run inside
+   `the_content`, which is always after `wp_head`. Fixed by changing
+   `tm_add_shortcode_inline_style()` to `echo` a deduped `<style id="tm-sc-*">`
+   block directly into the page body (browsers accept `<style>` in `<body>`).
+
+2. **`shortcodes.css` version was hardcoded** to `'1.0.0'` so browser caches
+   never invalidated. Changed to `THEATRE_MANAGER_VERSION`.
+
+3. **All renderers used inline `style=""` attributes** for structural layout
+   (display, flex, padding, margin) making every HTML element depend on PHP
+   string concatenation for basic rendering. Replaced with CSS classes
+   throughout all five renderers.
+
+4. **`show_limit` was applied before slot sort** in the tickets query, so
+   `show_limit=4` could silently drop a Spring show and keep two Falls.
+   Fixed: fetch all, sort, then `array_slice()`.
+
+### Changes
+- **`includes/functions.php`** — `tm_add_shortcode_inline_style()` now echoes
+  `<style id="tm-sc-{handle}">` into body; dedup guard unchanged.
+- **`includes/functions.php`** — `tm_enqueue_shortcodes_css()` now uses
+  `THEATRE_MANAGER_VERSION` instead of hardcoded `'1.0.0'`.
+- **`includes/shortcodes/tickets-shortcode.php`**:
+  - `tm_tickets_enqueue_styles()` rewritten to emit full structural CSS
+    (all 5 layouts) as the inline style block, with dynamic colour tokens
+    woven in at the same time. Uses `display:flex !important` etc. to win
+    over any WP block or theme CSS that sets `display:inline` on `<a>` or
+    `<span>` elements.
+  - `tm_tickets_render_minimal()` rewritten to use CSS classes instead of
+    per-element inline `style=""` attributes.
+  - `tm_tickets_render_spotlight()` rewritten to use CSS classes.
+  - `tm_tickets_render_banner()` — dates span class changed to
+    `tm-ticket-btn-dates` (was a second `tm-ticket-btn-label` with overrides).
+- **`assets/css/shortcodes.css`** — Added full base layout definitions for all
+  5 ticket layouts (banner, cards, table, minimal, spotlight) as a fallback for
+  contexts where the inline block is suppressed (e.g. REST API, WP-CLI).
+  Added `display: block/flex !important` on structural properties so base
+  styles are robust against WP core or theme CSS reset overrides.
+
+---
+
+## Version 3.9.6 — 2026-07-04 — Canonical show slot sort order (Fall → Winter → Spring)
+
+### Summary
+Show sorting by time slot is now driven by a single canonical helper,
+`tm_show_slot_order()`, defined in `includes/helpers.php`. All shortcodes
+that group or sort shows now share the same order. A companion helper,
+`tm_sort_shows_by_slot()`, accepts a `WP_Post[]` array and returns it sorted
+correctly.
+
+The slot order reflects a July–June theatre season year:
+  **Fall** (Jul–Nov) → **Winter** (Dec–Mar) → **Spring** (Apr–Jun)
+
+Shows with no time slot assigned sort last (index 999).
+
+### Bug fixes
+- **`tickets-shortcode.php`**: Shows were fetched with `orderby=meta_value ASC`
+  on the `_tm_show_season` meta key (a post ID integer), which produced an
+  arbitrary and meaningless order. Replaced with `tm_sort_shows_by_slot()`
+  after fetch, followed by `array_slice()` for the `show_limit` cap.
+- **`shows-shortcode.php`**: `array_search($slot_index, $slot_order)` used a
+  loose comparison, meaning `array_search(0, ...)` could match `false` or
+  empty strings. Fixed by adding the strict third argument (`true`) so only
+  exact integer matches return a slot name.
+
+### Refactoring
+- **`includes/helpers.php`**: Added `tm_show_slot_order()` and
+  `tm_sort_shows_by_slot()`. Both include inline doc comments explaining the
+  July–June season context.
+- **`shows-shortcode.php`**: Inline `array('Fall'=>0,...)` replaced with
+  `tm_show_slot_order()`.
+- **`tm_season_shows.php`**: Inline `['Fall','Winter','Spring']` replaced with
+  `array_keys(tm_show_slot_order())`.
+- **`tm_season_cast.php`**: Same as above.
+- **`tickets-shortcode.php`**: Inline sort replaced with `tm_sort_shows_by_slot()`.
+
+---
+
+## Version 3.9.5 — 2026-07-04 — Instructions page updated
+
+### Summary
+The admin Instructions page (Theatre Manager → Instructions) was missing three
+shortcodes entirely: `[tm_tickets]`, `[tm_season]`, and `[tm_landingpage]`.
+All three have been added, bringing the documented shortcode count to 22/22.
+The `[tm_tickets]` entry fully documents all five layouts and seven new
+attributes added in v3.9.4.
+
+### Changes
+- **`includes/admin-menu.php`** — `tm_instructions_page()` updated:
+  - **Entry 20: `[tm_tickets]`** — Added full documentation:
+    - All five `layout` values with descriptions (`banner`, `cards`, `table`,
+      `minimal`, `spotlight`)
+    - `show_limit`, `show_image`, `show_dates`, `show_genre`, `label_season`,
+      `label_show`, `button_text` parameters documented with types, defaults,
+      and which layouts they apply to
+    - Five copy-paste examples covering each layout
+    - Notes: current-season requirement, Tickets URL requirement, Display
+      Options pointer
+  - **Entry 21: `[tm_season]`** — Added. Documents `season_id` parameter.
+  - **Entry 22: `[tm_landingpage]`** — Added. Notes the dedicated Gutenberg
+    block alternative.
+
+---
+
+## Version 3.9.4 — 2026-07-04 — [tm_tickets] multi-layout overhaul
+
+### Summary
+The tickets shortcode now supports five distinct display layouts, selectable
+via `layout="..."`. The original solid-button style is preserved as the
+default (`banner`). New `show_image`, `show_dates`, `show_genre`, `label_season`,
+`label_show`, and `button_text` attributes give fine-grained control.
+BB module and Gutenberg block updated to expose all new attributes.
+
+### New shortcode attributes
+- `layout` — `banner` (default) | `cards` | `table` | `minimal` | `spotlight`
+- `show_image` — show poster/season image where supported (default `true`)
+- `show_dates` — show show dates (default `true`)
+- `show_genre` — show genre badge (default `false`)
+- `label_season` — override “Season Tickets” label
+- `label_show` — override “Show Tickets” label
+- `button_text` — override “Get Tickets” CTA text
+
+### Layouts
+| Layout | Description |
+|---|---|
+| `banner` | Original style: full-width solid-colour stacked buttons (label + title). Unchanged. |
+| `cards` | Poster-art cards in a flex grid. Image (2:3 ratio), type label, title, dates, genre pill, coloured CTA button. |
+| `table` | Responsive scrollable table: Production name, Dates, Genre, ticket link button. Season appears as a highlighted first row. |
+| `minimal` | Borderless text list. Each row: type label, show name, dates, animated circle-arrow right. Hover slides the row right. |
+| `spotlight` | Large hero card for the season (uses social banner or front image with dark gradient overlay + white CTA), followed by compact show tiles (3:4 poster, slot label, genre pill). |
+
+### Files changed
+- `includes/shortcodes/tickets-shortcode.php` — full rewrite
+- `modules/tm-tickets-module/tm-tickets-module.php` — expanded settings panels
+- `modules/tm-tickets-module/includes/frontend.php` — all new attrs forwarded
+- `blocks/tm-blocks/index.js` — `theatre-manager/tm-tickets` block fields updated
+
+---
+
+## Version 3.9.3 — 2026-07-04 — BB Module Icons (fix: icons now display)
+
+### Bug fix (icons were not appearing)
+Passing `'icon' => 'icon.svg'` in the module constructor caused BB to look
+for `icon.svg` inside its **own** `img/svg/` bundle (where it doesn’t exist),
+then fall back to treating the string as a dashicons class name. BB’s
+auto-discovery branch — `file_exists($this->dir . 'icon.svg')` — is only
+reached when the `icon` key is **omitted entirely**. Removed explicit
+`'icon'` keys from all 21 modules; `calendar.svg` in `tm-seasons-module`
+renamed to `icon.svg` for consistency.
+
+### Original change description
+
+
+### Summary
+Every Beaver Builder module now has a bespoke SVG icon that appears in the BB
+module picker. All 21 icons are original 20×20 filled-path SVGs matching the
+style of Beaver Builder's own built-in icons.
+
+### Changes
+- **21 SVG icon files added**, one per module, each reflecting the semantic
+  meaning of its shortcode:
+
+| Module | Icon concept |
+|---|---|
+| Board Members | Three-person group silhouette |
+| Sponsors | Ribbon medal with star points |
+| Sponsor Slider | Arrow-rail carousel with logo boxes |
+| Advertisers | Megaphone / broadcast cone |
+| Contributors | Person with downward arrow (giving) |
+| Testimonials | Speech bubble with three dot ellipsis |
+| Awards | Trophy cup with plinth |
+| Venues | Map pin over a stage baseline |
+| Shows | Theatre curtain arch with comedy/tragedy faces |
+| Cast | Comedy and tragedy mask pair |
+| Auditions | Spotlight beam with stage |
+| Seasons | Calendar grid with all cells filled |
+| Season (single) | Calendar with star in date area |
+| Season Shows | Calendar with show listing dots |
+| Season Cast | Calendar with person silhouette |
+| Season Banner | Landscape image frame with star |
+| Season Images | 2×2 photo grid |
+| Show Cast | Curtain arch with two person silhouettes |
+| Programs | Document/booklet with download arrow |
+| Tickets | Perforated ticket stub |
+| Current Season | Calendar with centred star burst |
+
+- **`icon` key added to all existing modules** that were missing it
+  (`tm-auditions-module`, `tm-season-module`, `tm-season-shows-module`)
+- **`tm-seasons-module`** already referenced `calendar.svg` — that file now
+  exists with a proper full-grid calendar icon
+- All icons use the BB 20×20 viewBox convention: `<rect fill="none"/>` base
+  layer + `<g><path/></g>` monochrome filled shape
+
+---
+
+## Version 3.9.2 — 2026-07-04 — Full 1:1:1 Shortcode/Block/BB-Module parity
+
+### Summary
+Every shortcode now has an exactly-matching Gutenberg block config and a Beaver
+Builder module. 18 new BB modules created; 1 Gutenberg block name corrected;
+version bumped 3.9.1 → 3.9.2.
+
+### Bug Fixes
+- **Gutenberg block name mismatch corrected**: `theatre-manager/tm-cast-show`
+  renamed to `theatre-manager/tm-show-cast` to match the registered shortcode
+  tag `tm_show_cast`. The shortcode map in both `generateShortcode()` functions
+  updated accordingly. Block title updated to "Show Cast List".
+
+### New Beaver Builder Modules (18)
+
+All modules follow the same conventions as the existing 4:
+- `FLBuilderModule` guard (`class_exists` check) prevents fatals without BB
+- `includes/frontend.php` renders by calling `do_shortcode()` with the
+  correctly named tag and only non-default attribute values appended
+- Dropdown helpers reuse `tm_get_bb_shows()` / `tm_get_bb_seasons()` when
+  they are available (defined by an earlier-loaded module), or fall back to
+  their own inline query
+- All new modules are in the `theatre-manager` BB category
+
+| Module directory | Shortcode |
+|---|---|
+| `tm-board-members-module` | `[tm_board_members]` |
+| `tm-sponsors-module` | `[tm_sponsors]` |
+| `tm-sponsor-slider-module` | `[tm_sponsor_slider]` |
+| `tm-advertisers-module` | `[tm_advertisers]` |
+| `tm-contributors-module` | `[tm_contributors]` |
+| `tm-testimonials-module` | `[tm_testimonials]` |
+| `tm-awards-module` | `[tm_awards]` |
+| `tm-venues-module` | `[tm_venues]` |
+| `tm-shows-module` | `[tm_shows]` |
+| `tm-cast-module` | `[tm_cast]` |
+| `tm-season-cast-module` | `[tm_season_cast]` |
+| `tm-season-banner-module` | `[tm_season_banner]` |
+| `tm-season-images-module` | `[tm_season_images]` |
+| `tm-show-cast-module` | `[tm_show_cast]` |
+| `tm-programs-module` | `[tm_programs]` |
+| `tm-tickets-module` | `[tm_tickets]` |
+| `tm-current-season-module` | `[tm_current_season]` |
+
+### Note on `tm_landingpage`
+`[tm_landingpage]` ships its own dedicated Gutenberg block bundle
+(`blocks/tm-landingpage-block/`) with a full React editor UI. It does not have
+a Beaver Builder module — its visual complexity makes a shortcode-pass-through
+module impractical. This is documented as the intentional exception to the
+1:1:1 rule.
+
+### BB loader auto-discovery
+All 21 modules are picked up automatically by the `glob()` in
+`includes/beaver-builder.php` — no manual `require_once` list needed.
+
+---
+
+## Version 3.9.1 — 2026-07-04 — Singleton class wrapper
+
+### Summary
+Re-introduced `Theatre_Manager` as a proper singleton class that wraps the
+entire plugin bootstrap. The class existed previously as an empty stub; it was
+removed in 3.9.0 because it had no body. This version restores the class with
+full implementation so that all `class_exists('Theatre_Manager')` checks in the
+Theatre Manager Theme and companion plugins (TM Members Area) continue to work
+correctly as a plugin-presence guard.
+
+### Changes
+- **`theatre-manager-plugin.php` rewritten as `Theatre_Manager` singleton**
+  - `Theatre_Manager::instance()` is the single entry point; `new Theatre_Manager()`
+    is blocked (private constructor + clone/wakeup guards).
+  - All `require_once` calls and bootstrap logic moved into the private `init()`
+    method, which runs exactly once from the constructor.
+  - Plugin is bootstrapped via `add_action('plugins_loaded', ['Theatre_Manager', 'instance'])`,
+    ensuring includes that themselves hook `init` or later are loaded at the
+    correct priority.
+  - Public accessors added: `->version()`, `->plugin_dir()`, `->plugin_url()`
+    so consumer code has a clean API beyond the raw constants.
+  - `THEATRE_MANAGER_VERSION`, `TM_PLUGIN_DIR`, `TM_PLUGIN_URL` constants
+    still defined at file scope (before the class) so they remain available
+    even if something requires the file at an unusual time.
+  - `class_exists('Theatre_Manager')` guard wraps the class declaration to
+    prevent fatal errors if a third-party plugin ever loads this file twice.
+- **Patch version bump: 3.9.0 → 3.9.1**
+
+---
+
+## Version 3.9.0 — 2026-07-04 — Best Practices & Editor Integration Overhaul
+
+### Summary
+Full expert audit pass covering security hardening, Gutenberg block registration,
+Beaver Builder integration, REST API exposure, duplicate code removal, and
+general best-practice cleanup. All 21 shortcodes now have corresponding
+Gutenberg block configs. All 8 CPTs now expose data to the REST API.
+
+### Security
+- **[S1–S3] Sanitize `get_option()` colour values before inline style use**
+  (`board-members-shortcode.php`, `sponsors-shortcode.php`,
+  `advertisers-shortcode.php`, `contributors-shortcode.php`,
+  `seasons-shortcode.php`, `shows-shortcode.php`). Every colour, border-width,
+  radius, and font-family option now passes through `tm_sanitize_css_color()`,
+  `absint()`, or `sanitize_text_field()` before being written into a
+  `style=""` attribute.
+- **[S4] `advertisers-shortcode.php`: `$atts` used before `shortcode_atts()`**
+  The `category` attribute was read from the raw (unsanitized) shortcode array
+  and passed into a `WP_Query` `meta_query` before normalisation. Fixed by
+  calling `shortcode_atts()` and `sanitize_key()` at the top of the function
+  and removing the duplicate `shortcode_atts()` call that followed.
+- **[S6] Removed empty `Theatre_Manager` class** from the main plugin file.
+  The class constructor did nothing and its presence was misleading.
+
+### Gutenberg Blocks
+- **[B3/Fix 1] Register `theatre-manager` block category** via `block_categories_all`
+  filter in `includes/blocks.php`. All `theatre-manager/*` blocks now appear
+  under their own named group in the block inserter instead of being silently
+  dropped into uncategorized.
+- **[B3/Fix 2] Enqueue `blocks/tm-blocks/index.js`** in `tm_enqueue_block_assets()`.
+  Previously only `tm-landingpage-block/index.js` was loaded. All 20 shortcode
+  block configs defined in `tm-blocks/index.js` were invisible in the editor.
+  Both bundles now load with consistent dependencies.
+- **[Fix 2] Removed redundant `is_admin()` guard** from `tm_enqueue_block_assets()`.
+  `enqueue_block_editor_assets` only fires inside the block editor; the guard
+  was dead code and prevented the Site Editor from receiving block assets.
+- **[Fix 2] Added `wp-api-fetch` dependency** to block script enqueue so blocks
+  have access to the WP API fetch utility.
+- **[Fix 2] Inject `tmBlocksData` JS global** via `wp_localize_script()` with
+  `restRoot`, `restNonce`, and `version` so block REST fetches work on
+  sub-directory WordPress installs.
+- **[Fix 9 / S5] Fixed hardcoded REST API paths** in `blocks/tm-blocks/index.js`.
+  All `fetch('/wp-json/wp/v2/...')` calls replaced with
+  `fetch(tmBlocksData.restRoot + '/wp/v2/...')` and the `X-WP-Nonce` header
+  added so REST requests are authenticated.
+- **[Fix 10] Added `tm_current_season` Gutenberg block config** to `tm-blocks/index.js`.
+  All 21 shortcodes now have a corresponding block config. Block name:
+  `theatre-manager/tm-current-season`, shortcode: `[tm_current_season]`.
+
+### Beaver Builder
+- **[B4/Fix 3] `includes/beaver-builder.php` now loaded** from the main plugin file.
+  The file was never `require_once`'d, meaning BB modules and the Theatre Manager
+  category never registered on any site.
+- **[B5/Fix 5] Added `FLBuilderModule` guard to `tm-seasons-module`**. The class
+  was declared unconditionally — any site without Beaver Builder would fatal
+  on activation.
+
+### CPT REST API
+- **[B8/Fix 4] `show_in_rest => true`** added to `board_member`, `sponsor`,
+  `advertiser`, `contributor`, `testimonial`, `award`, `venue`, and `cast`
+  CPTs. Previously only `show` and `season` had REST enabled. Block dropdown
+  fields for these CPTs now load correctly.
+
+### Bug Fixes
+- **[B2/Fix 6] Removed duplicate `tm_seasons` shortcode registration** from
+  `seasons-shortcode.php`. The richer `tm_seasons_shortcode()` in `tm_seasons.php`
+  (with filtering, layout, status badges) was being silently overwritten by
+  the simpler implementation. Duplicate call commented out with explanation.
+
+### Best Practices
+- **[B1/Fix 8] Replaced inline `<style>` blocks with `wp_add_inline_style()`**
+  in `board-members-shortcode.php`, `sponsors-shortcode.php`,
+  `tickets-shortcode.php`. Introduced `tm_add_shortcode_inline_style()` helper
+  in `functions.php` — deduplicates by handle so styles are written once per
+  page load even when a shortcode appears multiple times.
+- **[B9/Fix 11–12] Admin asset versions** now use `THEATRE_MANAGER_VERSION`
+  constant instead of hardcoded strings (`'1.0.1'`, `'1.0.2'`) so the browser
+  cache is busted automatically on every plugin update.
+
+---
+
+## Version 3.8.2 — 2026-07-04
+
+### Fixed
+- **PHP compatibility: removed arrow functions from `theme-integration.php`.**
+  The `fn( $tag ) =>` arrow function syntax introduced in 3.8.1 requires PHP 7.4+.
+  Replaced both `array_map( fn(...) )` calls with equivalent `foreach` loops
+  that are compatible with PHP 5.6+, matching the plugin's stated minimum
+  requirement and preventing install failures on hosts running older PHP.
+
+---
+
+## Version 3.8.1 — 2026-07-04
+
+### Fixed
+- **Critical: unscoped CSS selectors in `theme-integration.php` broke CF7 labels
+  and every other `label`, `li`, `span`, `strong` on the page in light mode.**
+  The dark-mode shortcode override block generated CSS like:
+  ```
+  html.tm-dark-mode .tm-board-members-grid p, li, td, th, span, label, strong {
+      color: #e0e0e0 !important;
+  }
+  ```
+  CSS parses comma-separated selector lists independently, so bare tags like
+  `label`, `li`, `span` with no prefix became **global** rules — applying
+  `color: #e0e0e0 !important` to every matching element on the entire page
+  regardless of mode. This made CF7 form labels near-white in light mode.
+  Fixed by building the selector list with `array_map` so every tag is
+  individually prefixed: `html.tm-dark-mode .tm-board-members-grid label`,
+  `html.tm-dark-mode .tm-sponsor-card label`, etc.
+- **CF7 `style.css` light-mode rules strengthened** with
+  `html:not(.tm-dark-mode)` scope and `!important` to beat any stale
+  plugin stylesheets.
+
+---
+
+## Version 3.8.0 — 2026-07-03 — Production Release
+
+### Summary
+Production release consolidating all Theme Integration & Dark/Light Mode work
+completed in the 3.7.x patch series. No new features beyond 3.7.22; this entry
+documents the full scope of changes shipped in this production milestone.
+
+### Added
+- **Full Light / Dark mode integration with Theatre Manager Theme.**
+  Plugin shortcodes now participate in the theme's dark/light toggle:
+  - `includes/theme-integration.php` (new file) detects when the TM theme is
+    active via `tm_theme_is_active()` and emits a CSS variable bridge on
+    `wp_head` (priority 20). Light values come from Display Options; dark
+    values fall back to theme Customizer tokens when no per-tab dark colour
+    is set in Display Options.
+  - `color-mode-switcher.js` extended: `applyDark()` reads
+    `tmShortcodeSelectors` / `tmShortcodeDark` JS globals and patches
+    shortcode wrapper inline styles; `applyLight()` restores via
+    `data-tm-idx` cache. Covers all 12 shortcode tabs.
+  - `tm_integration_js_data()` injects `tmShortcodeDark` and
+    `tmShortcodeSelectors` globals before the switcher script.
+- **Display Options: per-tab Light / Dark colour picker pairs.**
+  `includes/display-options.php` (new file) replaces settings registration
+  previously in `admin-menu.php`. Every colour field renders two WP colour
+  pickers side-by-side (☀ Light / 🌙 Dark). Dark pickers are visible only
+  when the TM theme is active and the frontend switcher is enabled. Per-tab
+  dark values take precedence over theme Customizer tokens via `!important`.
+- **Admin Dashboard.** The `Theatre Manager` top-level menu now opens a
+  dedicated dashboard with:
+  - **Theme & Dark Mode Status panel** — four-row table: TM Theme, Mode
+    Switcher, Default Mode, Shortcode Integration, each with semantic badges
+    (green/amber/red/grey) and contextual detail text.
+  - **Quick Access card grid** — Season Builder, Display Options, Settings,
+    Instructions, Regenerate PDF Previews, Sample Pages.
+- **Dashboard always-first fix.** `tm_pin_dashboard_submenu()` runs on
+  `admin_menu` priority 9999 and re-sorts `$submenu['theatre-manager']` after
+  all hooks fire, guaranteeing the Dashboard entry is index 0 regardless of
+  alphabetical CPT injection order.
+- **On-demand asset loading.** Swiper (sponsor slider), Slick (testimonials),
+  and PDF.js (programs) are now enqueued only from their respective shortcode
+  callbacks rather than globally. Double-registration guards added.
+- **`tm_sanitize_css_color()` extended** to accept `rgb()`, `rgba()`,
+  `hsl()`, `hsla()`, and CSS named color keywords in addition to hex values.
+- **`Requires PHP: 7.4`** added to plugin header.
+
+### Changed
+- `admin-menu.php`: `tm_dashboard_page()` is now the top-level menu callback
+  (previously pointed to `tm_display_options_page()`). Settings registration
+  and field callbacks moved to `display-options.php`.
+- `functions.php`: merged duplicate `admin_enqueue_scripts` hooks into one
+  unified `tm_enqueue_admin_assets()`. Admin CSS now also loads on the
+  dashboard page (`toplevel_page_theatre-manager`). `wp-color-picker` loaded
+  only on the Display Options page.
+- Fragile `plugin_dir_url(__FILE__) . '../assets/'` asset path replaced with
+  `TM_PLUGIN_URL` constant throughout shortcode files.
+- `tm_register_plugin_menu()` moved to `admin_menu` priority 9.
+- Removed orphaned `tm_register_header_text_color_options()` and its
+  `admin_init` hook.
+
+### Fixed
+- **Dark mode `serverDefault` JS bug:** `functions.php` now passes the
+  PHP-side default via `wp_add_inline_script(..., 'before')` so
+  `syncHtmlClass()` in `<head>` uses the correct value before first paint.
+- **Top-level menu redirect:** clicking `Theatre Manager` in the sidebar
+  previously opened the Advertisers CPT list (alphabetical CPT injection
+  beat the dashboard). Fixed by priority-9 registration plus a priority-9999
+  reorder hook.
+- **Side-by-side picker layout:** WP admin cascade overrode flex on
+  `.tm-color-pair-row`; resolved via `wp_add_inline_style()` appending
+  `display:flex!important` after all admin styles.
+- **Admin CSS missing on dashboard:** enqueue condition extended to include
+  `toplevel_page_theatre-manager` hook.
+
+---
+
+## Version 3.7.22 — 2026-07-03
+
+### Added
+- **Dashboard Theme & Dark Mode Status Panel.** The `Theatre Manager` top-level
+  admin page now shows a four-row status table above the quick-access card grid:
+  - **TM Theme** — green ✅ Active / red ❌ Inactive, with detected version.
+  - **Mode Switcher** — green Enabled / amber ⚠ Disabled (with Customizer link),
+    or grey N/A when the theme is not active.
+  - **Default Mode** — 🌙 Dark / ☀️ Light badge reflecting the current
+    `tm_color_mode` Customizer setting.
+  - **Shortcode Integration** — Active (both conditions met) / Partial
+    (theme active but switcher off) / Off (theme inactive).
+  Badges use semantic colour-coding (green/amber/red/grey). Customizer and
+  Display Options quick links appear when the TM theme is active.
+- **Display Options: side-by-side Light / Dark colour pickers.**
+  A new `includes/display-options.php` replaces the settings registration and
+  callback functions previously in `admin-menu.php`. Every colour field now
+  renders two WP colour pickers side-by-side:
+  - ☀ Light — existing option key (e.g. `tm_board_member_bg_color`)
+  - 🌙 Dark  — new option key with `_dark` suffix (e.g. `tm_board_member_bg_color_dark`)
+  Dark pickers are shown only when the TM Theme is active and the frontend
+  switcher is enabled. When neither condition is met, the single light picker
+  renders as before with a note explaining when dark colours activate.
+  Colour fields covered per tab: Background Color, Text Color, Border Color,
+  H1–H6 Color, and (for tickets) Button Color and Button Hover Color.
+- **`theme-integration.php` updated** to read per-tab `_dark` Display Options
+  first when building the dark-mode CSS block. If a tab has a dark bg/text/
+  border value set in Display Options, a specific `html.tm-dark-mode {tab-selector}`
+  rule is emitted with `!important`. The generic theme-token fallback rule is
+  emitted without `!important` so per-tab values always win via specificity.
+- **`admin.css` redesigned** with dedicated classes for the dashboard status
+  panel (`.tm-status-panel`, `.tm-status-table`, `.tm-badge-*`), the quick-
+  access card grid (`.tm-dashboard-grid`, `.tm-dashboard-card`), the colour
+  pair row (`.tm-color-pair-row`, `.tm-color-pair-cell`, `.tm-pair-label`), and
+  the font preview box (`.tm-font-preview`).
+- **`admin.js`**: added `tmUpdateFontPreview()` global function (replaces
+  the inline `<script>` that was echoed per font-select field) and confirmed
+  double-init guard on `.tm-color-picker.wpColorPicker()`.
+- **Side-by-side layout fix**: WordPress admin's own `form-table td` stylesheet
+  was overriding the flex declarations on `.tm-color-pair-row`. Fixed by using
+  `wp_add_inline_style()` on Display Options pages to append `display:flex!important`
+  rules after all other admin styles load, reliably winning the cascade.
+
+### Changed
+- `admin-menu.php`: old `tm_register_display_settings()`, `tm_color_picker_callback()`,
+  `tm_text_input_callback()`, `tm_checkbox_callback()`, `tm_rating_symbol_callback()`,
+  `tm_grid_columns_callback()`, and `tm_font_family_callback()` replaced by
+  their equivalents in `display-options.php`. Dead code wrapped in
+  `if (false) {}` stub blocks for reference; no duplicate registration.
+
+---
+
+## Version 3.7.21 — 2026-07-03
+
+### Added
+- **Theatre Manager Theme dark/light mode integration** (`includes/theme-integration.php`).
+  When the Theatre Manager Theme is the active theme, shortcode output now
+  participates fully in the site's dark/light toggle. Previously, the plugin's
+  shortcodes baked Display Option colours as hardcoded `style="background-color:
+  #hex; color: #hex"` inline attributes that neither CSS `!important` nor the
+  theme's JS patcher could reliably override.
+
+  **How it works:**
+  - `tm_theme_is_active()` — lightweight static helper that checks the active
+    stylesheet/template slug. Returns false when any other theme is active so
+    the integration is completely inert on non-TM sites.
+  - `tm_output_shortcode_theme_integration_css()` — hooked to `wp_head` at
+    priority 20 (after the theme's own token block). Emits two `<style>` blocks:
+    1. *Light-mode block*: scoped CSS custom property declarations
+       (`--tm-sc-bg`, `--tm-sc-text`, `--tm-sc-border`, `--tm-sc-font`) per
+       shortcode wrapper selector, sourced from Display Options settings.
+    2. *Dark-mode block*: `html.tm-dark-mode` overrides for every shortcode
+       wrapper class, pulling `surface_bg`, `body_text`, `heading_text`,
+       `muted_text`, `link`, and `border` from the theme's Customizer dark
+       tokens. Covers: board members, advertisers, sponsors, contributors,
+       testimonials, seasons, shows, cast, auditions, awards, venues, tickets.
+       Specific sub-selectors for `h1–h6`, `p`, `li`, `a`, table cells,
+       season/slot/show/program headings, and venue cards are all included.
+  - `tm_integration_js_data()` — hooked to `wp_enqueue_scripts` at priority 15.
+    Injects `tmShortcodeDark` (dark palette object) and `tmShortcodeSelectors`
+    (array of wrapper CSS selectors) as JS globals before the
+    `tm-color-mode-switcher` script body so the JS inline-style patcher can
+    include shortcode wrappers in its `applyDark()` / `applyLight()` cycle.
+    This covers elements whose inline `style=""` attributes would beat CSS
+    `!important` rules.
+  - `theme-integration.php` is required in the main plugin file after core
+    includes and runs only on the frontend (`wp_head` / `wp_enqueue_scripts`).
+
+  **When the TM theme is NOT active**, the integration file loads but all its
+  hooks return immediately — zero output, zero performance cost.
+
+---
+
+## Version 3.7.20 — 2026-07-03
+
+### Fixed
+- **[BUG] Duplicate `admin_enqueue_scripts` hook conflict.** Two separate
+  functions (`tm_enqueue_admin_assets` and `tm_enqueue_admin_scripts`) were
+  both hooked to `admin_enqueue_scripts` and both registered the `tm-admin-js`
+  handle with different dependency arrays. WordPress silently discards the
+  second `wp_enqueue_script()` call for a handle already registered, so
+  `wp-color-picker` never loaded on the Display Options page (color pickers
+  were non-functional). Merged into a single unified `tm_enqueue_admin_assets()`
+  function that conditionally adds `wp-color-picker` as a dependency only on
+  the Display Options page.
+- **[BUG] Fragile relative path in `tm_enqueue_slick_slider_assets()`.** Used
+  `plugin_dir_url(__FILE__) . '../assets/js/'` from inside `includes/` — path
+  traversal works but breaks if the file is moved. Replaced with the
+  `TM_PLUGIN_URL` constant.
+- **[BUG] Orphaned `tm_register_header_text_color_options()`.** Registered
+  global h1–h6 color settings under `tm_display_options` (a group with no UI
+  page). The per-tab `tm_{tab}_h1_color … tm_{tab}_h6_color` settings in
+  `tm_register_display_settings()` are the correct equivalents. Removed the
+  orphaned function and its `admin_init` hook.
+
+### Changed
+- **[PERF] Swiper, Slick Slider, and PDF.js are now conditionally loaded.**
+  Previously all three libraries were unconditionally enqueued on every
+  frontend page load (~250 KB extra JS+CSS per page for unrelated pages).
+  Each library is now only enqueued when its corresponding shortcode is
+  actually rendered on the current page:
+  - Swiper → `[tm_sponsor_slider]`
+  - Slick  → `[tm_testimonials]`
+  - PDF.js → `[tm_programs]`
+  Each shortcode callback calls the enqueue function directly; guard checks
+  (`wp_style_is` / `wp_script_is`) prevent double-registration.
+- **[UX] Top-level `Theatre Manager` admin menu now opens a proper dashboard
+  page.** Previously the main menu callback pointed to `tm_display_options_page()`,
+  so clicking the top-level item opened Display Options (confusing). A new
+  `tm_dashboard_page()` function renders a card-grid landing page with direct
+  links to Season Builder, Display Options, Settings, Instructions, Regenerate
+  PDF Previews, and Sample Pages.
+- **`tm_sanitize_css_color()` helper expanded.** Now accepts `rgb()`/`rgba()`,
+  `hsl()`/`hsla()`, and CSS named colors / keywords (`transparent`,
+  `currentColor`, etc.) in addition to hex values. Invalid values still fall
+  back to the `$fallback` parameter.
+
+### Fixed (metadata)
+- `Requires PHP:` header in `theatre-manager-plugin.php` was blank. Set to
+  `7.4` to match the theme's stated minimum.
+
+---
+
+## Version 3.7.19
+Show Landing Page Gutenberg Block added.
+- New Gutenberg block for tm_landingpage shortcode in block editor
+- Show search: Search for shows by name or select current show
+- Field management: Check/uncheck and drag-to-reorder all 14 fields
+- Live configuration preview with shortcode display
+- Cast grid options: 1-6 responsive columns
+- Ticket button styling: 9 button format options
+- Real-time summary showing selected show, fields, and options
+- Comprehensive block documentation and README
+- Automatic REST API support for show search
+- Default configuration: All fields enabled in recommended order
+
+## Version 3.7.18
+Comprehensive tm_landingpage shortcode requirements documentation.
+- Created TM_LANDINGPAGE_REQUIREMENTS.md with complete specification
+- Documents all 13 available fields: show_name, show_image, author, sub_authors, director, associate_director, producer, stage_manager, synopsis, show_dates, ticket_url, cast, castwithbio, venue
+- Specifies all parameters: show_id, field_list, castcols, urlbutton, buttonformat
+- Default output structure with headings and separators
+- Each field displays on separate line, inherits parent page formatting
+- Cast grid responsive: desktop/tablet/mobile with column-based image sizing
+- Full alignment inheritance from Gutenberg, Beaver Builder, theme classes
+- WCAG AAA accessibility compliance
+
+## Version 3.7.17
+Color contrast accessibility improvements.
+- Fixed glass button: Changed white text on transparent white to dark text on subtle dark overlay
+- Fixed empty rating stars: Changed white color to dark gray at 30% opacity
+- Improves WCAG AAA accessibility compliance
+- All text now has proper contrast with backgrounds
+
+## Version 3.7.16
+Cast image display improvement.
+- Fixed cast member images that were overflowing and cropping
+- Changed object-fit from cover to contain to show entire picture
+- Added light gray background (#f0f0f0) for clean appearance
+- Images remain fully responsive and scale with castcols parameter
+
+## Version 3.7.15
+Critical bug fix for cast grid layout.
+- Fixed critical issue where castwithbio field displayed only one column with very large images
+- CSS rule was using display: flex which overrode the grid layout
+- Restored proper display: grid with grid-template-columns using --cast-cols CSS variable
+- Cast grid now properly displays multiple columns respecting the castcols parameter
+
+## Version 3.7.14
+Comprehensive fixes: custom post type capabilities, responsive image scaling, castcols honoring, and field alignment inheritance.
+- Fixed custom post type capability issue preventing users from editing posts
+  - Added 'capability_type' => 'post' and 'map_meta_cap' => true to all 10 CPTs
+  - Resolves "Sorry, you are not allowed to edit posts in this post type" error
+  - Applies to: show, cast, season, venue, award, advertiser, board_member, sponsor, testimonial, contributor
+- Enhanced cast member image sizing for responsive display
+  - Images now scale based on castcols parameter: 300px (1 col) to 210px (6 cols)
+  - Uses formula: height = calc(300px - (castcols * 15px)) with max() fallback
+  - Added aspect-ratio: 3/4 for consistent portrait headshots
+  - Desktop: 300-210px, Tablet: 270-200px, Mobile: 220-160px
+  - All images remain fully responsive to container width
+- Fixed castcols parameter to be honored across all responsive breakpoints (previously ignored on mobile)
+  - Desktop (>1024px): Displays castcols columns as specified
+  - Tablet (1024px-768px): Displays min(castcols, 2) columns for readability
+  - Mobile (<768px): Displays min(castcols, 1) column (single column minimum for usability)
+- Enhanced all shortcode fields to inherit alignment and text styling from surrounding page context.
+- All fields now respect Gutenberg block alignment settings (center/left/right/justify).
+- Extended support for Beaver Builder alignment settings and theme-specific alignment classes.
+- Fields inherit all text properties: font-family, font-size, color, font-weight, line-height, letter-spacing, text-transform, direction.
+- Nested elements (cast lists, venue info) fully inherit parent styling and alignment.
+- Images automatically center within centered content using display: block and auto margins.
+- Enhanced CSS sibling selectors to detect:
+  - Gutenberg: has-text-align-* and wp-block-paragraph classes
+  - Beaver Builder: fl-col text alignment classes
+  - Theme-specific: centered, center, and other common alignment classes
+- Support for blocks separated by horizontal rules (<hr>).
+- Cast with bio grid now centers when parent is centered.
+- All text settings cascade properly from page/block context to all shortcode fields.
+- Updated PHP comments to document castcols behavior at different breakpoints.
+- Version updated to 3.7.14.
+
+## Version 3.7.13
+Block alignment inheritance for buttons.
+- Changed .tm-landingpage-wrapper from text-align: center to text-align: inherit
+- Buttons now respect parent Gutenberg block, Beaver Builder block, or container alignment
+- Works with center, left, and right alignment settings
+- Version updated to 3.7.13
+
+## Version 3.7.12
+Button alignment fix - ensures Get Tickets button centers with page content.
+- Fixed button centering by explicitly setting .tm-landingpage-wrapper text-align to center
+- Buttons now properly align with centered page layout
+- Version updated to 3.7.12
+
+## Version 3.7.11
+URL button display and comprehensive button styling options.
+- Added urlbutton parameter to tm_landingpage shortcode to display ticket URLs as styled buttons instead of text links.
+- Added buttonformat parameter with 9 comprehensive styling options: default, modern, minimal, outline, gradient, prominent, success, ghost, glass.
+- Implemented comprehensive CSS button styling with hover effects, transitions, and responsive sizing.
+- Fixed castcols parameter passing to field rendering function for proper castwithbio column control.
+- Updated tm_render_landingpage_field() to accept and use shortcode attributes for parameter passing.
+- Removed hardcoded text-align: center from .tm-url-button base class for proper alignment inheritance.
+- Landing page wrapper and field divs now inherit text-align from parent containers for proper alignment inheritance.
+- Fixed button alignment to conform to page/container text-align properties (center, left, right).
+- Updated shortcode_usage.txt with complete button parameter documentation and usage examples.
+- Updated plugin version metadata and public version constant to 3.7.11.
+
+## Version 3.7.10
+Show dates HTML editor and castwithbio display improvements.
+- Made show_dates field editable with HTML in Season Builder using TinyMCE rich text editor.
+- Added "Played by" prefix to actor names in castwithbio shortcode field for better readability.
+- Updated show_dates sanitization to use wp_kses_post() for HTML support.
+- Updated plugin version metadata and public version constant to 3.7.10.
+
+## Version 3.7.9
+Season Builder cast bio and show production fields.
+- Added bio textarea field to cast rows in Season Builder for editing actor biographies.
+- Added producer and stage_manager fields to Show form in Season Builder.
+- Updated JavaScript templates to include new fields in dynamic row creation.
+- Updated cast and show form table column widths and sanitization logic.
+- Updated plugin version metadata and public version constant to 3.7.9.
+
+## Version 3.7.8
+Castwithbio column control and responsive image sizing.
+- Added castcols parameter to tm_landingpage shortcode castwithbio field (range 1-6, default 3).
+- Reduced cast image heights for better column fit: 180px desktop, 160px tablet, 140px mobile.
+- Implemented CSS Grid with CSS custom properties for dynamic column control.
+- Updated responsive media queries with grid-column min() function for tablet adaptation.
+- Updated shortcode_usage.txt with castcols parameter documentation and usage examples.
+- Updated plugin version metadata and public version constant to 3.7.8.
+
+## Version 3.7.7
+Cast biography field integration.
+- Added bio field to cast post type (_tm_cast_bio meta field).
+- Integrated bio display into castwithbio shortcode field with HTML preservation.
+- Bio displays below actor name in responsive grid columns.
+- Updated plugin version metadata and public version constant to 3.7.7.
+
+## Version 3.7.6
+Responsive cast grid with biography support.
+- Added castwithbio field to tm_landingpage shortcode for responsive grid display of cast members.
+- Displays picture, character name, actor name, and biography in responsive columns.
+- Implemented CSS Grid with auto-fit columns, gap spacing, and proper image sizing.
+- Added hard_breaks documentation explaining block-level vs inline display impact.
+- Implemented smart conditional wrapping for different content types.
+- Updated shortcode_usage.txt with comprehensive castwithbio field documentation.
+- Updated plugin version metadata and public version constant to 3.7.6.
+
+## Version 3.4
+Auditions shortcode update.
+- Added the `TM_Auditions` shortcode to list upcoming auditions in ascending audition-date order.
+- Updated plugin version metadata and public version constant to 3.4.
+
+## Version 3.3
+Season Builder v1.4 update.
+- Added audition date and rich-text audition details to Shows.
+- Added those audition fields to the Season Builder so they can be edited from the same two-tab screen.
+- Renamed builder `Actions` columns to `Remove` to avoid confusion with saved fields.
+- Updated plugin version metadata and public version constant to 3.3.
+
+## Version 3.2
+Season Builder v1.2/v1.3 update.
+- Added a Media tab for season images, show image/program media, and cast headshots.
+- Added the remaining Season and Show fields to the builder, including current/upcoming season flags and full show details.
+- Switching between builder tabs now saves before changing tabs.
+- Updated plugin version metadata and public version constant to 3.2.
+
+## Version 3.1
+Season Builder v1.1 update.
+- Removed rows in Season Builder (Shows/Cast/Awards) are now moved to Trash when saving.
+- Updated plugin version metadata and public version constant to 3.1.
+
+## Version 3.0
+Season Builder first release.
+- Added Season Builder admin page to manage Season, Shows, Cast, and Awards in one screen.
+- Added linked save flow to create/update related data from a single form.
+- Added Awards CPT and integrated award editing into Season Builder.
+- Updated plugin version metadata and public version constant to 3.0.
+
+## Version 2.8
+Security and stability release.
+- Fixed cast image rendering in `tm_show_cast` and `tm_season_cast` when image meta stores attachment IDs.
+- Escaped unescaped title output in `tm_shows`.
+- Fixed malformed inline style strings and corrected shadow option behavior in season shortcodes.
+- Added CSS color sanitization helper and applied it to shortcode-generated style blocks.
+- Sanitized/validated display options tab query parameter.
+- Updated plugin version metadata and version constant to 2.8.
+
+## Version 2.0
+Major release: consolidated shortcodes, added sample content tooling and documentation, moved tests out of plugin, improved image/pdf preview troubleshooting and program preview behavior.
+
+## Version 1.5
+Complete the shortcodes for Season, Shows, and Cast
+Code Cleanup
+Update the documentation and Change log files
+Fix additional formatting errors
+Fix syntax errors
+
+## Version 1.4
+Complete shortcodes for Sponsors and Contributors
+Fix formatting and syntax errors
+
+## Version 1.3
+Complete shortcodes for Advertisers banner
+
+## Version 1.2
+Complete shortcodes for advertisers, testimonials and board members
+Fix syntax and formatting
+
+## Version 1.1
+Fix display issues with admin menu
+
+## Version 1.0
+Initial version of the plugin
+Created CPTs for all Theatre Manager post types
+ - Board Members
+ - Advertisers
+ - Sponsors
+ - Contributors
+ - Seasons
+ - Shows
+ - Casts
+ - Testimonials
+ 
+# ToDo
+Add Season subscription link to season CPT
+Add show ticket links to shows
+Add bios for actors
+Create a sync process for Sharepoint as a separate plugin

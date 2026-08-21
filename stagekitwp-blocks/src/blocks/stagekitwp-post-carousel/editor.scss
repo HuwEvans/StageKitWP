@@ -1,0 +1,44 @@
+/**
+ * The following styles get applied inside the editor only.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+
+.wp-block-create-block-stagekitwp-post-carousel {
+	border: 1px dotted #f00;
+}
+.wp-block-stagekitwp-post-carousel {
+	--stagekit-card-bg: #ffffff;
+	--stagekit-card-border: #e2e8f0;
+	--stagekit-card-text: #1e293b;
+	--stagekit-card-title: #0f172a;
+	--stagekit-card-meta: #64748b;
+	--stagekit-card-link: #0284c7;
+	--stagekit-nav-bg: #ffffff;
+	--stagekit-nav-text: #333333;
+	--stagekit-nav-border: #e2e8f0;
+
+	&.is-dark-mode {
+		--stagekit-card-bg: #182232 !important;
+		--stagekit-card-border: #2a384c !important;
+		--stagekit-card-text: #cbd5e1 !important;
+		--stagekit-card-title: #f8fafc !important;
+		--stagekit-card-meta: #94a3b8 !important;
+		--stagekit-card-link: #38bdf8 !important;
+		--stagekit-nav-bg: #182232 !important;
+		--stagekit-nav-text: #f8fafc !important;
+		--stagekit-nav-border: #2a384c !important;
+	}
+
+	&.is-light-mode {
+		--stagekit-card-bg: #ffffff !important;
+		--stagekit-card-border: #e2e8f0 !important;
+		--stagekit-card-text: #1e293b !important;
+		--stagekit-card-title: #0f172a !important;
+		--stagekit-card-meta: #64748b !important;
+		--stagekit-card-link: #0284c7 !important;
+		--stagekit-nav-bg: #ffffff !important;
+		--stagekit-nav-text: #333333 !important;
+		--stagekit-nav-border: #e2e8f0 !important;
+	}
+}

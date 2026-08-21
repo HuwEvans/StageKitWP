@@ -1,0 +1,79 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "stagekitwp/bookshelf-item",
+  "title": "Bookshelf Item",
+  "category": "stagekitwp-blocks",
+  "icon": "book-alt",
+  "description": "Affiliate book card.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "rawUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "amazonUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "asin": {
+      "type": "string",
+      "default": ""
+    },
+    "domain": {
+      "type": "string",
+      "default": "amazon.com"
+    },
+    "bookTitle": {
+      "type": "string",
+      "default": ""
+    },
+    "authorName": {
+      "type": "string",
+      "default": ""
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "coverImage": {
+      "type": "string",
+      "default": ""
+    },
+    "affiliateTag": {
+      "type": "string",
+      "default": ""
+    },
+    "cardOrientation": {
+      "type": "string",
+      "default": "horizontal"
+    },
+    "cardTheme": {
+      "type": "string",
+      "default": "light"
+    },
+    "imageAlignment": {
+      "type": "string",
+      "default": "left"
+    },
+    "cardSize": {
+      "type": "string",
+      "default": "normal"
+    }
+  },
+  "editorScript": "file:./index.js",
+  "style": "file:../style-index.css",
+  "editorStyle": "file:../index.css",
+  "example": {
+    "attributes": {
+      "bookTitle": "The Stage Manager's Handbook",
+      "authorName": "Example Author",
+      "cardOrientation": "horizontal",
+      "cardTheme": "light",
+      "imageAlignment": "left",
+      "cardSize": "normal"
+    }
+  }
+}

@@ -1,0 +1,791 @@
+<?php
+
+stagekitwp_sync_log('INFO', 'Admin Settings File loading');
+
+/**
+ * Add Settings submenu to TM Sync admin menu
+ */
+function stagekitwp_sync_register_settings_submenu() {
+    if (!is_admin()) return;
+
+    $parent_slug = function_exists('stagekitwp_sync_admin_parent_slug')
+        ? stagekitwp_sync_admin_parent_slug()
+        : 'stagekitwp-sync';
+    
+    add_submenu_page(
+        $parent_slug,                     // Parent menu slug
+        'Sync Settings',                  // Page title
+        'Settings',                       // Menu title
+        'manage_options',                 // Capability
+        'stagekitwp-sync-settings',               // Menu slug
+        'stagekitwp_sync_render_settings_page'    // Callback
+    );
+    
+    stagekitwp_sync_log('debug', 'Registered TM Sync Settings submenu');
+}
+add_action('admin_menu', 'stagekitwp_sync_register_settings_submenu');
+
+/**
+ * Register settings with WordPress Settings API
+ */
+function stagekitwp_sync_register_settings() {
+    register_setting(
+        'stagekitwp_sync_settings_group',
+        'stagekitwp_sync_folder_overrides',
+        array(
+            'type' => 'array',
+            'sanitize_callback' => 'stagekitwp_sync_sanitize_folder_overrides',
+            'show_in_rest' => false
+        )
+    );
+    
+    stagekitwp_sync_log('debug', 'Registered TM Sync settings');
+}
+add_action('admin_init', 'stagekitwp_sync_register_settings');
+
+/**
+ * Sanitize folder override settings
+ */
+function stagekitwp_sync_sanitize_folder_overrides($value) {
+    if (!is_array($value)) {
+        return array();
+    }
+    
+    $sanitized = array();
+    foreach ($value as $folder_name => $folder_id) {
+        $folder_name = sanitize_text_field($folder_name);
+        $folder_id = sanitize_text_field($folder_id);
+        
+        if (!empty($folder_name) && !empty($folder_id)) {
+            $sanitized[$folder_name] = $folder_id;
+        }
+    }
+    
+    return $sanitized;
+}
+
+/**
+ * Handle AJAX actions for cache management
+ */
+function stagekitwp_sync_handle_cache_ajax() {
+    check_ajax_referer('stagekitwp_sync_settings_nonce', 'nonce');
+    
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Insufficient permissions');
+    }
+    
+    $action = sanitize_text_field($_POST['action_type'] ?? '');
+    
+    switch ($action) {
+        case 'refresh_cache':
+            stagekitwp_sync_refresh_folder_cache();
+            wp_send_json_success(array('message' => 'Cache refreshed successfully'));
+            break;
+            
+        case 'clear_cache':
+            stagekitwp_sync_clear_folder_cache();
+            wp_send_json_success(array('message' => 'Cache cleared successfully'));
+            break;
+            
+        case 'get_cache_status':
+            $cached = stagekitwp_sync_get_cached_folder_ids();
+            wp_send_json_success(array('folders' => $cached));
+            break;
+            
+        default:
+            wp_send_json_error('Unknown action');
+    }
+}
+add_action('wp_ajax_stagekitwp_sync_cache_action', 'stagekitwp_sync_handle_cache_ajax');
+
+/**
+ * Handle AJAX actions for data cleaning
+ */
+function stagekitwp_sync_handle_clean_ajax() {
+    check_ajax_referer('stagekitwp_sync_settings_nonce', 'nonce');
+    
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Insufficient permissions');
+    }
+    
+    $action = sanitize_text_field($_POST['action_type'] ?? '');
+    
+    if ($action === 'delete_images') {
+        // Handle delete synced images
+        if (!function_exists('stagekitwp_sync_delete_all_images')) {
+            wp_send_json_error('Image management functions not available');
+        }
+        
+        $success = stagekitwp_sync_delete_all_images();
+        
+        if ($success) {
+            stagekitwp_sync_log('info', 'User deleted all synced images via settings');
+            wp_send_json_success([
+                'message' => 'Successfully deleted the synced images folder and all contents.'
+            ]);
+        } else {
+            wp_send_json_error('Failed to delete synced images folder. Check permissions.');
+        }
+    } else {
+        // Handle delete CPTs (original functionality)
+        $cpts = isset($_POST['cpts']) ? (array) $_POST['cpts'] : [];
+        
+        if (empty($cpts)) {
+            wp_send_json_error('No CPTs selected');
+        }
+        
+        $total_deleted = 0;
+        $results = [];
+        
+        foreach ($cpts as $cpt) {
+            $cpt = sanitize_text_field($cpt);
+            
+            $posts = get_posts([
+                'post_type' => $cpt,
+                'numberposts' => -1,
+                'post_status' => 'any'
+            ]);
+            
+            $deleted = 0;
+            foreach ($posts as $post) {
+                if (wp_delete_post($post->ID, true)) {
+                    $deleted++;
+                }
+            }
+            
+            $results[$cpt] = $deleted;
+            $total_deleted += $deleted;
+            
+            stagekitwp_sync_log('info', 'User deleted CPT posts via settings', ['cpt' => $cpt, 'deleted_count' => $deleted]);
+        }
+        
+        $message = sprintf('Successfully deleted %d post(s) from %d CPT(s).', $total_deleted, count($cpts));
+        wp_send_json_success([
+            'message' => $message,
+            'results' => $results,
+            'total_deleted' => $total_deleted
+        ]);
+    }
+}
+add_action('wp_ajax_stagekitwp_sync_clean_action', 'stagekitwp_sync_handle_clean_ajax');
+
+/**
+ * Refresh folder cache by discovering all folders
+ */
+function stagekitwp_sync_refresh_folder_cache() {
+    if (!function_exists('stagekitwp_sync_discover_all_folders')) {
+        stagekitwp_sync_log('error', 'Folder discovery functions not available');
+        return false;
+    }
+    
+    if (!class_exists('STAGEKITWP_Graph_Client')) {
+        stagekitwp_sync_log('error', 'STAGEKITWP_Graph_Client not available');
+        return false;
+    }
+    
+    stagekitwp_sync_log('info', 'User initiated folder cache refresh');
+    
+    // Get access token
+    $client = new STAGEKITWP_Graph_Client();
+    $token = $client->get_access_token_public();
+    
+    if (!$token) {
+        stagekitwp_sync_log('error', 'Failed to get access token for folder discovery');
+        return false;
+    }
+    
+    // SharePoint site and list IDs (hard-coded from sync files)
+    $site_id = 'miltonplayers.sharepoint.com,9122b47c-2748-446f-820e-ab3bc46b80d0,5d9211a6-6d28-4644-ad40-82fe3972fbf1';
+    $image_media_list_id = '36cd8ce2-6611-401a-ae0c-20dd4abcf36b';
+    
+    $result = stagekitwp_sync_discover_all_folders($site_id, $image_media_list_id, $token);
+    
+    if ($result) {
+        stagekitwp_sync_log('info', 'Folder cache refresh completed successfully', ['discovered_folders' => count($result)]);
+    } else {
+        stagekitwp_sync_log('warning', 'Folder cache refresh encountered errors or no folders found');
+    }
+    
+    return $result;
+}
+
+/**
+ * Render the admin settings page
+ */
+function stagekitwp_sync_render_settings_page( $embedded = false ) {
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized');
+    }
+    
+    $cached_folders = stagekitwp_sync_get_cached_folder_ids();
+    $overrides = get_option('stagekitwp_sync_folder_overrides', array());
+    ?>
+    
+
+    <?php if ( ! $embedded ) : ?>
+    <div class="wrap stagekitwp-sync-settings">
+        <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+		<?php echo stagekitwp_sync_render_hub_tabs( 'settings' ); ?>
+		<nav class="nav-tab-wrapper" style="margin-bottom:16px;">
+			<a class="nav-tab" href="<?php echo esc_url( admin_url( 'admin.php?page=stagekitwp-sync' ) ); ?>"><?php esc_html_e( 'Manual Sync', 'stagekitwp-sync' ); ?></a>
+            <?php if ( current_user_can( STAGEKITWP_SYNC_CAP ) ) : ?>
+                <a class="nav-tab" href="<?php echo esc_url( admin_url( 'admin.php?page=stagekitwp-sync-auth' ) ); ?>"><?php esc_html_e( 'Authentication', 'stagekitwp-sync' ); ?></a>
+            <?php endif; ?>
+			<a class="nav-tab" href="<?php echo esc_url( admin_url( 'admin.php?page=stagekitwp-sync-logs' ) ); ?>"><?php esc_html_e( 'Logs', 'stagekitwp-sync' ); ?></a>
+			<a class="nav-tab" href="<?php echo esc_url( admin_url( 'admin.php?page=stagekitwp-sync-details' ) ); ?>"><?php esc_html_e( 'Details', 'stagekitwp-sync' ); ?></a>
+			<a class="nav-tab nav-tab-active" href="<?php echo esc_url( admin_url( 'admin.php?page=stagekitwp-sync-settings' ) ); ?>"><?php esc_html_e( 'Settings', 'stagekitwp-sync' ); ?></a>
+		</nav>
+    <?php endif; ?>
+        
+        <!-- Tabs -->
+        <nav class="nav-tab-wrapper stagekitwp-sync-settings-tabs">
+            <a href="#" class="nav-tab nav-tab-active" data-tab="cached-folders">
+                <span class="dashicons dashicons-list-view"></span> Cached Folders
+            </a>
+            <a href="#" class="nav-tab" data-tab="manual-overrides">
+                <span class="dashicons dashicons-edit"></span> Manual Overrides
+            </a>
+            <a href="#" class="nav-tab" data-tab="clean-data">
+                <span class="dashicons dashicons-trash"></span> Clean Data
+            </a>
+            <a href="#" class="nav-tab" data-tab="help">
+                <span class="dashicons dashicons-editor-help"></span> Help
+            </a>
+        </nav>
+        
+        <!-- Tab: Cached Folders -->
+        <div class="nav-content stagekitwp-sync-settings-content" id="cached-folders" style="display: block;">
+            <div class="postbox">
+                <h2 class="hndle"><span class="dashicons dashicons-folder"></span> Folder Discovery Cache</h2>
+                <div class="inside">
+                    <p>These folders have been automatically discovered from SharePoint and cached for faster syncing.</p>
+                    
+                    <table class="widefat striped">
+                        <thead>
+                            <tr>
+                                <th>Folder Name</th>
+                                <th>Folder ID</th>
+                                <th width="100">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($cached_folders)): ?>
+                                <tr>
+                                    <td colspan="3" style="text-align: center; padding: 20px;">
+                                        <em>No folders cached yet. Run a sync to discover folders.</em>
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($cached_folders as $folder_name => $folder_id): ?>
+                                    <tr>
+                                        <td><strong><?php echo esc_html($folder_name); ?></strong></td>
+                                        <td><code><?php echo esc_html($folder_id); ?></code></td>
+                                        <td>
+                                            <button class="button button-small copy-id" data-id="<?php echo esc_attr($folder_id); ?>">
+                                                Copy ID
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                    
+                    <div style="margin-top: 15px;">
+                        <button type="button" class="button button-primary stagekitwp-sync-action" data-action="refresh_cache">
+                            <span class="dashicons dashicons-update"></span> Refresh Cache
+                        </button>
+                        <button type="button" class="button stagekitwp-sync-action" data-action="clear_cache" style="background-color: #dc3545; color: white; border-color: #dc3545;">
+                            <span class="dashicons dashicons-trash"></span> Clear Cache
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Manual Overrides -->
+        <div class="nav-content stagekitwp-sync-settings-content" id="manual-overrides" style="display: none;">
+            <div class="postbox">
+                <h2 class="hndle"><span class="dashicons dashicons-edit"></span> Manual Folder ID Overrides</h2>
+                <div class="inside">
+                    <p>Manually specify folder IDs to override auto-discovery. Useful for non-standard folder structures.</p>
+                    
+                    <form method="post" action="options.php">
+                        <?php settings_fields('stagekitwp_sync_settings_group'); ?>
+                        
+                        <table class="widefat striped">
+                            <thead>
+                                <tr>
+                                    <th>Folder Name</th>
+                                    <th>Folder ID (Override)</th>
+                                    <th width="50">Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody id="overrides-tbody">
+                                <?php if (!empty($overrides)): ?>
+                                    <?php foreach ($overrides as $folder_name => $folder_id): ?>
+                                        <tr class="override-row">
+                                            <td>
+                                                <input type="hidden" name="stagekitwp_sync_folder_overrides[<?php echo esc_attr($folder_name); ?>]" value="<?php echo esc_attr($folder_name); ?>">
+                                                <strong><?php echo esc_html($folder_name); ?></strong>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="stagekitwp_sync_folder_overrides[<?php echo esc_attr($folder_name); ?>]" value="<?php echo esc_attr($folder_id); ?>" class="regular-text code" placeholder="Folder ID from SharePoint">
+                                            </td>
+                                            <td>
+                                                <button type="button" class="button button-small remove-override">✕</button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                <!-- Template for new rows -->
+                                <tr class="override-row template" style="display: none;">
+                                    <td>
+                                        <input type="text" class="regular-text folder-name" placeholder="Folder Name">
+                                    </td>
+                                    <td>
+                                        <input type="text" class="regular-text code folder-id" placeholder="Folder ID">
+                                    </td>
+                                    <td>
+                                        <button type="button" class="button button-small remove-override">✕</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div style="margin-top: 15px;">
+                            <button type="button" class="button" id="add-override">
+                                <span class="dashicons dashicons-plus-alt"></span> Add Override
+                            </button>
+                            <?php submit_button('Save Overrides', 'primary', 'submit'); ?>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Clean Data -->
+        <div class="nav-content stagekitwp-sync-settings-content" id="clean-data" style="display: none;">
+            <div class="postbox">
+                <h2 class="hndle"><span class="dashicons dashicons-trash"></span> Clean Synced Data</h2>
+                <div class="inside">
+                    <p><strong>WARNING:</strong> Deleting posts is permanent. This will remove all synced posts for the selected CPT(s).</p>
+                    
+                    <div style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin-bottom: 15px; border-radius: 3px;">
+                        <strong>⚠️ Caution:</strong> Deleted posts cannot be recovered. Please backup your database first.
+                    </div>
+                    
+                    <h3>Delete Posts by CPT</h3>
+                    <p>Select which CPT data to delete:</p>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="cpt-checkbox" value="advertiser" id="cpt-advertiser">
+                            <strong>Advertisers</strong> - Delete all advertiser posts
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="cpt-checkbox" value="board_member" id="cpt-board_member">
+                            <strong>Board Members</strong> - Delete all board member posts
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="cpt-checkbox" value="cast" id="cpt-cast">
+                            <strong>Cast</strong> - Delete all cast posts
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="cpt-checkbox" value="sponsor" id="cpt-sponsor">
+                            <strong>Sponsors</strong> - Delete all sponsor posts
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="cpt-checkbox" value="season" id="cpt-season">
+                            <strong>Seasons</strong> - Delete all season posts
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="cpt-checkbox" value="show" id="cpt-show">
+                            <strong>Shows</strong> - Delete all show posts
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="cpt-checkbox" value="contributor" id="cpt-contributor">
+                            <strong>Contributors</strong> - Delete all contributor posts
+                        </label>
+                        <label style="display: block; margin-bottom: 8px;">
+                            <input type="checkbox" class="cpt-checkbox" value="testimonial" id="cpt-testimonial">
+                            <strong>Testimonials</strong> - Delete all testimonial posts
+                        </label>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <button type="button" class="button" id="select-all-cpts">
+                            Select All
+                        </button>
+                        <button type="button" class="button" id="clear-all-cpts">
+                            Clear All
+                        </button>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>Posts to delete:</strong> <span id="cpt-count">0</span>
+                    </div>
+                    
+                    <button type="button" class="button button-danger stagekitwp-clean-action" data-action="delete_cpts" style="background-color: #dc3545; color: white; border-color: #dc3545; margin-right: 10px;">
+                        <span class="dashicons dashicons-trash"></span> Delete Selected CPT Data
+                    </button>
+                    
+                    <div id="clean-status" style="margin-top: 15px; display: none; padding: 10px; border-radius: 3px;"></div>
+                    
+                    <hr style="margin: 30px 0;">
+                    
+                    <h3>Delete Synced Images</h3>
+                    <p>StageKitWP Sync stores all downloaded images in a dedicated folder: <code><?php echo esc_html(stagekitwp_sync_get_images_dir()); ?></code></p>
+                    
+                    <div style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin-bottom: 15px; border-radius: 3px;">
+                        <strong>⚠️ Caution:</strong> Deleting the synced images folder will remove all downloaded images used by the plugin. Images will be re-downloaded on the next sync.
+                    </div>
+                    
+                    <p>
+                        <strong>Status:</strong> 
+                        <?php 
+                            $images_dir = stagekitwp_sync_get_images_dir();
+                            if (file_exists($images_dir)) {
+                                $file_count = count(array_diff(scandir($images_dir), ['.', '..']));
+                                echo '<span style="color: #0073aa;"><strong>' . esc_html($file_count) . '</strong> files/folders</span>';
+                            } else {
+                                echo '<span style="color: #999;">Folder does not exist yet</span>';
+                            }
+                        ?>
+                    </p>
+                    
+                    <button type="button" class="button button-danger stagekitwp-clean-action" data-action="delete_images" style="background-color: #dc3545; color: white; border-color: #dc3545; margin-right: 10px;">
+                        <span class="dashicons dashicons-trash"></span> Delete Synced Images Folder
+                    </button>
+                    
+                    <div id="images-status" style="margin-top: 15px; display: none; padding: 10px; border-radius: 3px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Help -->
+        <div class="nav-content stagekitwp-sync-settings-content" id="help" style="display: none;">
+            <div class="postbox">
+                <h2 class="hndle"><span class="dashicons dashicons-editor-help"></span> Help & Documentation</h2>
+                <div class="inside">
+                    <h3>How Folder Discovery Works</h3>
+                    <p>StageKitWP Sync automatically discovers SharePoint folders on first sync:</p>
+                    <ol>
+                        <li>Extract folder name from SharePoint image URL (e.g., "People", "Sponsors")</li>
+                        <li>Search SharePoint for matching folder</li>
+                        <li>Cache the folder ID for future syncs (80% faster)</li>
+                    </ol>
+                    
+                    <h3>Manual Overrides</h3>
+                    <p>If auto-discovery doesn't work for your setup:</p>
+                    <ul>
+                        <li>Go to the "Manual Overrides" tab</li>
+                        <li>Add folder name and manually specify its ID</li>
+                        <li>These overrides take precedence over auto-discovery</li>
+                    </ul>
+                    
+                    <h3>Cache Management</h3>
+                    <ul>
+                        <li><strong>Refresh Cache:</strong> Re-discover all folders from SharePoint</li>
+                        <li><strong>Clear Cache:</strong> Remove all cached folders (auto-discover on next sync)</li>
+                    </ul>
+                    
+                    <h3>Finding Folder IDs</h3>
+                    <p>To get a folder ID from SharePoint:</p>
+                    <ol>
+                        <li>Open SharePoint in your browser</li>
+                        <li>Navigate to the folder</li>
+                        <li>Check the URL for the folder ID (usually in the path)</li>
+                        <li>Or use the copy button next to cached folders</li>
+                    </ol>
+                    
+                    <h3>Performance Tips</h3>
+                    <ul>
+                        <li>First sync: Auto-discovers folders (normal speed)</li>
+                        <li>Subsequent syncs: Use cached IDs (~80% faster)</li>
+                        <li>Multiple syncs of same data: Reuse existing attachments (no re-downloads)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status box -->
+        <div class="postbox" style="margin-top: 20px;">
+            <h2 class="hndle">System Status</h2>
+            <div class="inside">
+                <table>
+                    <tr>
+                        <td><strong>Generic Image Sync:</strong></td>
+                        <td><?php echo function_exists('stagekitwp_sync_image_for_post') ? '<span style="color: green;">✓ Loaded</span>' : '<span style="color: red;">✗ Not Found</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Folder Discovery:</strong></td>
+                        <td><?php echo function_exists('stagekitwp_sync_discover_all_folders') ? '<span style="color: green;">✓ Loaded</span>' : '<span style="color: red;">✗ Not Found</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Graph API Client:</strong></td>
+                        <td><?php echo class_exists('STAGEKITWP_Graph_Client') ? '<span style="color: green;">✓ Available</span>' : '<span style="color: red;">✗ Not Found</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cached Folders:</strong></td>
+                        <td><?php echo count($cached_folders); ?> folder(s)</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    <?php if ( ! $embedded ) : ?>
+    </div>
+    <?php endif; ?>
+    <style>
+        .stagekitwp-sync-settings .nav-tab-wrapper {
+            margin-bottom: 0;
+            border-bottom: 1px solid #ccc;
+        }
+        
+        .stagekitwp-sync-settings .nav-tab {
+            color: #0073aa;
+            border: 1px solid transparent;
+            padding: 8px 12px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        .stagekitwp-sync-settings .nav-tab:hover {
+            color: #005a87;
+            border-bottom-color: #005a87;
+        }
+        
+        .stagekitwp-sync-settings .nav-tab.nav-tab-active {
+            color: #000;
+            border-bottom: 4px solid #0073aa;
+        }
+        
+        .stagekitwp-sync-settings .nav-content {
+            padding: 15px 0;
+        }
+        
+        .stagekitwp-sync-settings code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .stagekitwp-sync-settings .postbox {
+            margin-top: 15px;
+        }
+        
+        .stagekitwp-sync-settings .dashicons {
+            margin-right: 5px;
+        }
+        
+        .copy-id {
+            cursor: pointer;
+        }
+        
+        .stagekitwp-sync-action {
+            margin-top: 10px;
+        }
+        
+        .override-row.template {
+            opacity: 0.5;
+        }
+    </style>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        // Tab switching
+        $('.stagekitwp-sync-settings-tabs .nav-tab').on('click', function(e) {
+            e.preventDefault();
+            var tab = $(this).data('tab');
+            
+            $('.stagekitwp-sync-settings-tabs .nav-tab').removeClass('nav-tab-active');
+            $(this).addClass('nav-tab-active');
+            
+            $('.stagekitwp-sync-settings-content').hide();
+            $('#' + tab).show();
+        });
+        
+        // Copy folder ID to clipboard
+        $('.copy-id').on('click', function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var $btn = $(this);
+            
+            // Copy to clipboard
+            var $temp = $('<input>');
+            $('body').append($temp);
+            $temp.val(id).select();
+            document.execCommand('copy');
+            $temp.remove();
+            
+            // Show feedback
+            var originalText = $btn.text();
+            $btn.text('✓ Copied!');
+            setTimeout(function() {
+                $btn.text(originalText);
+            }, 2000);
+        });
+        
+        // Cache management actions
+        $('.stagekitwp-sync-action').on('click', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var action = $btn.data('action');
+            
+            $btn.prop('disabled', true);
+            
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'stagekitwp_sync_cache_action',
+                    action_type: action,
+                    nonce: '<?php echo wp_create_nonce('stagekitwp_sync_settings_nonce'); ?>'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        if (action === 'clear_cache' || action === 'refresh_cache') {
+                            location.reload();
+                        }
+                    } else {
+                        alert('Error: ' + response.data);
+                    }
+                },
+                error: function() {
+                    alert('AJAX error occurred');
+                },
+                complete: function() {
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+        
+        // Add override row
+        $('#add-override').on('click', function(e) {
+            e.preventDefault();
+            var template = $('.override-row.template').clone();
+            template.removeClass('template');
+            template.show();
+            $('#overrides-tbody').append(template);
+        });
+        
+        // Remove override row
+        $(document).on('click', '.remove-override', function(e) {
+            e.preventDefault();
+            $(this).closest('.override-row').remove();
+        });
+        
+        // Clean data functionality
+        function updateCptCount() {
+            var count = $('.cpt-checkbox:checked').length;
+            $('#cpt-count').text(count);
+        }
+        
+        $('.cpt-checkbox').on('change', updateCptCount);
+        
+        $('#select-all-cpts').on('click', function(e) {
+            e.preventDefault();
+            $('.cpt-checkbox').prop('checked', true);
+            updateCptCount();
+        });
+        
+        $('#clear-all-cpts').on('click', function(e) {
+            e.preventDefault();
+            $('.cpt-checkbox').prop('checked', false);
+            updateCptCount();
+        });
+        
+        $('.stagekitwp-clean-action').on('click', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var action = $btn.data('action');
+            
+            if (action === 'delete_images') {
+                // Handle delete synced images
+                if (!confirm('Are you sure you want to delete all synced images?\n\nThis action cannot be undone!\n\nImages will be re-downloaded on the next sync.')) {
+                    return;
+                }
+                
+                $btn.prop('disabled', true);
+                var $status = $('#images-status');
+                $status.show().html('<p style="color: blue;">Deleting synced images folder...</p>');
+                
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'stagekitwp_sync_clean_action',
+                        action_type: action,
+                        nonce: '<?php echo wp_create_nonce('stagekitwp_sync_settings_nonce'); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $status.html('<p style="color: green;">✓ ' + response.data.message + '</p>');
+                            location.reload();
+                        } else {
+                            $status.html('<p style="color: red;">✗ Error: ' + response.data + '</p>');
+                        }
+                    },
+                    error: function() {
+                        $status.html('<p style="color: red;">✗ AJAX error occurred</p>');
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false);
+                    }
+                });
+            } else {
+                // Handle delete CPTs
+                var selectedCpts = [];
+                
+                $('.cpt-checkbox:checked').each(function() {
+                    selectedCpts.push($(this).val());
+                });
+                
+                if (selectedCpts.length === 0) {
+                    alert('Please select at least one CPT to delete.');
+                    return;
+                }
+                
+                var message = 'Are you sure you want to delete all posts for: ' + selectedCpts.join(', ') + '?\n\nThis action cannot be undone!';
+                if (!confirm(message)) {
+                    return;
+                }
+                
+                $btn.prop('disabled', true);
+                var $status = $('#clean-status');
+                $status.show().html('<p style="color: blue;">Deleting posts...</p>');
+                
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'stagekitwp_sync_clean_action',
+                        cpts: selectedCpts,
+                        nonce: '<?php echo wp_create_nonce('stagekitwp_sync_settings_nonce'); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $status.html('<p style="color: green;">✓ ' + response.data.message + '</p>');
+                            $('.cpt-checkbox:checked').prop('checked', false);
+                            updateCptCount();
+                        } else {
+                            $status.html('<p style="color: red;">✗ Error: ' + response.data + '</p>');
+                        }
+                    },
+                    error: function() {
+                        $status.html('<p style="color: red;">✗ AJAX error occurred</p>');
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false);
+                    }
+                });
+            }
+        });
+    });
+    </script>
+    <?php
+}
+
+?>

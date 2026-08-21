@@ -1,0 +1,143 @@
+/**
+ * Board Members Block - Responsive Styling
+ */
+
+.stagekitwp-board-members-block {
+    --stagekitwp-board-bg-color: #ffffff;
+    --stagekitwp-board-text-color: #000000;
+    --stagekitwp-board-border-color: #000000;
+    --stagekitwp-board-border-width: 0px;
+    --stagekitwp-board-border-radius: 0px;
+    --stagekitwp-board-shadow: none;
+    --stagekitwp-board-columns-mobile: 1;
+    --stagekitwp-board-columns-tablet: 2;
+    --stagekitwp-board-columns-desktop: 3;
+    margin: 20px 0;
+    color: var(--stagekitwp-board-text-color);
+}
+
+.stagekitwp-board-members-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--stagekitwp-board-columns-mobile), minmax(0, 1fr));
+    gap: 20px;
+}
+
+.stagekitwp-board-member-card,
+.stagekitwp-board-member-item,
+.stagekitwp-board-member-accordion-item {
+    background-color: var(--stagekitwp-board-bg-color);
+    color: var(--stagekitwp-board-text-color);
+    border: var(--stagekitwp-board-border-width) solid var(--stagekitwp-board-border-color);
+    border-radius: var(--stagekitwp-board-border-radius);
+    box-shadow: var(--stagekitwp-board-shadow);
+}
+
+.stagekitwp-board-member-card {
+    box-sizing: border-box;
+    padding: 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.stagekitwp-board-member-photo {
+    width: 100%;
+    max-width: 180px;
+    margin: 0 auto;
+}
+
+.stagekitwp-board-member-photo img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    aspect-ratio: 1 / 1;
+}
+
+.stagekitwp-photo-small .stagekitwp-board-member-photo {
+    max-width: 120px;
+}
+
+.stagekitwp-photo-medium .stagekitwp-board-member-photo {
+    max-width: 180px;
+}
+
+.stagekitwp-photo-large .stagekitwp-board-member-photo {
+    max-width: 240px;
+}
+
+.stagekitwp-board-member-name,
+.stagekitwp-board-member-position,
+.stagekitwp-board-member-company {
+    color: var(--stagekitwp-board-text-color);
+    margin: 0;
+}
+
+.stagekitwp-board-members-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stagekitwp-board-member-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px;
+}
+
+.stagekitwp-board-member-photo-small {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.stagekitwp-board-members-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stagekitwp-board-member-accordion-header {
+    width: 100%;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.04);
+    color: inherit;
+}
+
+.stagekitwp-board-member-accordion-header.active {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.stagekitwp-board-member-accordion-content {
+    padding: 14px;
+}
+
+.stagekitwp-board-member-accordion-content[hidden] {
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .stagekitwp-board-members-grid {
+        grid-template-columns: repeat(var(--stagekitwp-board-columns-tablet), minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .stagekitwp-board-members-grid {
+        grid-template-columns: repeat(var(--stagekitwp-board-columns-desktop), minmax(0, 1fr));
+    }
+}

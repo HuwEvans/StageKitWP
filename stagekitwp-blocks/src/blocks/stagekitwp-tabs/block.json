@@ -1,0 +1,84 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "stagekitwp/tabs",
+  "title": "StageKit Tabs",
+  "category": "stagekitwp-blocks",
+  "attributes": {
+    "tabStyle": {
+      "type": "string",
+      "default": "underline"
+    },
+    "tabAlignment": {
+      "type": "string",
+      "default": "flex-start"
+    },
+    "activeColor": {
+      "type": "string",
+      "default": "#2563eb"
+    },
+    "activeBgColor": {
+      "type": "string",
+      "default": "#ffffff"
+    },
+    "folderHeaderBg": {
+      "type": "string",
+      "default": "#f1f5f9"
+    },
+	"inactiveColor": {
+	  "type": "string",
+	  "default": "#64748b"
+	},
+	"inactiveBgColor": {
+	  "type": "string",
+	  "default": "transparent"
+	},
+	"hoverColor": {
+	  "type": "string",
+	  "default": "#1e293b"
+	},
+	"hoverBgColor": {
+	  "type": "string",
+	  "default": "#f1f5f9"
+	},
+    "tabPadding": {
+      "type": "string",
+      "default": "medium"
+    },
+    "borderRadius": {
+      "type": "number",
+      "default": 8
+    }
+  },
+  "editorScript": "file:./index.js",
+  "viewScript": "file:./view.js",
+  "style": "file:./style-index.css",
+  "example": {
+    "attributes": {
+      "tabStyle": "underline",
+      "tabAlignment": "flex-start",
+      "activeColor": "#2563eb",
+      "activeBgColor": "#ffffff",
+      "inactiveColor": "#64748b",
+      "inactiveBgColor": "#f1f5f9",
+      "tabPadding": "medium",
+      "borderRadius": 8
+    },
+    "innerBlocks": [
+      {
+        "name": "stagekitwp/tab-item",
+        "attributes": { "title": "Overview" },
+        "innerBlocks": [
+          { "name": "core/paragraph", "attributes": { "content": "A sample tab panel." } }
+        ]
+      },
+      {
+        "name": "stagekitwp/tab-item",
+        "attributes": { "title": "Details" },
+        "innerBlocks": [
+          { "name": "core/paragraph", "attributes": { "content": "Another sample tab panel." } }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+# Copyright (C) 2026 The Milton Players Theatre Group
+# This file is distributed under the same license as the TM Members Area plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: TM Members Area 1.8.0\n"
+"Report-Msgid-Bugs-To: https://miltonplayers.example/stagekitwp-members-area\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: stagekitwp-members-area\n"
+
+# Translation template for TM Members Area.
+# The plugin declares the "stagekitwp-members-area" text domain and loads it from
+# this /languages directory. Add translated .po/.mo files here, e.g.
+# stagekitwp-members-area-fr_FR.po / .mo.

@@ -1,0 +1,324 @@
+/*
+Theme Name: StageKitWP Theme
+Theme URI: https://developer.wordpress.org/themes/basics/theme-functions/
+Author: StageKitWP
+Description: A highly specialized, high-conversion theme framework custom-engineered for independent theatres, playhouses, and performance venues.
+Version: 3.1.0
+Requires at least: 6.3
+Tested up to: 6.8
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: stagekitwp-theme
+*/
+
+/* ==========================================================================
+   1. CORE THEME RESET & LAYOUT UTILITIES
+   ========================================================================== */
+html, body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+/* Remove bullets and default list padding from all footer and widget nav configurations */
+.stagekitwp-footer-widget ul,
+.stagekitwp-footer-widget ol,
+.widget_nav_menu ul,
+.site-footer ul {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.stagekitwp-footer-widget li,
+.widget_nav_menu li,
+.site-footer li {
+    list-style-type: none !important;
+    margin-bottom: 8px !important; /* Creates clean vertical reading separation */
+}
+
+.stagekitwp-footer-widget a,
+.widget_nav_menu a,
+.site-footer a {
+    text-decoration: none;
+    color: #cccccc;
+    transition: color 0.2s ease;
+}
+
+.stagekitwp-footer-widget a:hover,
+.widget_nav_menu a:hover,
+.site-footer a:hover {
+    color: #e50914; /* Smooth accent color hover feedback for standard links */
+}
+
+
+/* ==========================================================================
+   2. DONATE BUTTON ARCHITECTURE (AGGRESSIVE FRAMELESS OVERRIDES)
+   Strips away theme box behaviors so the Customizer image renders perfectly.
+   ========================================================================== */
+
+/* Main Header Customizer Wrapper Overrides */
+li.menu-item-donate-btn,
+.menu-item-donate-btn,
+#main-menu li.menu-item-donate-btn,
+.nav-menu li.menu-item-donate-btn,
+.main-navigation ul li.menu-item-donate-btn {
+    background: inherit !important;
+    background-color: inherit !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+li.menu-item-donate-btn a,
+.menu-item-donate-btn a,
+li.menu-item-donate-btn > a,
+.main-navigation ul li.menu-item-donate-btn a,
+.main-navigation ul li.menu-item-donate-btn a:hover {
+    background-color: inherit !important;
+    color: inherit !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    text-shadow: none !important;
+}
+
+/* Secondary Footer Customizer Wrapper Overrides */
+li.footer-item-donate-btn,
+.footer-item-donate-btn {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+li.footer-item-donate-btn a,
+.footer-item-donate-btn a,
+li.footer-item-donate-btn a:hover {
+    background-color: transparent !important;
+    color: inherit !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    text-shadow: none !important;
+}
+
+/* ==========================================================================
+   3. LOGO — LIGHT / DARK MODE SWITCHING
+   ========================================================================== */
+
+/* Dark logo image: hidden in light mode */
+.stagekitwp-logo-dark-img {
+    display: none !important;
+}
+
+/* When a separate dark logo exists: swap visibility */
+html.stagekitwp-dark-mode .stagekitwp-logo-light {
+    display: none !important;
+}
+html.stagekitwp-dark-mode .stagekitwp-logo-dark-img {
+    display: block !important;
+}
+
+/*
+ * Auto-invert fallback: when NO dark logo is uploaded, invert the light
+ * logo. Works well for logos on transparent/white backgrounds.
+ * The .stagekitwp-logo-no-dark class is added by JS when no dark logo src is present.
+ */
+html.stagekitwp-dark-mode .stagekitwp-logo-light.stagekitwp-logo-no-dark {
+    display: block !important; /* keep visible — we're inverting it */
+    filter: invert(1) hue-rotate(180deg);
+    transition: filter 0.25s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+    html.stagekitwp-dark-mode .stagekitwp-logo-light.stagekitwp-logo-no-dark {
+        transition: none;
+    }
+}
+
+/* ==========================================================================
+   Site Tagline — position variants
+   ========================================================================== */
+
+.stagekitwp-site-tagline {
+    font-size: 0.8rem;
+    font-weight: 400;
+    /* Tagline uses body-text colour so it reads on the header background
+       without inheriting the nav-link accent colour (--stagekitwp-header-text). */
+    color: var(--stagekitwp-body-text, #555555);
+    opacity: 0.75;
+    line-height: 1.3;
+}
+
+/* Below logo: sits under logo/name as a stacked second line */
+.stagekitwp-site-tagline--below-logo {
+    display: block;
+    margin-top: 2px !important;
+    font-style: italic;
+}
+
+/* Beside logo: inline next to the logo image, separated by a subtle divider */
+.stagekitwp-site-tagline--beside-logo {
+    display: inline-block;
+    padding-left: 12px;
+    border-left: 2px solid var(--stagekitwp-primary, #e50914);
+    white-space: normal;
+    max-width: 160px;
+}
+
+/* Header end: pushed to the far right of the header flex row */
+.stagekitwp-site-tagline--header-end {
+    display: block;
+    text-align: right;
+    font-style: italic;
+    flex-shrink: 0;
+}
+
+/* Dark mode: use a light grey so it reads on dark header backgrounds */
+html.stagekitwp-dark-mode .stagekitwp-site-tagline {
+    color: var(--stagekitwp-body-text, #aaaaaa);
+    opacity: 0.75;
+}
+
+/* ==========================================================================
+   Term Badge — position variants
+   ========================================================================== */
+
+/* Base: shared styles regardless of position */
+.term-badge {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* TOP BAR — default: full-width strip flush above the image */
+.term-badge.stagekitwp-badge-top-bar {
+    /* Inherits block display from card structure; no extra positioning needed */
+    padding: 8px 15px;
+    border-radius: 0;
+}
+
+/* OVER IMAGE — pinned to bottom-left of the .show-card-media wrapper */
+.show-card-media {
+    position: relative; /* ensure stacking context */
+}
+.term-badge.stagekitwp-badge-over-image {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 5px 12px;
+    border-radius: 0 4px 0 0;
+    max-width: 90%;
+    z-index: 2;
+}
+
+/* INSIDE CARD — pill badge sitting between image and title */
+.term-badge.stagekitwp-badge-inside-card {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 0.7rem;
+}
+
+/* ==========================================================================
+   PAGE TEMPLATE — entry-title and entry-content colours
+   Inline style="color" removed from page.php; colours driven by CSS variables
+   so dark mode inheritance works correctly.
+   ========================================================================== */
+
+.entry-title {
+    color: var(--stagekitwp-heading-text, #111111);
+}
+
+.entry-content {
+    color: var(--stagekitwp-body-text, #333333);
+}
+
+/* Ensure headings and paragraphs inside entry-content also respect the token */
+.entry-content h1,
+.entry-content h2,
+.entry-content h3,
+.entry-content h4,
+.entry-content h5,
+.entry-content h6 {
+    color: var(--stagekitwp-heading-text, #111111);
+}
+
+.entry-content p,
+.entry-content li,
+.entry-content td,
+.entry-content th {
+    color: var(--stagekitwp-body-text, #333333);
+}
+
+.entry-content a {
+    color: var(--stagekitwp-link-color, #0073aa);
+}
+
+.entry-content a:hover {
+    color: var(--stagekitwp-link-hover, #e50914);
+}
+
+/* ==========================================================================
+   CONTACT FORM 7 — theme variable integration
+   Both light and dark modes driven by --stagekitwp-* CSS custom properties so
+   the form always reads correctly whichever mode the visitor is using.
+   Never hardcode a colour here — change the theme Customizer palette instead.
+   ========================================================================== */
+
+/* CF7 Light mode — explicit :not(.stagekitwp-dark-mode) scope so these rules only
+   apply in light mode. Form elements (label, input, textarea) do NOT inherit
+   colour from their parent in most browsers — the UA stylesheet blocks it.
+   !important beats any other stylesheet that may set a conflicting colour. */
+html:not(.stagekitwp-dark-mode) .wpcf7 form label,
+html:not(.stagekitwp-dark-mode) .wpcf7 form .wpcf7-form-control-wrap {
+    color: var(--stagekitwp-body-text, #333333) !important;
+}
+
+html:not(.stagekitwp-dark-mode) .wpcf7 input[type="text"],
+html:not(.stagekitwp-dark-mode) .wpcf7 input[type="email"],
+html:not(.stagekitwp-dark-mode) .wpcf7 input[type="tel"],
+html:not(.stagekitwp-dark-mode) .wpcf7 input[type="url"],
+html:not(.stagekitwp-dark-mode) .wpcf7 input[type="number"],
+html:not(.stagekitwp-dark-mode) .wpcf7 input[type="date"],
+html:not(.stagekitwp-dark-mode) .wpcf7 textarea,
+html:not(.stagekitwp-dark-mode) .wpcf7 select {
+    background-color: var(--stagekitwp-surface-bg, #ffffff) !important;
+    color:            var(--stagekitwp-body-text,  #333333) !important;
+    border:           1px solid rgba(51, 51, 51, 0.30) !important;
+    border-radius:    3px;
+}
+
+/* Submit button inherits primary accent */
+.wpcf7 input[type="submit"] {
+    background-color: var(--stagekitwp-primary, #e50914);
+    color:            #ffffff;
+    border:           none;
+    padding:          8px 20px;
+    border-radius:    3px;
+    cursor:           pointer;
+}
+.wpcf7 input[type="submit"]:hover {
+    opacity: 0.85;
+}
+
+/* Validation messages */
+.wpcf7 .wpcf7-not-valid-tip {
+    color: var(--stagekitwp-primary, #e50914);
+}

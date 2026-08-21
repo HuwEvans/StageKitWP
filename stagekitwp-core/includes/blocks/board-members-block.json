@@ -1,0 +1,61 @@
+{
+  "name": "stagekitwp/board-members",
+  "title": "Board Members",
+  "description": "Display board member profiles with configurable grid, list, or accordion layouts",
+  "category": "stagekitwp-core",
+  "icon": "groups",
+  "keywords": [
+    "board",
+    "members",
+    "team",
+    "profiles"
+  ],
+  "attributes": {
+    "layout": {
+      "type": "string",
+      "enum": [
+        "grid",
+        "list",
+        "accordion"
+      ],
+      "default": "grid"
+    },
+    "showPhotos": {
+      "type": "boolean",
+      "default": true
+    },
+    "showCompany": {
+      "type": "boolean",
+      "default": true
+    },
+    "photoSize": {
+      "type": "string",
+      "enum": [
+        "small",
+        "medium",
+        "large"
+      ],
+      "default": "medium"
+    },
+    "columns": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "supports": {
+    "align": [
+      "wide",
+      "full"
+    ],
+    "anchor": true,
+    "customClassName": true
+  },
+  "example": {
+    "attributes": {
+      "layout": "grid",
+      "showPhotos": true,
+      "showCompany": true,
+      "photoSize": "medium"
+    }
+  }
+}

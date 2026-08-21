@@ -1,10 +1,10 @@
 {
   "slug": "stagekitwp-blocks",
-  "name": "stagekitwp-blocks",
-  "requires": "6.0",
-  "tested": "6.6",
+  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-blocks/stagekitwp-blocks-1.5.0.zip",
   "new_version": "1.5.0",
-  "package": "https://hsctjourney.com/updates/stagekitwp-blocks/stagekitwp-blocks-1.5.0.zip",
-  "download_url": "https://hsctjourney.com/updates/stagekitwp-blocks/stagekitwp-blocks-1.5.0.zip",
-  "version": "1.5.0"
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-blocks/stagekitwp-blocks-1.5.0.zip",
+  "version": "1.5.0",
+  "tested": "6.6",
+  "name": "stagekitwp-blocks",
+  "requires": "6.0"
 }

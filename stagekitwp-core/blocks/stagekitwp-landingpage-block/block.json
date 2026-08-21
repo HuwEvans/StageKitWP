@@ -1,0 +1,11 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "stagekitwp/landingpage",
+    "title": "Show Landing Page",
+    "category": "common",
+    "description": "Display comprehensive information about a theatre show with cast, dates, venue, and more",
+    "keywords": ["show", "theatre", "landing", "cast", "venue"],
+    "icon": "theater",
+    "textdomain": "stagekitwp"
+}

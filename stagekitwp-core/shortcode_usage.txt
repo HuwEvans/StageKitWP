@@ -1,0 +1,338 @@
+# StageKitWP Plugin Shortcode Reference
+
+This document lists the shortcodes provided by the StageKitWP plugin, their parameters, admin options (where applicable), and example usage. Each shortcode outputs markup with CSS classes you can override in your theme.
+
+Guidelines
+- Dates: seasons use post meta keys `_stagekitwp_season_start_date` and `_stagekitwp_season_end_date` (strings parsed with PHP's `strtotime`). The plugin sorts seasons by parsed start date.
+- Season selector: Several shortcodes accept a `which` attribute with values: `all` (default), `current`, `next`, `current_and_next`. `current` is strictly where today &gt; start AND today &lt; end.
+- Season Builder media parity: Show-level testimonial image (`_stagekitwp_show_testimonial_media`) is managed in **StageKitWP → Season Builder → Media** under each show's **Testimonial Media** field.
+- Season Builder references: Linked testimonials now appear in **Season Builder → Details** inside each show's **Testimonials** section (read-only list with edit links).
+- Empty-state message overrides: **StageKitWP → Settings → Shortcode Empty-State Messages** provides rich-text HTML overrides (with media-library image insertion) for “No seasons found” and “No shows in season” outputs used by season-related shortcodes.
+
+## Available Shortcodes
+
+1) [stagekitwp_advertisers]
+   Purpose: Displays a grid/list of advertisers (CPT `advertiser`).
+   Parameters:
+    - view (optional): `grid` (default) or `slider`
+    - category (optional): Filter by advertiser category slug (e.g. `restaurant`)
+    - image_type (optional): `banner` (default) or `logo` (used by slider)
+    - columns (optional): grid columns `1-6` (default from Display Options)
+    - lock_columns (optional): `true` or `false` (default: `false`)
+       - When `true`, keeps the chosen `columns` value in widget/footer areas instead of collapsing to a single column.
+    - mini_logos (optional): `true` or `false` (default: `false`)
+       - When `true`, uses compact advertiser card padding/heights and smaller logos.
+   Example:
+    [stagekitwp_advertisers view="grid" columns="3" lock_columns="true" mini_logos="true"]
+
+2) [stagekitwp_board_members]
+   Purpose: Shows board members CPT in a grid/list.
+   Parameters:
+   - title (optional)
+   - layout (optional): `grid`, `list`, `table`, or `spotlight`
+   - photo_size (optional): circular image size in px for grid layout (60-220, default 120)
+   - circle_photos (optional): `true` or `false` for board-member photos in all layouts that show circular photos (default: `true`)
+   Example:
+   [stagekitwp_board_members title="Board" layout="grid" photo_size="140" circle_photos="false"]
+   [stagekitwp_board_members layout="list" show_bio="true" circle_photos="false"]
+
+3) [stagekitwp_cast]
+   Purpose: Displays cast members (CPT `cast`). Supports grouping by show.
+   Parameters:
+   - show_id (optional): integer show ID to limit cast to a single show
+   - exclude (optional): comma-separated list of cast fields to hide, e.g. `picture,actor_name,show`
+   - orderby (optional): WP query orderby value (default `title`)
+   - order (optional): `ASC` or `DESC` (default `ASC`)
+   - group_by (optional): `none` (default) or `show` — when `show` the cast is rendered grouped under show titles
+   Examples:
+   - All cast: [stagekitwp_cast]
+   - Cast for show 123: [stagekitwp_cast show_id="123"]
+   - Grouped by show, hide pictures: [stagekitwp_cast group_by="show" exclude="picture"]
+
+4) [stagekitwp_contributors]
+   Purpose: Lists contributors/donors (CPT `contributor`).
+   Parameters:
+   - layout (optional): `grid` or `list`
+   - category (optional)
+   Example:
+   [stagekitwp_contributors layout="grid"]
+
+5) [stagekitwp_programs]
+   Purpose: Displays show program PDFs as a gallery, or a single current-program link with fallback logic.
+   Parameters:
+   - layout (optional): `gallery` (default) or `current_link`
+   - season (optional): season ID or season slug (gallery layout)
+   - columns (optional): number of columns in gallery (default: 3)
+   - size (optional): thumbnail image size for gallery (`thumbnail`, `medium`, `large`)
+   - link_text (optional): link label used by `current_link` (default: `View Program`)
+   - open_new (optional): `true` or `false` for `current_link` target behavior (default: `true`)
+   Behavior (`layout="current_link"`):
+   - Resolves current show using current season flag first, then inclusive date-range fallback, then newest published show.
+   - If the current show has no program file/URL, it falls back to another show in the same season first, then the newest show site-wide that has a program.
+   - If no show program exists at all, outputs `No program available.`
+   Example:
+   [stagekitwp_programs season="177" columns="2"]
+   [stagekitwp_programs layout="current_link" link_text="View Current Program"]
+
+6) [stagekitwp_seasons]
+   Purpose: Shows season posts.
+   Parameters:
+   - count (optional): Number of seasons to display (default: all)
+   - layout (optional): `list` or `grid`
+   Example:
+   [stagekitwp_seasons count="4" layout="grid"]
+
+7) [stagekitwp_shows]
+   Purpose: Displays shows listing, grouped by season and time slot.
+   Parameters:
+   - season_id (optional): ID of a specific season. If omitted, the shortcode may display multiple seasons sorted by start date.
+   - which (optional): One of `all` (default), `current`, `next`, `current_and_next`. Only used when `season_id` is omitted.
+   - exclude (optional): comma-separated list of show fields to exclude (e.g., `sm_image,program`)
+   - layout (optional): `grid` (default) or `list`
+   - count (optional): number of shows to display (default: all)
+   Behavior:
+   - Shows are sorted by the season start date (ascending). Within a season shows are grouped/ordered by time slot: `Fall`, `Winter`, `Spring`. Shows without a season appear last under "Other Shows".
+   Example:
+   [stagekitwp_shows which="current" exclude="synopsis" layout="grid"]
+
+8) [stagekitwp_sponsor_slider]
+   Purpose: Creates a sliding showcase of sponsors (CPT `sponsor`).
+   Parameters:
+   - category (optional)
+   - speed (optional): milliseconds for autoplay speed (default depends on slider settings)
+   Example:
+   [stagekitwp_sponsor_slider category="platinum" speed="4000"]
+
+9) [stagekitwp_sponsors]
+   Purpose: Displays sponsors list.
+   Parameters:
+   - category (optional)
+   - layout (optional): `grid` or `list`
+   - title (optional)
+   Example:
+   [stagekitwp_sponsors category="gold" layout="grid" title="Our Sponsors"]
+
+10) [stagekitwp_testimonials]
+   Purpose: Shows testimonials (CPT `testimonial`) with multiple layouts/modes, linked-show metadata, and configurable rating symbols.
+    Parameters:
+   - limit / count (optional): Number of testimonials to display (`count` kept as alias)
+   - mode (optional): `slider`, `grid`, `full`, `per_show`, or `per_show_slider`
+   - layout (optional): `classic`, `quote`, `minimal`, `spotlight`, or `overlay`
+   - columns (optional): Grid columns (1-4)
+   - image_width / image_height (optional): Strict image dimensions in px
+   - image_fit (optional): `cover` or `contain`
+   - image_position (optional): `center`, `left`, `right`, or `top`
+   - image_focus (optional): `center_center`, `center_top`, `center_bottom`, `left_center`, `right_center`
+   - text_overlay (optional): `true`/`false` to overlay text content on image
+   - image_opacity (optional): decimal `0.1` to `1` (used by overlay mode)
+   - show_name_placement (optional): `meta`, `header`, `slug`, or `image_indent`
+   - tag_icon_source (optional): `none`, `site_icon`, `miltonman`, or `custom`
+   - tag_icon_url (optional): custom icon URL for show-name tag badge
+   - tag_icon_size (optional): icon size in px (12-48)
+   - show_id (optional): Only testimonials linked to this show ID
+   - show_name/show_comment/show_rating/show_show/show_date/show_media (optional): Per-field visibility toggles (`true`/`false`)
+   - reviews_per_show (optional): Only used in `mode="per_show"` or `mode="per_show_slider"`. Max reviews shown per show (default `4`)
+   - review_align (optional): Only used in `mode="per_show"` or `mode="per_show_slider"`. `left`, `center`, `right`, `alternating` (right, left, center repeating), or `alternating_lr` (left, right repeating)
+
+    Per Show mode (mode="per_show"):
+    - Groups testimonials by their linked show. Only shows that have at least one linked, published testimonial are included, listed alphabetically by show title.
+    - Each show renders as a single card (reusing the shortcode's `layout` styling — classic/quote/minimal/spotlight/overlay — and `image_position`/`image_fit`/`image_focus`), containing: the show's Testimonial Media image (falls back to the show's Image field when Testimonial Media is empty), the show title, then up to `reviews_per_show` most recent reviews stacked inside that same card, separated by a thin divider.
+    - `review_align` controls each individual review's text alignment within the card: `left`, `center`, `right`, `alternating`, or `alternating_lr`. `alternating` cycles right → left → center → repeat per review, starting from the first review in each show's card. `alternating_lr` cycles left → right → repeat (no center), also starting from the first review.
+    - `show_id` restricts the view to a single show. `show_media`, `show_name`, `show_comment`, `show_rating`, and `show_date` toggles still apply per review.
+    - Note: with `layout="overlay"`, the review stack flows below the image (not pinned absolutely over it) since a fixed-height overlay box can't hold a variable number of stacked reviews.
+
+    Per Show Slider mode (mode="per_show_slider"):
+    - Identical to `per_show` mode (same query, single-card layout, `reviews_per_show`, `review_align`), but shows are presented one at a time in the same Slick-powered carousel used by `mode="slider"` — arrows, dots, adaptive height, and 5-second autoplay.
+    - Use this when you want the per-show single-card layout but only want one show's card visible at a time instead of stacking every show's card down the page.
+
+    Admin option (Display → Testimonials):
+    - Option name: `stagekitwp_testimonials_rating_symbol`
+    - Default: `Stars`
+    - Available values and behavior:
+      - `Stars` — filled: ★, empty: ☆ (different glyphs)
+      - `Thumbs Up` — filled: 👍, empty: same glyph (displayed faded via CSS filters)
+      - `Rockets` — filled: 🚀, empty: same glyph (displayed faded via CSS filters)
+      - `Hearts` — filled: ❤️, empty: 🤍 (different glyphs)
+      - `Theatre Masks` — filled: 🎭, empty: same glyph (displayed faded via CSS filters)
+    Notes:
+    - Each testimonial stores an integer rating in post meta `_stagekitwp_rating` (0–5). The shortcode renders five symbols and uses the selected symbol set.
+   - Each testimonial can optionally store a linked show (`_stagekitwp_testimonial_show_id`) and custom testimonial date (`_stagekitwp_testimonial_date`).
+   - Linked shows can optionally provide testimonial media via `_stagekitwp_show_testimonial_media`.
+    - The `Thumbs Up`, `Rockets` and `Theatre Masks` options use the same glyph for filled and empty and rely on CSS (opacity/grayscale) to make the empty glyph visually distinct.
+    Example:
+   [stagekitwp_testimonials mode="grid" layout="quote" columns="2" limit="6" image_height="320"]
+   [stagekitwp_testimonials mode="per_show" reviews_per_show="4" review_align="alternating"]
+   [stagekitwp_testimonials mode="per_show_slider" layout="spotlight" reviews_per_show="3" review_align="alternating"]
+
+11) [stagekitwp_show_cast]
+    Purpose: Displays cast for a specific show (wrapper around cast entries filtered by show).
+    Parameters:
+    - show_id (required): ID of the show to display cast for
+    Example:
+    [stagekitwp_show_cast show_id="123"]
+
+11a) [stagekitwp_landingpage]
+    Purpose: Displays comprehensive information about a specific show on a landing page or detail page.
+    Parameters:
+    - show_id (optional): ID of the show to display, or "current" to display the current season's show (default: "current")
+    - field_list (optional): Comma-separated list of fields to display in order (default: all fields)
+    - hard_breaks (optional): "true" (default) or "false" — output formatting mode
+      - When true: each field is wrapped in a div with formatted HTML, proper structure with line breaks
+      - When false: plain text only (no HTML tags) except for images (img tag only); content flows inline
+    - castcols (optional): Number of columns for castwithbio field layout (default: "3", range: 1-6)
+      - Applies only when using the castwithbio field; ignored for other fields
+      - Responsive: automatically reduces to fewer columns on tablets/mobile
+    - urlbutton (optional): "true" or "false" (default: "false") — when true, displays ticket_url as a styled button instead of a text link
+      - Only applies when ticket_url is in field_list and hard_breaks="true"
+      - Button text displays as "Get Tickets" instead of the raw URL
+      - program_button (optional): "true" or "false" (default: "false") — when true, displays a Program button in card/hero layouts when a show program PDF exists
+    - buttonformat (optional): Style format for urlbutton when urlbutton="true" (default: "default")
+      - Available formats: default, modern, minimal, outline, gradient, prominent, success, ghost, glass
+      - See Button Format Options below for descriptions
+    Available Fields (use in field_list parameter):
+    - show_name: The show's title (plain text)
+    - show_image: The show's main image/poster (always outputs `<img>` tag only)
+    - author: Show author/playwright (plain text)
+    - sub_authors: Additional authors (plain text)
+    - director: Director's name (plain text)
+    - associate_director: Associate director's name (plain text)
+    - producer: Producer's name (plain text)
+    - stage_manager: Stage manager's name (plain text)
+    - synopsis: Show synopsis/description (plain text when hard_breaks=false, HTML when true)
+    - show_dates: Performance dates and times (plain text when hard_breaks=false, HTML when true)
+    - ticket_url: Link to ticket purchase page (plain text URL when hard_breaks=false, HTML link/button when true)
+   - program_pdf: Program PDF icon + text link when a program file is available on the show
+    - cast: Cast member information (comma-separated plain text when hard_breaks=false, formatted list when true)
+    - castwithbio: Cast members in responsive columns with picture, character name, actor name, and bio (always formatted)
+    - venue: Venue information (space-separated plain text when hard_breaks=false, formatted div when true)
+    
+    Button Format Options (for urlbutton with buttonformat parameter):
+    - default: Classic blue button with subtle hover lift effect (CSS class: stagekitwp-button-default)
+    - modern: Rounded dark button with scale transform on hover (CSS class: stagekitwp-button-modern)
+    - minimal: Transparent button with blue border; fills blue on hover (CSS class: stagekitwp-button-minimal)
+    - outline: Transparent with dark border; inverts on hover (CSS class: stagekitwp-button-outline)
+    - gradient: Purple-to-indigo gradient with lifting hover effect (CSS class: stagekitwp-button-gradient)
+    - prominent: Large red call-to-action button with enhanced shadow (CSS class: stagekitwp-button-prominent)
+    - success: Green button suitable for confirmations/success actions (CSS class: stagekitwp-button-success)
+    - ghost: Minimalist button with underline on hover (CSS class: stagekitwp-button-ghost)
+    - glass: Frosted glass effect with backdrop blur (CSS class: stagekitwp-button-glass)
+    
+    Notes:
+    - When hard_breaks="true": each field is wrapped in divs with class "stagekitwp-landingpage-field-{fieldname}" for CSS targeting
+    - When hard_breaks="false": absolutely plain text (except images), no HTML formatting or wrapper divs
+    - Images always output as `<img>` tags regardless of hard_breaks setting
+    - When show_id="current", the shortcode finds the show whose associated season contains today's date
+    - The castwithbio field always displays in a responsive grid layout regardless of hard_breaks setting; it shows cast pictures, character names, actor names, and bios in responsive columns
+    - The castwithbio field requires that cast members have their Bio field filled in on the cast post; empty bios will simply not be displayed
+    - Button styling responds to screen size; on mobile devices (max-width: 768px) buttons adjust padding and font size for better touch targets
+    
+    IMPORTANT - hard_breaks Behavior and Text Display:
+    - hard_breaks="true" (default): outputs block-level divs that can break paragraph structure. Use when you want the shortcode output to be standalone and fully formatted.
+    - hard_breaks="false": outputs minimal HTML (plain text + images only) that respects paragraph alignment and text flow. Use when mixing shortcodes inline with surrounding text on a page.
+    - When hard_breaks="false" with image-only output (e.g., field_list="show_image"): the image is wrapped in an inline-block span that respects the paragraph's text-align property (center, left, right, etc.). This allows the image to center without breaking the paragraph flow, and any text immediately following remains in the same paragraph.
+    - When hard_breaks="false" with mixed content (image + text fields): the entire output is wrapped in a centered div to ensure both image and text are centered together.
+    - Preceding text on the page: With hard_breaks="true", block-level divs may shift or reflow preceding text. With hard_breaks="false", the shortcode output respects the existing paragraph formatting and alignment without disrupting surrounding text.
+    
+    Examples:
+    - Display current show with formatted output: [stagekitwp_landingpage show_id="current"]
+    - Display show inline with plain text: [stagekitwp_landingpage show_id="123" field_list="show_name,author" hard_breaks="false"]
+    - Display show image only (raw): [stagekitwp_landingpage show_id="456" field_list="show_image" hard_breaks="false"]
+    - Display show with custom field order and formatting: [stagekitwp_landingpage show_id="789" field_list="show_image,show_name,author,director,synopsis,ticket_url" hard_breaks="true"]
+    - Display show with cast members in responsive columns with bios (3-column default): [stagekitwp_landingpage show_id="123" field_list="show_image,show_name,castwithbio,ticket_url"]
+    - Display show with cast in 4 columns: [stagekitwp_landingpage show_id="123" field_list="show_image,show_name,castwithbio,ticket_url" castcols="4"]
+    - Display show with cast in 2 columns: [stagekitwp_landingpage show_id="123" field_list="show_image,show_name,castwithbio,ticket_url" castcols="2"]
+    - Display show with ticket button (default blue style): [stagekitwp_landingpage show_id="123" field_list="show_name,ticket_url" urlbutton="true"]
+   - Display show with ticket and program buttons in hero: [stagekitwp_landingpage show_id="123" layout="hero" field_list="show_name,show_image,ticket_url,program_pdf" urlbutton="true" program_button="true" buttonformat="outline"]
+    - Display show with prominent red ticket button: [stagekitwp_landingpage show_id="123" field_list="show_name,ticket_url" urlbutton="true" buttonformat="prominent"]
+    - Display show with modern rounded button: [stagekitwp_landingpage show_id="123" field_list="show_name,ticket_url" urlbutton="true" buttonformat="modern"]
+    - Display show with glass effect button: [stagekitwp_landingpage show_id="123" field_list="show_name,ticket_url" urlbutton="true" buttonformat="glass"]
+
+12) [stagekitwp_season_banner]
+    Purpose: Displays the season banner/header (uses season featured image/meta).
+    Parameters:
+    - season_id (required): ID of the season
+    Example:
+    [stagekitwp_season_banner season_id="456"]
+
+13) [stagekitwp_season_cast]
+    Purpose: Shows cast members grouped by season and show (when `season_id` omitted the `which` selector applies).
+    Parameters:
+    - season_id (optional): ID of the season (omit to use `which`)
+    - which (optional): `all` (default) | `current` | `next` | `current_and_next`
+    - show_cast_images (optional): `true` (default) or `false` — whether to show cast pictures
+    - cast_layout (optional): `grid` (default) or `list`
+    Notes:
+    - After each show's cast the shortcode will render a "Program Preview" when a program attachment or URL exists. The preview prefers a generated thumbnail (`_stagekitwp_pdf_preview`), falls back to the attachment image, and finally to a client-side canvas rendering (PDF.js).
+    Example:
+    [stagekitwp_season_cast which="current" cast_layout="list" show_cast_images="true"]
+
+14) [stagekitwp_season_images]
+    Purpose: Displays an image gallery tied to a season.
+    Parameters:
+    - season_id (required): ID of the season
+    - layout (optional): `grid` or `slider`
+    Example:
+    [stagekitwp_season_images season_id="456" layout="grid"]
+
+15) [stagekitwp_season_shows]
+    Purpose: Lists shows grouped by season (or filtered to specific seasons).
+    Parameters:
+    - season_id (optional): ID of the season to show (omit to list multiple seasons)
+    - which (optional): `all` (default) | `current` | `next` | `current_and_next`
+    - layout (optional): `grid` or `list`
+    Notes:
+    - Seasons are sorted by `_stagekitwp_season_start_date` (earliest first). Current/next selection is based on strict comparisons (today &gt; start AND today &lt; end).
+    Example:
+    [stagekitwp_season_shows which="current_and_next" layout="grid"]
+
+16) [stagekitwp_awards]
+      Purpose: Displays awards and nominations grouped by season and category.
+      Parameters:
+      - layout (optional): `table` (default), `cards`, `list`, or `showcase`
+      - season_id (optional): integer season ID filter
+      - category (optional): category filter, e.g. `Musical`, `Drama`, or `Comedy`
+      - show_season (optional): `true` or `false` (default `true`)
+      - show_category (optional): `true` or `false` (default `true`)
+      - show_recipient (optional): `true` or `false` (default `true`)
+         - When `false`, recipient names are hidden in every layout and the table layout removes the Recipient column entirely.
+      - winners_only (optional): `true` or `false` (default `false`)
+      Notes:
+      - Table layout now leads with the status badge column: Status, Award, Recipient, Show.
+      - Show titles link to the linked show's front-end page when a published show exists.
+      Examples:
+      [stagekitwp_awards]
+      [stagekitwp_awards layout="showcase" winners_only="true"]
+      [stagekitwp_awards layout="cards" category="Musical" show_recipient="false"]
+
+17) [stagekitwp_past_shows]
+      Purpose: Displays past seasons and their shows, excluding current and upcoming seasons.
+      Parameters:
+      - layout (optional): `list` (default) or `cards`
+      - limit (optional): number of past seasons to display (`-1` = all)
+      - show_author (optional): `true` or `false` (default `true`)
+      - show_program (optional): `true` or `false` (default `true`)
+      - show_awards (optional): `true` or `false` (default `true`)
+      Notes:
+      - Seasons are ordered newest first. In list layout, shows are ordered Spring → Winter → Fall inside each season.
+      - On mobile, list layout now stacks each row vertically so Season, Slot, Title, Author, Programme, and Awards remain visible instead of being hidden.
+      - Show titles link to the linked show's front-end page when a published show exists.
+      Examples:
+      [stagekitwp_past_shows]
+      [stagekitwp_past_shows layout="cards" limit="3"]
+      [stagekitwp_past_shows show_awards="false" show_program="false"]
+
+## Common Parameter Types
+- layout: accepts values like `grid`, `list`, `slider` depending on shortcode
+- count: integer number of items to return
+- category: string matching a category slug or name
+- *_id: integer ID of the resource (show_id, season_id, etc.)
+
+## Styling and Hooks
+- All shortcodes add semantic CSS classes (for example `.stagekitwp-show-card`, `.stagekitwp-cast-grid`, `.stagekitwp-program-preview`) so you can override styles in your theme or enqueue your own stylesheet.
+- Filters: many shortcodes use WordPress filters in their templates; see the shortcode functions in `includes/shortcodes/` if you need to hook or modify output programmatically.
+
+## Examples (copy/paste)
+- All shows for current season: [stagekitwp_shows which="current"]
+- Cast grouped by show (for a specific season): [stagekitwp_season_cast season_id="456" group_by="show"]
+- Testimonials slider (5 items): [stagekitwp_testimonials count="5" mode="slider"]
+- Show a program preview after each cast: the `stagekitwp_season_cast` shortcode does this by default when a program attachment or URL exists.

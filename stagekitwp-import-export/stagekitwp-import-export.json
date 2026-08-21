@@ -1,0 +1,18 @@
+{
+  "name": "StageKitWP - Import-Export",
+  "slug": "stagekitwp-import-export",
+  "version": "2.0.0",
+  "author": "StageKitWP",
+  "author_homepage": "https://github.com/stagekitwp",
+  "requires": "6.0",
+  "tested": "6.6",
+  "requires_php": "8.0",
+  "homepage": "https://github.com/stagekitwp/stagekitwp-import-export",
+  "download_url": "https://github.com/stagekitwp/stagekitwp-import-export/releases/latest/download/stagekitwp-import-export.zip",
+  "short_description": "Import and export CPT data, plugin settings, and theme customisations across the StageKitWP ecosystem.",
+  "sections": {
+    "description": "The import/export plugin packages selected modules into ZIP or JSON bundles and can import them back with conflict handling, remapping, and queued processing.",
+    "installation": "Upload the stagekitwp-import-export plugin folder to wp-content/plugins/, activate it, and open TM I/O in the admin menu.",
+    "changelog": "See CHANGELOG.md for the full release history."
+  }
+}

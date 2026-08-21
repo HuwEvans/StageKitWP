@@ -1,0 +1,48 @@
+StageKitWP Blocks
+==================
+
+Version: 1.6.0
+Plugin slug: stagekitwp-blocks
+Text domain: stagekitwp-blocks
+Author: Huw Evans
+License: GPL-2.0-or-later
+Requires WordPress: 6.8+
+Requires PHP: 7.4+
+
+Description
+-----------
+StageKitWP Blocks provides Gutenberg blocks for the StageKitWP and Theatre Manager ecosystems.
+
+Included blocks
+---------------
+- StageKit Tabs and Tab Item
+- Post Carousel
+- Bookshelf Container and Bookshelf Item
+- Dark Mode Image
+
+Highlights in version 1.6.0
+---------------------------
+- Gutenberg inserter hover examples for all blocks.
+- Visual-only Bookshelf Item editor preview with metadata controls in the inspector.
+- Dark Mode Image block with separate Media Library images for light and dark modes.
+- Common image settings: alignment, width, aspect ratio, image fit, border radius, and optional linking.
+- Improved tab color handling across editor and frontend output.
+- WordPress preset colors and transparent alpha values normalized for valid CSS rendering.
+
+Installation
+------------
+1. Upload or install the stagekitwp-blocks ZIP through the WordPress Plugins screen.
+2. Activate StageKitWP Blocks.
+3. Insert blocks from the StageKitWP Blocks category in the block editor.
+
+Theme integration
+-----------------
+Dark Mode Image detects the Theatre Manager theme's html.tm-dark-mode class. The block displays its light image normally and switches to its dark image when the theme enters dark mode.
+
+Packaging
+---------
+This file is included as a plain-text companion to the plugin ZIP and can be used to identify the archive version and contents before installation.
+
+Build command
+-------------
+npm run build

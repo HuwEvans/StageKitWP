@@ -1,0 +1,124 @@
+<?php
+defined('ABSPATH') || exit;
+
+const STAGEKITWP_SYNC_LOG_DIR = 'stagekitwp-sync/logs';
+const STAGEKITWP_SYNC_LOG_RETENTION_DAYS = 30;
+
+/**
+ * Get the full path to the log file for a given date.
+ *
+ * @param string|null $date Format: 'Y-m-d'. Defaults to today.
+ * @return string Absolute file path.
+ */
+function stagekitwp_logger_file_for_date( $date = null ) {
+    $date = $date ?: current_time('Y-m-d');
+    $uploads = wp_upload_dir();
+    $log_dir = trailingslashit($uploads['basedir']) . STAGEKITWP_SYNC_LOG_DIR;
+    return trailingslashit($log_dir) . "stagekitwp-sync-{$date}.log";
+}
+
+/**
+ * Write a log entry to the TM Sync log file.
+ *
+ * @param string $level    Log level: debug, info, warning, error
+ * @param string $message  Log message
+ * @param array  $context  Optional context data
+ */
+function stagekitwp_sync_log($level, $message, $context = []) {
+    static $log_initialized = false;
+
+    // Normalize log level
+    $level = strtoupper($level);
+    
+    // Set up log file path (use same location as logs-page expects)
+    $log_file = stagekitwp_logger_file_for_date();
+    $log_dir = dirname($log_file);
+
+    // Initialize log directory if needed
+    if (!$log_initialized) {
+        if (!file_exists($log_dir)) {
+            wp_mkdir_p($log_dir);
+        }
+        $log_initialized = true;
+    }
+
+    // Add request ID to context for tracking related log entries
+    if (empty($context['request_id'])) {
+        static $request_id = null;
+        if ($request_id === null) {
+            $request_id = uniqid('stagekitwp_sync_', true);
+        }
+        $context['request_id'] = $request_id;
+    }
+
+    // Add debug backtrace for better debugging
+    if ($level === 'ERROR' || $level === 'WARNING') {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $caller = isset($trace[1]) ? $trace[1] : $trace[0];
+        $context['file'] = isset($caller['file']) ? basename($caller['file']) : '';
+        $context['line'] = $caller['line'] ?? '';
+        $context['function'] = $caller['function'] ?? '';
+    }
+
+    // Format the log entry as JSON for easy parsing
+    $timestamp = current_time('Y-m-d H:i:s');
+    $log_entry = [
+        'timestamp' => $timestamp,
+        'level' => strtolower($level),
+        'channel' => $context['channel'] ?? 'default',
+        'message' => $message,
+        'context' => $context,
+    ];
+    
+    // Write to log file as JSON (one entry per line)
+    $json_entry = wp_json_encode($log_entry, JSON_UNESCAPED_SLASHES) . "\n";
+    error_log($json_entry, 3, $log_file);
+}
+
+/**
+ * Convenience wrappers
+ */
+function stagekitwp_log_debug($msg, $ctx = [])  { stagekitwp_sync_log('debug', $msg, $ctx); }
+function stagekitwp_log_info($msg, $ctx = [])   { stagekitwp_sync_log('info', $msg, $ctx); }
+function stagekitwp_log_warn($msg, $ctx = [])   { stagekitwp_sync_log('warning', $msg, $ctx); }
+function stagekitwp_log_error($msg, $ctx = [])  { stagekitwp_sync_log('error', $msg, $ctx); }
+
+/**
+ * Log function execution time and result
+ */
+function stagekitwp_log_timed($label, callable $fn, array $ctx = []) {
+    $start = microtime(true);
+    stagekitwp_log_info("▶ {$label} started", $ctx);
+    try {
+        $result = $fn();
+        $duration = round((microtime(true) - $start) * 1000, 2);
+        stagekitwp_log_info("✔ {$label} completed in {$duration} ms", $ctx);
+        return $result;
+    } catch (Throwable $e) {
+        $duration = round((microtime(true) - $start) * 1000, 2);
+        stagekitwp_log_error("✖ {$label} failed in {$duration} ms", array_merge($ctx, [
+            'error' => $e->getMessage(),
+            'file'  => $e->getFile(),
+            'line'  => $e->getLine(),
+        ]));
+        throw $e;
+    }
+}
+
+/**
+ * Prune old logs (optional: call daily via cron)
+ */
+function stagekitwp_sync_prune_logs() {
+    $uploads = wp_upload_dir();
+    $log_dir = trailingslashit($uploads['basedir']) . STAGEKITWP_SYNC_LOG_DIR;
+    if (!is_dir($log_dir)) return;
+
+    $files = glob($log_dir . '/stagekitwp-sync-*.log');
+    $cutoff = time() - (STAGEKITWP_SYNC_LOG_RETENTION_DAYS * DAY_IN_SECONDS);
+
+    foreach ($files as $file) {
+        if (filemtime($file) < $cutoff) {
+            @unlink($file);
+        }
+    }
+}

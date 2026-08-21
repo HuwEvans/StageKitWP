@@ -1,0 +1,183 @@
+/* Member Directory (Phase C) */
+
+:root {
+    --stagekitwp-ma-surface: var(--stagekitwp-surface-bg, #fff);
+    --stagekitwp-ma-text: var(--stagekitwp-body-text, #1a1a1a);
+    --stagekitwp-ma-heading: var(--stagekitwp-heading-text, #1a1a1a);
+    --stagekitwp-ma-muted: var(--stagekitwp-muted-text, #666);
+    --stagekitwp-ma-border: color-mix(in srgb, var(--stagekitwp-ma-text) 18%, transparent);
+    --stagekitwp-ma-link: var(--stagekitwp-link, #7a1f2b);
+    --stagekitwp-ma-link-hover: var(--stagekitwp-link-hover, #5f1721);
+    --stagekitwp-ma-accent: var(--stagekitwp-primary, #7a1f2b);
+}
+
+.stagekitwp-dir-search {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+.stagekitwp-dir-search input[type="text"],
+.stagekitwp-dir-search select {
+    padding: .5rem .65rem;
+    border: 1px solid var(--stagekitwp-ma-border);
+    background: var(--stagekitwp-ma-surface);
+    color: var(--stagekitwp-ma-text);
+    border-radius: 6px;
+    font-size: .95rem;
+}
+.stagekitwp-dir-search button {
+    padding: .5rem 1rem;
+    border: 0;
+    border-radius: 6px;
+    background: var(--stagekitwp-ma-accent);
+    color: #fff;
+    cursor: pointer;
+    font-size: .95rem;
+}
+.stagekitwp-dir-search button:hover { background: var(--stagekitwp-ma-link-hover); }
+.stagekitwp-dir-reset {
+    font-size: .9rem;
+    color: var(--stagekitwp-ma-muted);
+    text-decoration: underline;
+}
+
+.stagekitwp-dir-count {
+    color: var(--stagekitwp-ma-muted);
+    font-size: .9rem;
+    margin: 0 0 1rem;
+}
+.stagekitwp-dir-empty {
+    padding: 1rem;
+    background: color-mix(in srgb, var(--stagekitwp-ma-surface) 92%, var(--stagekitwp-ma-text) 8%);
+    border-radius: 8px;
+    color: var(--stagekitwp-ma-muted);
+}
+
+.stagekitwp-dir-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.stagekitwp-dir-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: .35rem;
+    padding: 1.25rem 1rem;
+    border: 1px solid var(--stagekitwp-ma-border);
+    border-radius: 12px;
+    background: var(--stagekitwp-ma-surface);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow .15s ease, transform .15s ease;
+}
+.stagekitwp-dir-card:hover {
+    box-shadow: 0 6px 18px rgba(0,0,0,.1);
+    transform: translateY(-2px);
+}
+
+.stagekitwp-dir-avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: color-mix(in srgb, var(--stagekitwp-ma-surface) 85%, var(--stagekitwp-ma-text) 15%);
+}
+.stagekitwp-dir-avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--stagekitwp-ma-accent);
+    background: color-mix(in srgb, var(--stagekitwp-ma-accent) 14%, var(--stagekitwp-ma-surface) 86%);
+}
+
+.stagekitwp-dir-name { font-weight: 600; font-size: 1.02rem; color: var(--stagekitwp-ma-heading); }
+.stagekitwp-dir-role {
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--stagekitwp-ma-accent);
+}
+.stagekitwp-dir-interests { font-size: .82rem; color: var(--stagekitwp-ma-muted); line-height: 1.35; }
+
+/* Single profile view */
+.stagekitwp-profile-back {
+    display: inline-block;
+    margin-bottom: 1rem;
+    font-size: .9rem;
+    color: var(--stagekitwp-ma-link);
+    text-decoration: none;
+}
+.stagekitwp-profile-back:hover { text-decoration: underline; }
+
+.stagekitwp-profile-head {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1rem;
+}
+.stagekitwp-profile-avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: 0 0 auto;
+}
+.stagekitwp-profile-avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.6rem;
+    font-weight: 600;
+    color: var(--stagekitwp-ma-accent);
+    background: color-mix(in srgb, var(--stagekitwp-ma-accent) 14%, var(--stagekitwp-ma-surface) 86%);
+}
+.stagekitwp-profile-name { margin: 0; color: var(--stagekitwp-ma-heading); }
+.stagekitwp-profile-role {
+    margin: .25rem 0 0;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--stagekitwp-ma-accent);
+}
+
+.stagekitwp-profile-interests {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin: 0 0 1.25rem;
+}
+.stagekitwp-profile-tag {
+    padding: .3rem .7rem;
+    background: color-mix(in srgb, var(--stagekitwp-ma-accent) 14%, var(--stagekitwp-ma-surface) 86%);
+    color: var(--stagekitwp-ma-accent);
+    border-radius: 999px;
+    font-size: .82rem;
+}
+
+.stagekitwp-profile-bio {
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.stagekitwp-profile-message {
+    display: inline-block;
+    padding: .6rem 1.2rem;
+    background: var(--stagekitwp-ma-accent);
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: .95rem;
+}
+.stagekitwp-profile-message:hover { background: var(--stagekitwp-ma-link-hover); }
+
+@media (prefers-reduced-motion: reduce) {
+    .stagekitwp-dir-card { transition: none; }
+    .stagekitwp-dir-card:hover { transform: none; }
+}

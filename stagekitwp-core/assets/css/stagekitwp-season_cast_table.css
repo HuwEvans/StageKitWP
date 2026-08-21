@@ -1,0 +1,41 @@
+
+.stagekitwp-cast-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.stagekitwp-cast-list th,
+.stagekitwp-cast-list td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+	width: 33%;
+}
+
+.stagekitwp-cast-list th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.stagekitwp-cast-list img.stagekitwp-cast-thumbnail {
+    max-width: 60px;
+    height: auto;
+    border-radius: 4px;
+}
+
+@media screen and (max-width: 768px) {
+    .stagekitwp-cast-list th,
+    .stagekitwp-cast-list td {
+        padding: 8px;
+    }
+
+    .stagekitwp-cast-list img.stagekitwp-cast-thumbnail {
+        max-width: 40px;
+    }
+}
+
+.stagekitwp-cast-table {
+	width: 100%;
+}

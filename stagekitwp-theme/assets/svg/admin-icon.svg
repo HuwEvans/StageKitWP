@@ -1,0 +1,13 @@
+<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+  <!-- Left curtain -->
+  <path d="M2 3 C2 8, 2 12, 4 17 L7 17 C6 12, 6 8, 7 3 Z"/>
+
+  <!-- Right curtain -->
+  <path d="M18 3 C18 8, 18 12, 16 17 L13 17 C14 12, 14 8, 13 3 Z"/>
+
+  <!-- Top bar -->
+  <rect x="2" y="3" width="16" height="1"/>
+
+  <!-- Stage opening -->
+  <rect x="8" y="5" width="4" height="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+</svg>

@@ -1,0 +1,209 @@
+<?php
+/**
+ * Plugin Name: StageKitWP Sync
+ * Description: Sync SharePoint lists to StageKitWP CPTs (one-way) via Microsoft Graph (App-only, Sites.Selected).
+ * Version: 3.0.0
+ * Author: Huw Evans
+ * Requires at least: 6.5
+ * Requires PHP: 8.1
+ * Requires Plugins: stagekitwp-core
+ * Text Domain: stagekitwp-sync
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+// Public version constant for the sync plugin
+if ( ! defined( 'STAGEKITWP_CORE_SYNC_VERSION' ) ) {
+	define( 'STAGEKITWP_CORE_SYNC_VERSION', '3.0.0' );
+}
+if ( ! defined( 'STAGEKITWP_SYNC_VERSION' ) ) {
+	define( 'STAGEKITWP_SYNC_VERSION', STAGEKITWP_CORE_SYNC_VERSION );
+}
+
+class STAGEKITWP_Sync {
+    public function __construct() {
+}
+}
+
+// Define plugin paths.
+if ( ! defined( 'STAGEKITWP_SYNC_PLUGIN_DIR' ) ) {
+    define( 'STAGEKITWP_SYNC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+}
+if ( ! defined( 'STAGEKITWP_SYNC_PLUGIN_DIR' ) ) {
+    define( 'STAGEKITWP_SYNC_PLUGIN_DIR', STAGEKITWP_SYNC_PLUGIN_DIR );
+}
+require_once STAGEKITWP_SYNC_PLUGIN_DIR . 'includes/stagekitwp-sync-logger.php';
+require_once STAGEKITWP_SYNC_PLUGIN_DIR . 'includes/stagekitwp-sync-image-management.php';
+require_once STAGEKITWP_SYNC_PLUGIN_DIR . 'admin/stagekitwp-sync-admin-menu.php';
+require_once STAGEKITWP_SYNC_PLUGIN_DIR . 'includes/stagekitwp-sync-helpers.php';
+// Load sync handlers first to make folder-discovery functions available.
+require_once STAGEKITWP_SYNC_PLUGIN_DIR . 'includes/sync/stagekitwp-sync-handlers.php';
+require_once STAGEKITWP_SYNC_PLUGIN_DIR . 'includes/api/class-stagekitwp-sync-graph-client.php';
+// Now load settings page (which uses folder-discovery functions).
+require_once STAGEKITWP_SYNC_PLUGIN_DIR . 'admin/stagekitwp-sync-settings-page.php';
+require_once STAGEKITWP_SYNC_PLUGIN_DIR . 'admin/stagekitwp-sync-logs-page.php';
+require_once STAGEKITWP_SYNC_PLUGIN_DIR . 'admin/stagekitwp-admin-sync.php';
+
+	
+if ( ! function_exists('stagekitwp_sync_required_cpts') ) {
+    /**
+     * Return the list of CPT slugs this plugin requires.
+     * Filterable so other plugins/sites can add/remove CPTs.
+     *
+     * @return string[]
+     */
+    function stagekitwp_sync_required_cpts() {
+        $required = [
+            'contributor',
+            'advertiser',
+            'board_member',
+            'cast',
+            'season',
+            'show',
+        ];
+
+        /**
+         * Filter the required CPT slugs for StageKitWP Sync.
+         *
+         * @param string[] $required
+         */
+        return (array) apply_filters('stagekitwp_sync_required_cpts', $required);
+    }
+}
+
+if ( ! function_exists('stagekitwp_sync_missing_cpts') ) {
+    /**
+     * Check which required CPTs are missing.
+     * Call this AFTER 'init' (or at a higher priority) so CPTs have been registered.
+     *
+     * @return string[] Missing CPT slugs (empty array if all present).
+     */
+    function stagekitwp_sync_missing_cpts() {
+        $missing = [];
+        foreach ( stagekitwp_sync_required_cpts() as $slug ) {
+            if ( ! post_type_exists($slug) ) {
+                $missing[] = $slug;
+            }
+        }
+        return $missing;
+    }
+}
+
+if ( ! function_exists('stagekitwp_sync_ready') ) {
+    /**
+     * Are all CPT dependencies satisfied?
+     *
+     * @return bool
+     */
+    function stagekitwp_sync_ready() {
+        // Store the result in a static cache for the current request.
+        static $cached = null;
+        if ( $cached !== null ) {
+            return $cached;
+        }
+        // Safe default before 'init': assume not ready.
+        if ( ! did_action('init') ) {
+            return false;
+        }
+        $cached = ( stagekitwp_sync_missing_cpts() === [] );
+        return $cached;
+    }
+}
+
+/**
+ * Schedule the CPT check after most CPTs are typically registered.
+ * Using priority 30 to run after typical 'init' priority 10 registrations.
+ */
+add_action('init', function () {
+    $missing = stagekitwp_sync_missing_cpts();
+
+    // Persist for debugging/visibility (optional).
+    if ( empty($missing) ) {
+        delete_option('stagekitwp_sync_missing_cpts');
+    } else {
+        update_option('stagekitwp_sync_missing_cpts', array_values($missing), false);
+    }
+
+    // If missing, show an admin notice to privileged users.
+    if ( ! empty($missing) ) {
+        add_action('admin_notices', function () use ($missing) {
+            if ( ! current_user_can('manage_options') ) {
+                return;
+            }
+
+            $title = esc_html__('StageKitWP Sync: Required CPTs Missing', 'stagekitwp-sync');
+            $list  = '<code>' . esc_html(implode(', ', $missing)) . '</code>';
+
+            echo '<div class="notice notice-error"><p><strong>' . $title . '</strong><br>'
+               . wp_kses_post(sprintf(
+                   /* translators: %s is a comma-separated list of CPT slugs. */
+                   __('The plugin detected the following custom post types are not registered: %s. Features depending on them are disabled until they are available.', 'stagekitwp-sync'),
+                   $list
+               ))
+               . '</p></div>';
+        });
+    }
+}, 30);
+
+/**
+ * Example: Only bootstrap your plugin after CPTs are confirmed available.
+ * This protects CPT-dependent code paths.
+ */
+add_action('plugins_loaded', function () {
+    // Optional: also ensure the parent plugin/symbols exist before moving on.
+    if ( ! defined('STAGEKITWP_CORE_VERSION') ) {
+        // Add your admin notice here if you haven’t already.
+        return;
+    }
+
+    // Defer actual bootstrap until after our CPT check ran (init @ 30).
+    add_action('init', function () {
+        if ( ! stagekitwp_sync_ready() ) {
+            // Don’t register CPT-dependent hooks, schedules, admin pages, etc.
+            return;
+        }
+
+        // ✅ All good—boot your plugin now.
+        stagekitwp_sync_bootstrap();
+    }, 40);
+}, 0);
+
+/**
+ * Your real bootstrap function.
+ */
+if ( ! function_exists('stagekitwp_sync_bootstrap') ) {
+    function stagekitwp_sync_bootstrap() {
+
+        // Everything here can safely assume the required CPTs exist.
+    }
+}
+
+
+add_action('admin_init', function() {
+    if (isset($_GET['force_advertiser_sync'])) {
+        stagekitwp_sync_log('INFO', 'Forced advertiser sync via admin_init');
+        $summary = stagekitwp_sync_advertisers(false);
+        stagekitwp_sync_log('INFO', 'Forced sync summary: ' . $summary);
+        echo $summary;
+        exit;
+    }
+});
+
+/**
+ * Plugin activation hook - set up folders and initial configuration
+ */
+register_activation_hook(__FILE__, function() {
+    if (function_exists('stagekitwp_sync_activate_setup')) {
+        stagekitwp_sync_activate_setup();
+    }
+});
+
+/**
+ * Plugin deactivation hook - clean up synced images and scheduled events
+ */
+register_deactivation_hook(__FILE__, function() {
+    if (function_exists('stagekitwp_sync_deactivate_cleanup')) {
+        stagekitwp_sync_deactivate_cleanup();
+    }
+});
+

@@ -1,0 +1,126 @@
+{
+  "$schema": "https://miltonplayers.example/schema/stagekitwp-plugin-bundle.json",
+  "generated": "2026-08-10",
+  "plugin": {
+    "name": "StageKitWP - Import-Export",
+    "slug": "stagekitwp-import-export",
+    "version": "2.0.0",
+    "author": "StageKitWP",
+    "author_homepage": "https://github.com/stagekitwp",
+    "homepage": "https://github.com/stagekitwp/stagekitwp-import-export",
+    "download_url": "https://github.com/stagekitwp/stagekitwp-import-export/releases/download/2.0.0/stagekitwp-import-export-2.0.0.zip",
+    "requires": "6.0",
+    "tested": "6.6",
+    "requires_php": "8.0",
+    "requires_plugins": [],
+    "last_updated": "2026-08-10"
+  },
+  "description": {
+    "short": "Import and export CPT data, plugin settings, and theme customisations across the StageKitWP ecosystem — ZIP bundles, a CSV Season Builder, page-ID remapping, batched Clear Data, and WP-CLI.",
+    "full": "StageKitWP - Import-Export moves StageKitWP ecosystem data between sites: content (custom post types), plugin settings, and theme customisations. Data is organised into modules — StageKitWP Core, StageKitWP - Members, StageKitWP - RC Library, StageKitWP Sync, and the StageKitWP Theme — and any combination can be exported to a single ZIP bundle (JSON data, a manifest, and referenced media) and imported elsewhere. Imports accept a ZIP bundle, a single-module JSON, or a remote HTTPS URL, with skip or overwrite conflict strategies and a dry-run that reports create/update/skip counts before touching anything. Large imports queue automatically (Action Scheduler or WP-Cron) and run in the background so they never time out. A CSV Season Builder creates a whole season of Shows from a spreadsheet with a downloadable template, title-based matching, and a one-click rollback token. Page ID Remap reconnects page-based settings after a move, and Clear Data permanently removes StageKitWP content by full ecosystem, plugin group, or single CPT — now deleted in small batches with a live progress bar so even very large sites never hit the PHP timeout. Everything is scriptable with the wp stagekitwp-io command, StageKitWP Sync secrets are redacted from exports by default, and all queries work on both MySQL and SQLite."
+  },
+  "instructions": {
+    "admin_page": "TM I/O → Instructions",
+    "summary": "See TM I/O → Instructions in wp-admin for the full in-plugin guide. Export: TM I/O → Export, tick modules, download a ZIP. Import: TM I/O → Import (ZIP/JSON upload or remote URL) with skip/overwrite and a dry run; large imports queue automatically. CSV Season Builder: the second Import tab builds Shows and Seasons from a spreadsheet template with a rollback token. Page Remap: reconnect page-based settings after moving a site. Clear Data: delete by full ecosystem, plugin, or CPT with a count-first dry run, typed DELETE confirmation, batched deletion, and a live progress bar. Settings: set the Batch size (10-500, default 50) that governs delete, import, and export chunking. WP-CLI: wp stagekitwp-io export|import|progress|modules.",
+    "installation": "1. Upload the stagekitwp-import-export folder to wp-content/plugins/ (or install the ZIP from Plugins → Add New). 2. Activate the plugin from Plugins. 3. Open TM I/O in the admin menu. 4. Read TM I/O → Instructions for a full guide. The StageKitWP plugins whose data you want to move should be active so their modules appear; inactive modules are skipped automatically."
+  },
+  "modules": [
+    { "id": "stagekitwp-core", "label": "StageKitWP Core", "contains": "Shows, Seasons, Cast, Venues, Awards, Board Members, Contributors, Sponsors, Testimonials, Advertisers, Announcements, Events, Conversations, and Email Templates." },
+    { "id": "stagekitwp-members", "label": "StageKitWP - Members", "contains": "Member settings, email configuration, RSVP status flags, and directory page mapping." },
+    { "id": "stagekitwp-rc-library", "label": "StageKitWP - RC Library", "contains": "Books & Scripts, Rubric Items, and Rubric Templates." },
+    { "id": "stagekitwp-sync", "label": "StageKitWP Sync", "contains": "Sync configuration and connection settings (secrets redacted by default)." },
+    { "id": "stagekitwp-theme", "label": "StageKitWP Theme", "contains": "All Customizer theme mods, colour settings, nav menu locations, sidebar/widget layout, and logo/media references." }
+  ],
+  "cli": [
+    { "command": "wp stagekitwp-io modules", "description": "List modules with their post types and availability." },
+    { "command": "wp stagekitwp-io export", "description": "Export all modules to a ZIP in the current directory." },
+    { "command": "wp stagekitwp-io export --modules=stagekitwp,stagekitwp-rc-library --output=/tmp/bundle.zip", "description": "Export specific modules to a named file." },
+    { "command": "wp stagekitwp-io import /path/to/bundle.zip", "description": "Import a bundle, skipping conflicts (default)." },
+    { "command": "wp stagekitwp-io import bundle.zip --conflict=overwrite --modules=stagekitwp", "description": "Overwrite matching posts, only for the given modules." },
+    { "command": "wp stagekitwp-io import https://example.com/bundle.zip", "description": "Import directly from a remote HTTPS URL." },
+    { "command": "wp stagekitwp-io progress <job-id>", "description": "Check the status of a queued async import." }
+  ],
+  "features": [
+    "Modular export/import of the entire StageKitWP ecosystem to a single ZIP bundle",
+    "Import from ZIP bundle, single-module JSON, or a remote HTTPS URL",
+    "Skip or overwrite conflict strategies with a non-destructive dry run",
+    "Hybrid sync/async imports: large imports queue via Action Scheduler or WP-Cron and never time out",
+    "CSV Season Builder with downloadable template, title-based matching, and one-click rollback",
+    "Page ID Remap to reconnect page-based settings after a site move",
+    "Clear Data by full ecosystem, plugin group, or single CPT with batched deletion and a live progress bar",
+    "Configurable Batch size (10-500) that governs delete, import, and export chunking",
+    "Robust import file detection: uses the real upload filename and falls back to magic-byte sniffing (fixes the .tmp temp-path rejection)",
+    "Complete media export: bundles every referenced image (by attachment ID or URL, across all meta and post_content) plus size variants, with an optional Include media files toggle",
+    "Media reconnection on import: remaps old→new attachment IDs and URLs across featured images, meta, and inline content so images display on the destination",
+    "Relationship-safe import: remaps post-ID references (show→season, show→venue, cast→show, award→show) and post_parent from old to new IDs so shows stay linked to seasons and shortcodes keep working",
+    "Duplicate-proof batched import: an atomic per-job lock plus GUID-preserving inserts prevent overlapping runners or re-imports from importing posts 2-3 times",
+    "Fast imports: batched single-INSERT post meta plus deferred term counting, suspended cache invalidation, and detached per-post save hooks make large imports ~2.6x faster",
+    "Full WP-CLI command set (wp stagekitwp-io export|import|progress|modules)",
+    "TM Sync secrets redacted from exports by default",
+    "Portable across MySQL and SQLite"
+  ],
+  "icons": {
+    "svg": "assets/icon.svg",
+    "1x": "assets/icon-128x128.png",
+    "2x": "assets/icon-256x256.png",
+    "default": "assets/icon-256x256.png"
+  },
+  "banners": {
+    "svg": "assets/banner.svg",
+    "low": "assets/banner-772x250.png",
+    "high": "assets/banner-1544x500.png"
+  },
+  "screenshots": [
+    { "src": "assets/screenshots/screenshot-1-export.jpg", "caption": "Export screen: pick any combination of ecosystem modules and download a single ZIP bundle." },
+    { "src": "assets/screenshots/screenshot-2-import.jpg", "caption": "Import a ZIP bundle or JSON (upload or remote URL) with skip/overwrite conflict handling and a dry run." },
+    { "src": "assets/screenshots/screenshot-3-clear-data.jpg", "caption": "Clear Data: delete by full ecosystem, plugin, or CPT with a count-first preview, typed confirmation, and batched deletion with a progress bar." },
+    { "src": "assets/screenshots/screenshot-4-remap.jpg", "caption": "Page ID Remap reconnects page-based plugin settings after moving a site." },
+    { "src": "assets/screenshots/screenshot-5-instructions.jpg", "caption": "A complete in-plugin Instructions page covering every feature and the WP-CLI commands." }
+  ],
+  "changelog": {
+    "current": "2.0.0",
+    "markdown": "# Changelog\n\nAll notable changes to **TM IO – Import & Export** are documented here.\nThis project adheres to [Semantic Versioning](https://semver.org/).\n\n## [1.3.3] — 2026-07-07\n\n### Performance — Imports ~2.6x faster via batched single-INSERT post meta, deferred term counting/cache invalidation, and detaching per-post save_post handlers during the batch (226 records ~19s -> ~7s).\n\n### Fixed — Relationship remap now also works on older export files by deriving the original post ID from the GUID when the old_id field is absent.\n\n## [1.3.2] — 2026-07-07\n\n### Fixed — Posts imported 2-3 times: added an atomic per-job processing lock and preserved the source GUID on insert so overlapping runners and re-imports stop duplicating.\n\n### Fixed — Shows not linked to seasons and empty shortcodes: import now remaps relationship meta (_stagekitwp_show_season, _stagekitwp_show_venue, _stagekitwp_cast_show, _stagekitwp_award_show_id) and post_parent from old to new post IDs in both sync and queued paths.\n\n## [1.3.1] — 2026-07-07\n\n### Added — Export summary with media count\n- The Export success message now reports what was bundled (records, images incl. size variants, and ZIP size), driven by a new export stats payload.\n\n## [1.3.0] — 2026-07-07\n\n### Fixed — Media was never exported\n- The exporter missed StageKitWP image keys (_stagekitwp_logo, _stagekitwp_show_sm_image, etc.) and values stored as URLs. It now scans all meta plus post_content, resolves URLs and resized variants to attachments, and bundles originals + size variants with media/index.json.\n\n### Added — Include media files toggle on the Export page (on by default).\n\n### Fixed — Imported media reconnected: import runs media first, then remaps old→new attachment IDs/URLs across featured images, meta, and inline content in both sync and queued imports.\n\n## [1.2.1] — 2026-07-07\n\n### Fixed — Import progress bar never moved\n- Queued imports showed a bar stuck at 0%. The queue now computes a real percentage from a processed/total count, and the progress poll self-drives the batch runner so imports advance even when WP-Cron / Action Scheduler do not fire. Empty modules roll through in one poll; the bar reaches 100% smoothly.\n\n## [1.2.0] — 2026-07-07\n\n### Fixed — Import of uploaded files\n- Uploaded bundles were rejected with ‘Unsupported import file type: .tmp’ because the type check read the PHP upload’s temp path instead of the real filename. The importer now uses the original upload name plus magic-byte sniffing (PK for ZIP, { or [ for JSON). Import and Dry Run both fixed.\n\n### Added — Configurable batch size\n- New TM I/O → Settings page with a Batch size control (10–500, default 50) governing delete, import-queue, and export chunking; Clear Data also gains a per-run override. Added stagekitwp_import_export_batch_size() and clamp constants.\n\n## [1.1.0] — 2026-07-07\n\n### Added — Batched Clear Data & progress feedback\n- **Batched delete**: the Clear Data (purge) tool now deletes posts in small server-side batches instead of one long request. Each batch removes at most 50 posts and returns progress, so no single request can hit the PHP `max_execution_time` limit on large ecosystems.\n- **Live progress bar**: the Clear Data page shows an animated progress bar with a live percentage and an \"X of Y deleted\" readout. The on-page CPT count badges update as each batch completes.\n- **New AJAX endpoint** `stagekitwp_import_export_purge_batch` and a new `STAGEKITWP_IMPORT_EXPORT_Purger::purge_batch()` method returning per-batch and remaining counts plus a `done` flag, with a stall guard against undeletable posts.\n\n### Added — In-plugin Instructions page\n- New **TM I/O → Instructions** screen documenting modules, export, import (ZIP/JSON and CSV Season Builder), Page Remap, batched Clear Data, a full WP-CLI reference, and an FAQ.\n\n### Added — Publishing assets\n- Plugin icon (SVG + 128/256 PNG), banner (SVG + 772×250 / 1544×500 PNG), and admin screenshots under `assets/`.\n\n## [1.0.0] — 2026-07-06\n\n### Added — Initial release\n- Modular export/import for the StageKitWP ecosystem (core, Members Area, RC Library, TM Sync, Theme) to a single ZIP bundle.\n- Import from ZIP, single-module JSON, or a remote HTTPS URL; skip/overwrite strategies with a dry run.\n- Hybrid sync/async imports queued via Action Scheduler or WP-Cron above a 200-record threshold.\n- CSV Season Builder with template, title-based matching, and a rollback token.\n- Page ID Remap for page-based settings after a site move.\n- Clear Data by ecosystem, plugin, or CPT with count-first preview and typed confirmation.\n- WP-CLI: export, import, progress, modules. TM Sync secrets redacted. MySQL + SQLite portable.\n",
+    "entries": [
+      {
+        "version": "1.3.3",
+        "date": "2026-07-07",
+        "notes": "### Performance — Imports ~2.6x faster\n- Post meta was the bottleneck (update_post_meta does a SELECT + write per key, and each is its own commit on SQLite). Fresh inserts now write all of a post's meta in one batched SQL INSERT, with term counting deferred, cache invalidation suspended, and the per-post save_post handlers (60+ callbacks that only read the empty $_POST during import) temporarily detached. A 226-record import dropped from ~19s to ~7s.\n\n### Fixed — Relationship remap works on older exports\n- Remapping needs each post's original ID; files exported before 1.3.2 lack it, so the importer now also derives the old ID from the GUID (?p=123). Posts with pretty-permalink GUIDs (no ID) or references to already-deleted posts still can't be reconstructed — re-export with 1.3.2+ for complete data.\n\n### Note\n- The earlier '38 imported / 181 skipped' was a pre-1.3.2 symptom: overlapping runners re-fed batches and skipped them once GUIDs were preserved. The 1.3.2 lock fixed the re-feeding; a clean re-import now imports every record."
+      },
+      {
+        "version": "1.3.2",
+        "date": "2026-07-07",
+        "notes": "### Fixed — Posts imported 2-3 times (duplicates)\n- The batched importer had no concurrency lock, so Action Scheduler, the reschedule chain, and the browser progress-poll could all process the same job at the same batch offset at once, each re-importing the slice. Dedup missed because freshly inserted posts got a new GUID. Added an atomic per-job processing lock and preserved the source GUID on insert so overlapping runners and re-imports correctly detect existing posts.\n\n### Fixed — Shows not linked to seasons; empty shortcodes\n- Relationships are stored as post IDs in meta (_stagekitwp_show_season, _stagekitwp_show_venue, _stagekitwp_cast_show, _stagekitwp_award_show_id) and via post_parent. On import each post gets a new ID but these references were never updated, so shows pointed at dead season IDs and shortcodes (querying meta_value = season id) returned nothing. Export now records the original post ID, import builds an old->new ID map across modules, and a finalize pass remaps every relationship meta key (and resolves post_parent by GUID) in both sync and queued paths."
+      },
+      {
+        "version": "1.3.1",
+        "date": "2026-07-07",
+        "notes": "### Added — Export summary with media count\n- The Export success message now reports what was bundled, e.g. ‘✅ Export complete • 192 records • 12 images (36 files incl. sizes) — 16.3 MB’. When media is off it reads ‘media not included’; when no images are referenced it reads ‘no media referenced’.\n- STAGEKITWP_IMPORT_EXPORT_Exporter::export() now fills an optional stats out-parameter (post_count, media_count, media_files, filesize, include_media) and the export AJAX response returns it for the UI."
+      },
+      {
+        "version": "1.3.0",
+        "date": "2026-07-07",
+        "notes": "### Fixed — Media was never exported\n- The exporter only looked at the featured image and meta keys ending in _image_id / _thumbnail_id. StageKitWP stores images in keys like _stagekitwp_logo, _stagekitwp_show_sm_image, _stagekitwp_season_image_front, _stagekitwp_photo, _stagekitwp_venue_image and picture, and values may be an attachment ID OR a raw URL — so nothing was bundled. The collector now scans every meta value (scalar or nested), detects IDs and /wp-content/uploads/ URLs, resolves URLs and resized -WxH variants to their attachment, and also scans post_content. Originals plus all size variants are packed with media/index.json.\n\n### Added — Include media files toggle\n- The Export page has a new Include media files checkbox (on by default). Uncheck for a smaller data-only ZIP when the destination already has the media.\n\n### Fixed — Imported media reconnected\n- Import now runs media first, builds an old→new ID and URL map (including size variants), and rewrites featured images, image meta (IDs and URLs) and inline post_content URLs — in both the sync and batched/queued paths — so images display on the destination."
+      },
+      {
+        "version": "1.2.1",
+        "date": "2026-07-07",
+        "notes": "### Fixed — Import progress bar never moved\n- Queued (large) imports showed a bar stuck at 0%. Cause 1: percent was never calculated (only 0 on start / 100 on completion) — the queue now stores the job total and recomputes the percentage after each batch, with a processed/total readout. Cause 2: the background runner (WP-Cron / Action Scheduler) did not fire reliably on local/shared hosts — the progress poll now self-drives the queue, processing one batch per poll while sharing offset state so posts are never processed twice. Empty/options-only modules roll through in a single poll and the internal _media pseudo-module is skipped, so the bar reaches 100% smoothly."
+      },
+      {
+        "version": "1.2.0",
+        "date": "2026-07-07",
+        "notes": "### Fixed — Import of uploaded files\n- Uploaded bundles were rejected with ‘Unsupported import file type: .tmp’ because the type check read the PHP upload’s temp path (ending in .tmp) instead of the real filename. The importer now uses the original upload name and, as a safety net, sniffs the file’s magic bytes (PK for ZIP, leading { or [ for JSON). Both Import and Dry Run were fixed.\n\n### Added — Configurable batch size\n- New TM I/O → Settings page with a Batch size control (10–500, default 50). One setting governs every chunked operation: Clear Data deletion (also overridable per run on the Clear Data page), the background import queue, and the export read query. Added stagekitwp_import_export_batch_size() plus STAGEKITWP_IMPORT_EXPORT_BATCH_DEFAULT/MIN/MAX constants, all clamped to the safe range."
+      },
+      {
+        "version": "1.1.0",
+        "date": "2026-07-07",
+        "notes": "### Added — Batched Clear Data & progress feedback\n- Clear Data now deletes posts in small server-side batches (≤50/request) instead of one long request, so large ecosystems never hit the PHP max_execution_time limit.\n- A live progress bar shows the percentage and an ‘X of Y deleted’ readout; on-page CPT counts update per batch.\n- New stagekitwp_import_export_purge_batch AJAX endpoint and STAGEKITWP_IMPORT_EXPORT_Purger::purge_batch() returning per-batch and remaining counts plus a done flag, with a stall guard for undeletable posts.\n\n### Added — In-plugin Instructions page\n- New TM I/O → Instructions screen covering modules, export, import (ZIP/JSON + CSV Season Builder), Page Remap, batched Clear Data, WP-CLI, and an FAQ.\n\n### Added — Publishing assets\n- Icon (SVG + 128/256 PNG), banner (SVG + 772×250 / 1544×500 PNG), and admin screenshots under assets/."
+      },
+      {
+        "version": "1.0.0",
+        "date": "2026-07-06",
+        "notes": "### Added — Initial release\n- Modular export/import of the StageKitWP ecosystem (core, Members Area, RC Library, TM Sync, Theme) to a single ZIP bundle (JSON + manifest + media).\n- Import from ZIP bundle, single-module JSON, or remote HTTPS URL; skip/overwrite conflict strategies with a non-destructive dry run.\n- Hybrid sync/async imports: imports over 200 records queue via Action Scheduler or WP-Cron and run in the background.\n- CSV Season Builder: build Shows and Seasons from a spreadsheet with a downloadable template, title-based matching, and a one-click rollback token.\n- Page ID Remap to reconnect page-based settings after a site move.\n- Clear Data by full ecosystem, plugin group, or single CPT with a count-first dry run and typed DELETE confirmation.\n- WP-CLI: wp stagekitwp-io export|import|progress|modules. TM Sync secrets redacted from exports by default. Portable across MySQL and SQLite."
+      }
+    ]
+  }
+}

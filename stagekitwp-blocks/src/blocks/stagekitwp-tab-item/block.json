@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "stagekitwp/tab-item",
+  "title": "Tab Item",
+  "category": "stagekitwp-blocks",
+  "parent": [ "stagekitwp/tabs" ],
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "New Tab"
+    }
+  },
+  "editorScript": "file:./index.js",
+  "example": {
+    "attributes": {
+      "title": "Tab Example"
+    },
+    "innerBlocks": [
+      { "name": "core/paragraph", "attributes": { "content": "Sample tab content." } }
+    ]
+  }
+}

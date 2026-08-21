@@ -1,0 +1,45 @@
+{
+  "name": "stagekitwp/venues",
+  "title": "Venues",
+  "description": "Display venues with expandable accordion layout, optional maps, and search functionality",
+  "category": "stagekitwp-core",
+  "icon": "location-alt",
+  "keywords": [
+    "venues",
+    "locations",
+    "address",
+    "map"
+  ],
+  "attributes": {
+    "showMaps": {
+      "type": "boolean",
+      "default": false
+    },
+    "columns": {
+      "type": "number",
+      "default": 1
+    },
+    "showSearch": {
+      "type": "boolean",
+      "default": true
+    },
+    "showId": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "align": [
+      "wide",
+      "full"
+    ],
+    "anchor": true,
+    "customClassName": true
+  },
+  "example": {
+    "attributes": {
+      "showMaps": false,
+      "showSearch": true
+    }
+  }
+}

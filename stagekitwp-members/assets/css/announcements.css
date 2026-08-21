@@ -1,0 +1,49 @@
+/* Announcements feed (Phase F) */
+
+:root {
+    --stagekitwp-ma-surface: var(--stagekitwp-surface-bg, #fff);
+    --stagekitwp-ma-text: var(--stagekitwp-body-text, #1a1a1a);
+    --stagekitwp-ma-heading: var(--stagekitwp-heading-text, #1a1a1a);
+    --stagekitwp-ma-muted: var(--stagekitwp-muted-text, #666);
+    --stagekitwp-ma-border: color-mix(in srgb, var(--stagekitwp-ma-text) 18%, transparent);
+    --stagekitwp-ma-accent: var(--stagekitwp-primary, #9a1f1f);
+}
+
+.stagekitwp-ann-empty { color: var(--stagekitwp-ma-muted); }
+
+.stagekitwp-ann-item {
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--stagekitwp-ma-border);
+    border-left: 4px solid var(--stagekitwp-ma-border);
+    border-radius: 10px;
+    background: var(--stagekitwp-ma-surface);
+    color: var(--stagekitwp-ma-text);
+    margin-bottom: 1rem;
+}
+.stagekitwp-ann-item--important {
+    border-left-color: var(--stagekitwp-ma-accent);
+    background: color-mix(in srgb, var(--stagekitwp-ma-accent) 10%, var(--stagekitwp-ma-surface) 90%);
+}
+
+.stagekitwp-ann-head { margin-bottom: .5rem; }
+.stagekitwp-ann-flag {
+    display: inline-block;
+    padding: .15rem .55rem;
+    margin-bottom: .35rem;
+    background: var(--stagekitwp-ma-accent);
+    color: #fff;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.stagekitwp-ann-title { margin: 0; font-size: 1.15rem; color: var(--stagekitwp-ma-heading); }
+.stagekitwp-ann-meta {
+    margin: .2rem 0 0;
+    font-size: .82rem;
+    color: var(--stagekitwp-ma-muted);
+}
+
+.stagekitwp-ann-body { line-height: 1.6; color: var(--stagekitwp-ma-text); }
+.stagekitwp-ann-body p:last-child { margin-bottom: 0; }

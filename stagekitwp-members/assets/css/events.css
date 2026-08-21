@@ -1,0 +1,233 @@
+/* Member events + RSVP (Phase D2) */
+
+:root {
+    --stagekitwp-ma-surface: var(--stagekitwp-surface-bg, #fff);
+    --stagekitwp-ma-surface-alt: color-mix(in srgb, var(--stagekitwp-ma-surface) 92%, var(--stagekitwp-body-text, #1a1a1a) 8%);
+    --stagekitwp-ma-text: var(--stagekitwp-body-text, #1a1a1a);
+    --stagekitwp-ma-heading: var(--stagekitwp-heading-text, #1a1a1a);
+    --stagekitwp-ma-muted: var(--stagekitwp-muted-text, #666);
+    --stagekitwp-ma-border: color-mix(in srgb, var(--stagekitwp-ma-text) 18%, transparent);
+    --stagekitwp-ma-link: var(--stagekitwp-link, #7a1f2b);
+    --stagekitwp-ma-link-hover: var(--stagekitwp-link-hover, #5f1721);
+    --stagekitwp-ma-accent: var(--stagekitwp-primary, #7a1f2b);
+    --stagekitwp-ma-accent-contrast: #fff;
+    --stagekitwp-ma-ok-bg: color-mix(in srgb, #16a34a 16%, var(--stagekitwp-ma-surface) 84%);
+    --stagekitwp-ma-ok-border: color-mix(in srgb, #16a34a 42%, transparent);
+    --stagekitwp-ma-ok-text: color-mix(in srgb, #166534 80%, var(--stagekitwp-ma-text) 20%);
+}
+
+.stagekitwp-events-heading {
+    margin: 1.5rem 0 .75rem;
+    padding-bottom: .35rem;
+    border-bottom: 2px solid var(--stagekitwp-ma-accent);
+    color: var(--stagekitwp-ma-heading);
+}
+.stagekitwp-events-notice {
+    padding: .75rem 1rem;
+    background: var(--stagekitwp-ma-ok-bg);
+    border: 1px solid var(--stagekitwp-ma-ok-border);
+    color: var(--stagekitwp-ma-ok-text);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+.stagekitwp-events-empty {
+    color: var(--stagekitwp-ma-muted);
+    padding: .5rem 0 1rem;
+}
+.stagekitwp-events-ical {
+    margin: 0 0 1.25rem;
+    font-size: .9rem;
+}
+.stagekitwp-events-ical a {
+    color: var(--stagekitwp-ma-link);
+    text-decoration: none;
+}
+.stagekitwp-events-ical a:hover {
+    color: var(--stagekitwp-ma-link-hover);
+    text-decoration: underline;
+}
+
+.stagekitwp-event {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--stagekitwp-ma-border);
+    border-radius: 12px;
+    background: var(--stagekitwp-ma-surface);
+    color: var(--stagekitwp-ma-text);
+    margin-bottom: .85rem;
+}
+.stagekitwp-event-title {
+    margin: 0 0 .2rem;
+    font-size: 1.1rem;
+    color: var(--stagekitwp-ma-heading);
+}
+.stagekitwp-event-date {
+    margin: 0 0 .35rem;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--stagekitwp-ma-accent);
+    font-weight: 600;
+}
+.stagekitwp-event-blurb { margin: 0 0 .35rem; color: var(--stagekitwp-ma-text); }
+.stagekitwp-event-counts { margin: 0; font-size: .82rem; color: var(--stagekitwp-ma-muted); }
+
+.stagekitwp-event-rsvp {
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap;
+}
+.stagekitwp-rsvp-form { margin: 0; }
+.stagekitwp-rsvp-btn {
+    padding: .45rem .8rem;
+    border: 1px solid var(--stagekitwp-ma-border);
+    border-radius: 999px;
+    background: var(--stagekitwp-ma-surface);
+    color: var(--stagekitwp-ma-text);
+    cursor: pointer;
+    font-size: .85rem;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.stagekitwp-rsvp-btn:hover {
+    border-color: var(--stagekitwp-ma-accent);
+    color: var(--stagekitwp-ma-accent);
+}
+.stagekitwp-rsvp-btn.is-active {
+    background: var(--stagekitwp-ma-accent);
+    border-color: var(--stagekitwp-ma-accent);
+    color: var(--stagekitwp-ma-accent-contrast);
+}
+.stagekitwp-rsvp-status {
+    font-size: .85rem;
+    color: var(--stagekitwp-ma-muted);
+    font-style: italic;
+}
+
+/* All-details layout */
+.stagekitwp-event-detail {
+    padding: 1.15rem 1.25rem;
+    border: 1px solid var(--stagekitwp-ma-border);
+    border-radius: 12px;
+    background: var(--stagekitwp-ma-surface);
+    color: var(--stagekitwp-ma-text);
+    margin-bottom: .85rem;
+}
+.stagekitwp-event-detail-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+    margin-bottom: .6rem;
+}
+.stagekitwp-event-detail-title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--stagekitwp-ma-heading);
+    flex: 1 1 auto;
+}
+.stagekitwp-visibility-badge {
+    display: inline-block;
+    padding: .15rem .55rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.stagekitwp-visibility-badge--public {
+    background: color-mix(in srgb, #16a34a 18%, var(--stagekitwp-ma-surface) 82%);
+    color: #166534;
+}
+.stagekitwp-visibility-badge--private {
+    background: color-mix(in srgb, #dc2626 18%, var(--stagekitwp-ma-surface) 82%);
+    color: #991b1b;
+}
+.stagekitwp-event-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem 1.5rem;
+    margin-bottom: .6rem;
+    font-size: .85rem;
+    color: var(--stagekitwp-ma-muted);
+}
+.stagekitwp-event-detail-meta-item {
+    display: inline-flex;
+    gap: .25rem;
+}
+.stagekitwp-event-detail-label {
+    font-weight: 600;
+    color: var(--stagekitwp-ma-heading);
+}
+.stagekitwp-event-detail-excerpt {
+    margin: 0 0 .5rem;
+    color: var(--stagekitwp-ma-text);
+    font-style: italic;
+}
+.stagekitwp-event-detail-content {
+    margin: 0 0 .6rem;
+    color: var(--stagekitwp-ma-text);
+    font-size: .9rem;
+    line-height: 1.6;
+}
+.stagekitwp-event-detail-content p {
+    margin: 0 0 .5rem;
+}
+.stagekitwp-event-detail-content p:last-child {
+    margin-bottom: 0;
+}
+.stagekitwp-event-detail-counts {
+    margin: 0 0 .5rem;
+    font-size: .82rem;
+    color: var(--stagekitwp-ma-muted);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.stagekitwp-event-detail-counts span {
+    display: inline-flex;
+    align-items: center;
+    gap: .2rem;
+}
+.stagekitwp-event-detail-rsvp {
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap;
+    padding-top: .5rem;
+    border-top: 1px solid var(--stagekitwp-ma-border);
+}
+
+/* My RSVPs table */
+.stagekitwp-myrsvps-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.stagekitwp-myrsvps-table th,
+.stagekitwp-myrsvps-table td {
+    text-align: left;
+    padding: .6rem .7rem;
+    border-bottom: 1px solid var(--stagekitwp-ma-border);
+}
+.stagekitwp-myrsvps-table th {
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--stagekitwp-ma-muted);
+}
+.stagekitwp-rsvp-pill {
+    display: inline-block;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 600;
+}
+.stagekitwp-rsvp-pill--going    { background: color-mix(in srgb, #16a34a 18%, var(--stagekitwp-ma-surface) 82%); color: #166534; }
+.stagekitwp-rsvp-pill--maybe    { background: color-mix(in srgb, #f59e0b 18%, var(--stagekitwp-ma-surface) 82%); color: #92400e; }
+.stagekitwp-rsvp-pill--declined { background: color-mix(in srgb, #dc2626 18%, var(--stagekitwp-ma-surface) 82%); color: #991b1b; }
+
+@media (prefers-reduced-motion: reduce) {
+    .stagekitwp-rsvp-btn { transition: none; }
+}

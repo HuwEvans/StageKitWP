@@ -1,9 +1,9 @@
 {
-  "url": "https://hsctjourney.com/updates/",
+  "new_version": "3.1.0",
+  "version": "3.1.0",
+  "url": "https://github.com/HuwEvans/StageKitWP",
   "name": "StageKitWP Theme",
-  "new_version": "3.0.0",
   "slug": "stagekitwp-theme",
-  "package": "https://hsctjourney.com/updates/stagekitwp-theme/stagekitwp-theme-3.0.0.zip",
-  "download_url": "https://hsctjourney.com/updates/stagekitwp-theme/stagekitwp-theme-3.0.0.zip",
-  "version": "3.0.0"
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-theme/stagekitwp-theme-3.1.0.zip",
+  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-theme/stagekitwp-theme-3.1.0.zip"
 }

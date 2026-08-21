@@ -1,0 +1,53 @@
+{
+  "name": "StageKitWP - Import-Export",
+  "slug": "stagekitwp-import-export",
+  "version": "2.0.0",
+  "author": "StageKitWP",
+  "author_homepage": "https://github.com/stagekitwp",
+  "requires": "6.0",
+  "tested": "6.6",
+  "requires_php": "8.0",
+  "last_updated": "2026-08-10",
+  "homepage": "https://github.com/stagekitwp/stagekitwp-import-export",
+  "download_url": "https://github.com/stagekitwp/stagekitwp-import-export/releases/download/2.0.0/stagekitwp-import-export-2.0.0.zip",
+  "requires_plugins": [],
+  "short_description": "Import and export CPT data, plugin settings, and theme customisations across the StageKitWP ecosystem — ZIP bundles, a CSV Season Builder, page-ID remapping, batched Clear Data, and WP-CLI.",
+  "description": "StageKitWP - Import-Export moves StageKitWP ecosystem data between sites: content (custom post types), plugin settings, and theme customisations. Data is organised into modules — StageKitWP Core, StageKitWP - Members, StageKitWP - RC Library, StageKitWP Sync, and the StageKitWP Theme — and any combination can be exported to a single ZIP bundle and imported elsewhere. Imports accept a ZIP bundle, a single-module JSON, or a remote HTTPS URL, with skip/overwrite strategies and a dry run. Large imports queue automatically and run in the background. A CSV Season Builder creates a whole season of Shows from a spreadsheet with a rollback token, Page ID Remap reconnects page-based settings after a move, and Clear Data removes StageKitWP content by ecosystem, plugin, or CPT with batched deletion and a live progress bar. Everything is scriptable with wp stagekitwp-io, StageKitWP Sync secrets are redacted by default, and all queries work on both MySQL and SQLite.",
+  "sections": {
+    "description": "Modular import/export for the StageKitWP ecosystem: content, settings, and theme customisations. ZIP bundles, JSON, remote URLs, a CSV Season Builder, Page ID Remap, batched Clear Data, and WP-CLI.",
+    "installation": "1. Upload the stagekitwp-import-export folder to wp-content/plugins/ (or install the ZIP from Plugins > Add New). 2. Activate the plugin. 3. Open TM I/O in the admin menu. 4. See TM I/O > Instructions for a full guide. Activate the ecosystem plugins whose data you want to move so their modules appear; inactive modules are skipped automatically.",
+    "instructions": "See the in-plugin TM I/O > Instructions page for a full guide. Export: TM I/O > Export, tick modules, download a ZIP. Import: TM I/O > Import (ZIP/JSON upload or remote URL) with skip/overwrite and a dry run; large imports queue automatically. CSV Season Builder: the second Import tab builds Shows and Seasons from a spreadsheet template with a rollback token. Page Remap: reconnect page-based settings after moving a site. Clear Data: delete by ecosystem, plugin, or CPT with a count-first dry run, typed DELETE confirmation, batched deletion, and a live progress bar. Settings: set the Batch size (10-500, default 50) that governs delete, import, and export chunking. WP-CLI: wp stagekitwp-io export|import|progress|modules.",
+    "changelog": "See CHANGELOG.md for the full history. 1.3.3 made imports ~2.6x faster (batched single-INSERT post meta, deferred term counting and cache invalidation, and temporarily detaching per-post save_post handlers during the batch; 226 records went from ~19s to ~7s) and extended relationship remapping to older export files by deriving the original post ID from the GUID when the old_id field is absent. 1.3.2 fixed posts importing 2-3 times (added an atomic per-job processing lock so overlapping runners cannot re-import the same batch, and preserved the source GUID on insert so dedup works) and fixed shows losing their season link and empty shortcodes (import now records original post IDs, builds an old->new ID map, and remaps relationship meta like _stagekitwp_show_season, _stagekitwp_show_venue, _stagekitwp_cast_show, _stagekitwp_award_show_id plus post_parent in both sync and queued paths). 1.3.1 added a media count to the export success message (e.g. '12 images (36 files incl. sizes)') via a new export stats payload. 1.3.0 fixed media export (the collector missed StageKitWP image keys like _stagekitwp_logo and _stagekitwp_show_sm_image and values stored as URLs; it now scans all meta plus post_content, resolves URLs and size variants, and bundles originals + variants), added an Include media files toggle on the Export page, and reconnected imported media by remapping old->new attachment IDs and URLs across featured images, meta, and inline content in both sync and queued imports. 1.2.1 fixed the queued-import progress bar that never moved: the queue now computes a real percentage from a processed/total count and the progress poll self-drives the batch runner so imports advance even when WP-Cron does not fire. 1.2.0 fixed importing uploaded files (the .tmp temp-path was rejected; now uses the real filename plus magic-byte sniffing) and added a configurable Batch size on a new Settings page that governs delete, import, and export chunking. 1.1.0 added batched Clear Data with a live progress bar (so large deletes never hit the PHP timeout), a new in-plugin Instructions page, and publishing assets (icon, banner, screenshots). 1.0.0 was the initial release: modular ZIP/JSON export and import (with remote URL, skip/overwrite, and dry run), hybrid sync/async imports, the CSV Season Builder with rollback, Page ID Remap, Clear Data, and a full WP-CLI command set."
+  },
+  "modules": [
+    { "id": "stagekitwp-core", "label": "StageKitWP Core" },
+    { "id": "stagekitwp-members", "label": "StageKitWP - Members" },
+    { "id": "stagekitwp-rc-library", "label": "StageKitWP - RC Library" },
+    { "id": "stagekitwp-sync", "label": "StageKitWP Sync" },
+    { "id": "stagekitwp-theme", "label": "StageKitWP Theme" }
+  ],
+  "cli": [
+    { "command": "wp stagekitwp-io modules", "description": "List modules with their post types and availability." },
+    { "command": "wp stagekitwp-io export", "description": "Export all modules to a ZIP." },
+    { "command": "wp stagekitwp-io import <file|url>", "description": "Import a bundle (--conflict=skip|overwrite, --modules=...)." },
+    { "command": "wp stagekitwp-io progress <job-id>", "description": "Check a queued async import." }
+  ],
+  "icons": {
+    "svg": "assets/icon.svg",
+    "1x": "assets/icon-128x128.png",
+    "2x": "assets/icon-256x256.png",
+    "default": "assets/icon-256x256.png"
+  },
+  "banners": {
+    "svg": "assets/banner.svg",
+    "low": "assets/banner-772x250.png",
+    "high": "assets/banner-1544x500.png"
+  },
+  "screenshots": [
+    { "src": "assets/screenshots/screenshot-1-export.jpg", "caption": "Export screen: pick any combination of ecosystem modules and download a single ZIP bundle." },
+    { "src": "assets/screenshots/screenshot-2-import.jpg", "caption": "Import a ZIP bundle or JSON (upload or remote URL) with skip/overwrite conflict handling and a dry run." },
+    { "src": "assets/screenshots/screenshot-3-clear-data.jpg", "caption": "Clear Data: delete by ecosystem, plugin, or CPT with a count-first preview and batched deletion with a progress bar." },
+    { "src": "assets/screenshots/screenshot-4-remap.jpg", "caption": "Page ID Remap reconnects page-based plugin settings after moving a site." },
+    { "src": "assets/screenshots/screenshot-5-instructions.jpg", "caption": "A complete in-plugin Instructions page covering every feature and the WP-CLI commands." }
+  ]
+}

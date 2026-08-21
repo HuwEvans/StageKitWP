@@ -1,0 +1,82 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "stagekitwp/dual-image",
+  "title": "Dark Mode Image",
+  "category": "stagekitwp-blocks",
+  "icon": "format-image",
+  "description": "Display a light and dark image based on the Theatre Manager theme color mode.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "lightImageId": {
+      "type": "number",
+      "default": 0
+    },
+    "lightImageUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "lightImageAlt": {
+      "type": "string",
+      "default": ""
+    },
+    "darkImageId": {
+      "type": "number",
+      "default": 0
+    },
+    "darkImageUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "darkImageAlt": {
+      "type": "string",
+      "default": ""
+    },
+    "alignment": {
+      "type": "string",
+      "default": "center"
+    },
+    "imageWidth": {
+      "type": "number",
+      "default": 100
+    },
+    "aspectRatio": {
+      "type": "string",
+      "default": "auto"
+    },
+    "objectFit": {
+      "type": "string",
+      "default": "contain"
+    },
+    "borderRadius": {
+      "type": "number",
+      "default": 0
+    },
+    "linkUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "linkTargetBlank": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "editorStyle": "file:./index.css",
+  "example": {
+    "attributes": {
+      "lightImageUrl": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'%3E%3Crect width='640' height='360' fill='%23f8fafc'/%3E%3Ccircle cx='320' cy='140' r='70' fill='%232563eb'/%3E%3Cpath d='M0 300L180 170L300 260L430 130L640 300V360H0Z' fill='%2364758b'/%3E%3C/svg%3E",
+      "darkImageUrl": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'%3E%3Crect width='640' height='360' fill='%231e293b'/%3E%3Ccircle cx='320' cy='140' r='70' fill='%23fbbf24'/%3E%3Cpath d='M0 300L180 170L300 260L430 130L640 300V360H0Z' fill='%2394a3b8'/%3E%3C/svg%3E",
+      "lightImageAlt": "Light mode sample image",
+      "darkImageAlt": "Dark mode sample image",
+      "alignment": "center",
+      "imageWidth": 100,
+      "aspectRatio": "16 / 9",
+      "objectFit": "cover",
+      "borderRadius": 8
+    }
+  }
+}

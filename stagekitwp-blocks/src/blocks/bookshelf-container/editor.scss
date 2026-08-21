@@ -1,0 +1,90 @@
+.wp-block-stagekitwp-bookshelf-item {
+    border: 1px dashed #ccc;
+    padding: 15px;
+}
+
+.wp-block-stagekitwp-bookshelf-container {
+    border: 2px dashed #8b5e3c;
+    padding: 20px;
+    min-height: 200px;
+}
+
+.stagekitwp-bookshelf-editor-preview {
+    min-height: 180px;
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 1px dashed rgba(255, 255, 255, 0.45);
+    background: rgba(0, 0, 0, 0.18);
+    color: #fff;
+}
+
+.stagekitwp-bookshelf-editor-preview__label {
+    display: block;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.stagekitwp-bookshelf-editor-preview__books {
+    display: flex;
+    align-items: end;
+    gap: 8px;
+    min-height: 120px;
+}
+
+.stagekitwp-bookshelf-editor-preview__book {
+    display: block;
+    width: 42px;
+    height: 110px;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(90deg, #355c7d, #6c5b7b 45%, #c06c84);
+    box-shadow: inset 3px 0 rgba(255, 255, 255, 0.2), 3px 0 5px rgba(0, 0, 0, 0.25);
+}
+
+.stagekitwp-bookshelf-editor-preview__books.layout-covers {
+    align-items: stretch;
+}
+
+.stagekitwp-bookshelf-editor-preview__books.layout-covers .stagekitwp-bookshelf-editor-preview__book {
+    width: 76px;
+    height: 110px;
+    border-radius: 2px;
+    background: linear-gradient(145deg, #e8c07d, #c96c6c 55%, #355c7d);
+}
+
+.stagekitwp-bookshelf-item-editor__visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    min-height: 180px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 6px 6px 2px 2px;
+    background: linear-gradient(135deg, #355c7d, #6c5b7b 55%, #c06c84);
+    box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.28);
+}
+
+.stagekitwp-bookshelf-item-editor__visual img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 180px;
+    object-fit: cover;
+}
+
+.stagekitwp-bookshelf-item-editor__visual.orientation-horizontal {
+    width: 58px;
+    min-height: 220px;
+}
+
+.stagekitwp-bookshelf-item-editor__visual.orientation-horizontal img {
+    min-height: 220px;
+    object-fit: cover;
+}
+
+.stagekitwp-bookshelf-item-editor__cover-placeholder {
+    padding: 12px;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+}

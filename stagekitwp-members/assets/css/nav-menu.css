@@ -1,0 +1,26 @@
+/* TM Members Area – Nav menu injected items */
+
+:root {
+    --stagekitwp-ma-link: var(--stagekitwp-link, #4f46e5);
+    --stagekitwp-ma-link-hover: var(--stagekitwp-link-hover, #dc2626);
+}
+
+/* Visual hint: auth-related items get a subtle tint */
+.stagekitwp-ma-nav-login > a,
+.stagekitwp-ma-nav-logout > a {
+    font-weight: 600;
+}
+
+.stagekitwp-ma-nav-login > a {
+    color: var(--stagekitwp-ma-link);
+}
+
+.stagekitwp-ma-nav-logout > a {
+    color: var(--stagekitwp-ma-link-hover);
+}
+
+/* Producer Dashboard gets a small indicator */
+.stagekitwp-ma-nav-dashboard > a::before {
+    content: "⚙\fe0e\a0";
+    font-size: .85em;
+}

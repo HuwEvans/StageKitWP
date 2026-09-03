@@ -90,10 +90,7 @@ function stagekitwp_advertiser_shortcode($atts) {
                 $wrapper_classes[] = 'stagekitwp-adv-mini-logos';
             }
 
-            $wrapper_style = '';
-            if ( $lock_columns ) {
-                $wrapper_style = ' style="--stagekitwp-adv-force-cols:' . esc_attr( (string) $columns ) . ';"';
-            }
+               $wrapper_style = ' style="--stagekitwp-adv-cols:' . esc_attr( (string) $columns ) . '; --stagekitwp-adv-force-cols:' . esc_attr( (string) $columns ) . ';"';
 
             echo '<div class="' . esc_attr( implode( ' ', $wrapper_classes ) ) . '"' . $wrapper_style . '>';
             while ($query->have_posts()) {

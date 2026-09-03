@@ -1469,6 +1469,7 @@ function stagekitwp_shortcode_landingpage($atts) {
     $has_image   = isset( $fields_data['show_image'] );
     $has_title   = isset( $fields_data['show_name'] );
     $show_title  = $has_title ? esc_html( get_the_title( $show_id ) ) : '';
+    $show_heading_tag = ( is_singular( 'show' ) || is_front_page() ) ? 'h1' : 'h2';
     $info_html   = stagekitwp_lp_info_sections( $fields_data, $show_id, $use_button, $buttonformat );
     $banner_html = $show_banner ? stagekitwp_lp_season_banner( $show_id ) : '';
     $img_url     = '';
@@ -1504,7 +1505,7 @@ function stagekitwp_shortcode_landingpage($atts) {
                 <?php endif; ?>
                 <div class="stagekitwp-lp-info-col">
                     <?php if ( $show_title ) : ?>
-                        <h1 class="stagekitwp-lp-title"><?php echo $show_title; ?></h1>
+                        <<?php echo $show_heading_tag; ?> class="stagekitwp-lp-title"><?php echo $show_title; ?></<?php echo $show_heading_tag; ?>>
                         <hr class="stagekitwp-lp-title-rule">
                     <?php endif; ?>
                     <?php echo $info_html; ?>
@@ -1523,13 +1524,13 @@ function stagekitwp_shortcode_landingpage($atts) {
                 <img src="<?php echo esc_url( $img_url ); ?>" alt="<?php echo esc_attr( $show_title ); ?>" class="stagekitwp-lp-hero-img">
                 <div class="stagekitwp-lp-hero-overlay">
                     <?php if ( $show_title ) : ?>
-                    <h1 class="stagekitwp-lp-hero-title"><?php echo $show_title; ?></h1>
+                    <<?php echo $show_heading_tag; ?> class="stagekitwp-lp-hero-title"><?php echo $show_title; ?></<?php echo $show_heading_tag; ?>>
                     <?php endif; ?>
                 </div>
             </div>
             <?php elseif ( $show_title ) : ?>
             <div class="stagekitwp-lp-hero-title-bar">
-                <h1 class="stagekitwp-lp-hero-title-noimg"><?php echo $show_title; ?></h1>
+                <<?php echo $show_heading_tag; ?> class="stagekitwp-lp-hero-title-noimg"><?php echo $show_title; ?></<?php echo $show_heading_tag; ?>>
             </div>
             <?php endif; ?>
             <div class="stagekitwp-lp-hero-body">
@@ -1562,7 +1563,7 @@ function stagekitwp_shortcode_landingpage($atts) {
                 <?php endif; ?>
                 <div class="stagekitwp-lp-prog-titleblock">
                     <?php if ( $show_title ) : ?>
-                    <h1 class="stagekitwp-lp-title"><?php echo $show_title; ?></h1>
+                    <<?php echo $show_heading_tag; ?> class="stagekitwp-lp-title"><?php echo $show_title; ?></<?php echo $show_heading_tag; ?>>
                     <hr class="stagekitwp-lp-title-rule">
                     <?php endif; ?>
                     <?php
@@ -1633,7 +1634,7 @@ function stagekitwp_shortcode_landingpage($atts) {
         ?>
         <div class="stagekitwp-landingpage-wrapper stagekitwp-landingpage stagekitwp-lp-layout-minimal"<?php echo $wrapper_style; ?>>
             <?php if ( $show_title ) : ?>
-            <h1 class="stagekitwp-lp-title"><?php echo $show_title; ?></h1>
+            <<?php echo $show_heading_tag; ?> class="stagekitwp-lp-title"><?php echo $show_title; ?></<?php echo $show_heading_tag; ?>>
             <hr class="stagekitwp-lp-title-rule">
             <?php endif; ?>
             <?php if ( $has_image && $img_url ) : ?>

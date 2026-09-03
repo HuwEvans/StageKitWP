@@ -16,7 +16,7 @@ function stagekitwp_register_plugin_menu() {
         'stagekitwp-core',
         'stagekitwp_dashboard_page',
         $icon_url,
-        22.51
+        26
     );
 
     // Dashboard — same slug as parent so WP uses this as the top-level link target.
@@ -547,8 +547,8 @@ function stagekitwp_handle_cpt_save() {
 		wp_die( esc_html__( 'Invalid content type.', 'stagekitwp-core' ) );
 	}
 
-	if ( ! $nonce || ! wp_verify_nonce( $nonce, 'stagekitwp_cpt_save_' . $post_type . '_' . $post_id ) ) {
-		wp_die( esc_html__( 'Nonce verification failed.', 'stagekitwp-core' ) );
+	if (empty($nonce) || !wp_verify_nonce($nonce, 'stagekitwp_cpt_save_' . $post_type . '_' . $post_id)) {
+		wp_die(esc_html__('Nonce verification failed.', 'stagekitwp-core'));
 	}
 
 	$title = isset( $_POST['stagekitwp_cpt_post_title'] ) ? sanitize_text_field( wp_unslash( $_POST['stagekitwp_cpt_post_title'] ) ) : '';
@@ -608,8 +608,8 @@ function stagekitwp_handle_cpt_delete() {
 		wp_die( esc_html__( 'Invalid content type.', 'stagekitwp-core' ) );
 	}
 
-	if ( ! $post_id || ! $nonce || ! wp_verify_nonce( $nonce, 'stagekitwp_cpt_save_' . $post_type . '_' . $post_id ) ) {
-		wp_die( esc_html__( 'Nonce verification failed.', 'stagekitwp-core' ) );
+	if (! $post_id || empty($nonce) || ! wp_verify_nonce($nonce, 'stagekitwp_cpt_save_' . $post_type . '_' . $post_id)) {
+		wp_die(esc_html__('Nonce verification failed.', 'stagekitwp-core'));
 	}
 
 	if ( ! current_user_can( 'delete_post', $post_id ) ) {
@@ -650,8 +650,8 @@ function stagekitwp_handle_cpt_restore() {
 		wp_die( esc_html__( 'Invalid content type.', 'stagekitwp-core' ) );
 	}
 
-	if ( ! $post_id || ! $nonce || ! wp_verify_nonce( $nonce, 'stagekitwp_cpt_restore_' . $post_type . '_' . $post_id ) ) {
-		wp_die( esc_html__( 'Nonce verification failed.', 'stagekitwp-core' ) );
+	if (! $post_id || empty($nonce) || ! wp_verify_nonce($nonce, 'stagekitwp_cpt_restore_' . $post_type . '_' . $post_id)) {
+		wp_die(esc_html__('Nonce verification failed.', 'stagekitwp-core'));
 	}
 
 	if ( ! current_user_can( 'edit_post', $post_id ) ) {

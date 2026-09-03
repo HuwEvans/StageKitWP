@@ -174,7 +174,7 @@ function stagekitwp_theme_render_dashboard_page() {
             $pages_to_build = array(
                 'about-us'          => array( 'title' => 'About Us', 'content' => '<p>Our structural theatre mission pipeline.</p>' ),
                 'history'           => array( 'title' => 'History', 'content' => '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Founded over half a century ago, our playhouse remains a historical pillar.</p>' ),
-                'contact-us'        => array( 'title' => 'Contact Us', 'content' => '<p>Get in touch via our admin box office avenues.</p>' ),
+                'contact-us'        => array( 'title' => 'Contact Our Community Theatre Team', 'content' => '<p>Get in touch via our admin box office avenues.</p>' ),
                 'board-of-directors'=> array( 'title' => 'Board of Directors', 'content' => '[stagekitwp_board_members]' ),
                 'get-involved'      => array( 'title' => 'Get Involved', 'content' => '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lend your backstage talents.</p>' ),
                 'code-of-conduct'   => array( 'title' => 'By-laws and Code of Conduct', 'content' => '<p>Lorem ipsum dolor sit amet. Operational governance terms.</p>' ),

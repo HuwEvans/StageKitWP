@@ -29,9 +29,9 @@ get_header();
             <main id="primary" class="show-main-content" style="flex: 1 1 650px;">
                 
                 <section class="show-synopsis" style="margin-bottom: 45px;">
-                    <h3 style="font-size: 1.5rem; text-transform: uppercase; border-bottom: 2px solid #f0f0f1; padding-bottom: 10px; margin-bottom: 20px; color: #111111;">
+                    <h2 style="font-size: 1.5rem; text-transform: uppercase; border-bottom: 2px solid #f0f0f1; padding-bottom: 10px; margin-bottom: 20px; color: #111111;">
                         <?php _e( 'Synopsis & Details', 'stagekitwp-theme' ); ?>
-                    </h3>
+                    </h2>
                     <div class="entry-content" style="line-height: 1.8; color: #333333; font-size: 1.1rem;">
                         <?php the_content(); ?>
                     </div>
@@ -39,9 +39,9 @@ get_header();
 
                 <?php if ( class_exists( 'StageKitWP_Core' ) ) : ?>
                     <section class="show-cast-block" style="margin-bottom: 45px;">
-                        <h3 style="font-size: 1.5rem; text-transform: uppercase; border-bottom: 2px solid #f0f0f1; padding-bottom: 10px; margin-bottom: 20px; color: #111111;">
+                        <h2 style="font-size: 1.5rem; text-transform: uppercase; border-bottom: 2px solid #f0f0f1; padding-bottom: 10px; margin-bottom: 20px; color: #111111;">
                             <?php _e( 'Cast & Creative Team', 'stagekitwp-theme' ); ?>
-                        </h3>
+                        </h2>
                         <div class="stagekitwp-plugin-cast-injection">
                             <?php 
                             // Call the core plugin block engine layout dynamically
@@ -62,9 +62,9 @@ get_header();
             <aside class="show-sidebar-booking" style="flex: 0 1 350px; width: 100%;">
                 <div class="sticky-booking-box" style="position: sticky; top: 30px; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
                     
-                    <h4 style="margin-top: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.5px; color: #111111; margin-bottom: 20px;">
+                    <h2 style="margin-top: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.5px; color: #111111; margin-bottom: 20px;">
                         🗓️ <?php _e( 'Performance Information', 'stagekitwp-theme' ); ?>
-                    </h4>
+                    </h2>
 
                     <ul class="show-info-meta-list" style="list-style: none; padding: 0; margin: 0 0 30px 0; font-size: 1rem; color: #495057;">
                         <li style="padding: 10px 0; border-bottom: 1px dashed #dee2e6;">

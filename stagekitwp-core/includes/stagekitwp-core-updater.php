@@ -11,7 +11,7 @@
  *   {
  *     "name":         "StageKitWP",
  *     "slug":         "stagekitwp-core",
- *     "version":      "4.1.0",
+ *     "version":      "5.2.0",
  *     "requires":     "6.0",
  *     "tested":       "6.8",
  *     "requires_php": "7.4",
@@ -62,8 +62,10 @@ define( 'STAGEKITWP_UPDATE_CACHE_TTL', 12 * HOUR_IN_SECONDS );
  * @return object|false        Decoded JSON object, or false on failure.
  */
 function stagekitwp_updater_fetch_manifest( $force = false ) {
+    $cache_key = 'stagekitwp_updater_manifest_' . STAGEKITWP_CORE_VERSION;
+    
     if ( ! $force ) {
-        $cached = get_transient( STAGEKITWP_UPDATE_TRANSIENT );
+        $cached = get_transient( $cache_key );
         if ( false !== $cached ) {
             return $cached;
         }
@@ -86,11 +88,11 @@ function stagekitwp_updater_fetch_manifest( $force = false ) {
     $data = json_decode( wp_remote_retrieve_body( $response ) );
 
     if ( ! is_object( $data ) || empty( $data->version ) ) {
-        set_transient( STAGEKITWP_UPDATE_TRANSIENT, false, 30 * MINUTE_IN_SECONDS );
+        set_transient( $cache_key, false, 30 * MINUTE_IN_SECONDS );
         return false;
     }
 
-    set_transient( STAGEKITWP_UPDATE_TRANSIENT, $data, STAGEKITWP_UPDATE_CACHE_TTL );
+    set_transient( $cache_key, $data, STAGEKITWP_UPDATE_CACHE_TTL );
     return $data;
 }
 
@@ -238,9 +240,10 @@ function stagekitwp_updater_purge_cache( $upgrader, $hook_extra ) {
         'plugin' === $hook_extra['type'] &&
         'update'  === $hook_extra['action'] &&
         isset( $hook_extra['plugins'] ) &&
-        in_array( 'stagekitwp-core/stagekitwp-plugin.php', $hook_extra['plugins'], true )
+        in_array( 'stagekitwp-core/stagekitwp-core.php', $hook_extra['plugins'], true )
     ) {
-        delete_transient( STAGEKITWP_UPDATE_TRANSIENT );
+        $cache_key = 'stagekitwp_updater_manifest_' . STAGEKITWP_CORE_VERSION;
+        delete_transient( $cache_key );
     }
 }
 add_action( 'upgrader_process_complete', 'stagekitwp_updater_purge_cache', 10, 2 );
@@ -279,7 +282,8 @@ function stagekitwp_updater_handle_force_check() {
     if ( ! current_user_can( 'update_plugins' ) )  { return; }
     check_admin_referer( 'stagekitwp_force_update_check' );
 
-    delete_transient( STAGEKITWP_UPDATE_TRANSIENT );   // bust our cache
+    $cache_key = 'stagekitwp_updater_manifest_' . STAGEKITWP_CORE_VERSION;
+    delete_transient( $cache_key );   // bust our cache
     delete_site_transient( 'update_plugins' ); // bust WP's cache
     wp_update_plugins();                        // trigger fresh check now
 

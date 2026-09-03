@@ -66,7 +66,7 @@ class StageKitWP_Core {
      *
      * @var string
      */
-    private $version = '5.0.0';
+    private $version = '5.2.0';
 
     /**
      * Return (and lazily create) the singleton instance.
@@ -92,10 +92,28 @@ class StageKitWP_Core {
      * Called once from the constructor.
      */
     private function init() {
-        // Core utilities (sanitizers, helpers, enqueue functions)
+        $this->load_core_files();
+        $this->load_admin_files();
+        $this->load_frontend_files();
+        $this->load_cpt_files();
+        $this->load_shortcodes();
+        $this->load_gutenberg_blocks();
+        $this->load_beaver_builder();
+        $this->register_cpt_hooks();
+    }
+
+    /**
+     * Load core utility files.
+     */
+    private function load_core_files() {
         require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-functions.php';
         require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-helpers.php';
+    }
 
+    /**
+     * Load admin-related files.
+     */
+    private function load_admin_files() {
         // Admin UI. The menu/workspace definitions are loaded on every
         // request because local routers and embedded admin screens may not
         // report is_admin() during plugin bootstrap.
@@ -109,18 +127,55 @@ class StageKitWP_Core {
 
         // Self-hosted update checker
         require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-updater.php';
+    }
 
+    /**
+     * Load frontend-related files.
+     */
+    private function load_frontend_files() {
         // Theme integration bridge (dark/light mode, colour tokens)
         require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-theme-integration.php';
 
         // Show front-end display (template_redirect + meta box + global setting)
         require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-show-front-display.php';
+    }
 
-        // Custom Post Types
+    /**
+     * Load Custom Post Type files.
+     */
+    private function load_cpt_files() {
         foreach ( glob( STAGEKITWP_CORE_DIR . 'cpt/stagekitwp-core-cpt/*.php' ) as $cpt_file ) {
             require_once $cpt_file;
         }
+    }
 
+    /**
+     * Load shortcode files.
+     */
+    private function load_shortcodes() {
+        foreach ( glob( STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-shortcodes/*.php' ) as $sc_file ) {
+            require_once $sc_file;
+        }
+    }
+
+    /**
+     * Load Gutenberg blocks.
+     */
+    private function load_gutenberg_blocks() {
+        require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-blocks.php';
+    }
+
+    /**
+     * Load Beaver Builder integration.
+     */
+    private function load_beaver_builder() {
+        require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-beaver-builder.php';
+    }
+
+    /**
+     * Register CPT hooks.
+     */
+    private function register_cpt_hooks() {
         // Keep first-install CPT registration deterministic even if another
         // loader has altered the individual CPT init callbacks.
         add_action( 'init', function() {
@@ -143,17 +198,6 @@ class StageKitWP_Core {
                 }
             }
         }, 0 );
-
-        // Shortcodes
-        foreach ( glob( STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-shortcodes/*.php' ) as $sc_file ) {
-            require_once $sc_file;
-        }
-
-        // Gutenberg blocks
-        require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-blocks.php';
-
-        // Beaver Builder integration (inert when BB is not active)
-        require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-beaver-builder.php';
     }
 
     // -----------------------------------------------------------------------

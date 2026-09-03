@@ -214,7 +214,7 @@ function stagekitwp_generate_pdf_preview($attachment_id) {
 
     $file = get_attached_file($attachment_id);
     if (!$file || !file_exists($file)) {
-        return array('success' => false, 'message' => 'File not found: ' . $file);
+        return array('success' => false, 'message' => 'File not found');
     }
 
     $upload_dir = wp_upload_dir();
@@ -235,13 +235,27 @@ function stagekitwp_generate_pdf_preview($attachment_id) {
         $orig_filename = wp_basename($file);
         $thumb_filename = pathinfo($orig_filename, PATHINFO_FILENAME) . '-preview.jpg';
         $dest_path = trailingslashit($upload_dir['path']) . $thumb_filename;
+        
+        // Security: Validate destination path to prevent directory traversal
+        $dest_path = realpath($dest_path);
+        if (false === $dest_path || strpos($dest_path, realpath($upload_dir['path'])) !== 0) {
+            $imagick->clear();
+            $imagick->destroy();
+            return array('success' => false, 'message' => 'Invalid destination path');
+        }
 
         if ($imagick->writeImage($dest_path)) {
             $preview_url = trailingslashit($upload_dir['url']) . $thumb_filename;
+            // Security: Validate preview URL to prevent stored XSS
+            if (!wp_http_validate_url($preview_url)) {
+                $imagick->clear();
+                $imagick->destroy();
+                return array('success' => false, 'message' => 'Invalid preview URL');
+            }
             update_post_meta($attachment_id, '_stagekitwp_pdf_preview', esc_url_raw($preview_url));
             $imagick->clear();
             $imagick->destroy();
-            return array('success' => true, 'message' => 'Preview generated: ' . $preview_url);
+            return array('success' => true, 'message' => 'Preview generated');
         } else {
             $imagick->clear();
             $imagick->destroy();

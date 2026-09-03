@@ -191,15 +191,15 @@
     width: 100%;
     max-width: 100%;
     /* Responsive auto-fit by default; only overridden when column count is locked. */
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(var(--stagekitwp-adv-cols, 3), minmax(0, 1fr));
 }
 
-.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-.stagekitwp-advertiser-wrapper.stagekitwp-adv-lock-cols.stagekitwp-grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.stagekitwp-advertiser-wrapper.stagekitwp-grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
 .stagekitwp-advertiser-entry {
   text-align: center;
@@ -232,6 +232,21 @@
     object-fit: contain;
   display: block;
   margin: 0 auto;
+}
+
+/* Responsive breakpoint adjustments for advertiser grid */
+@media (max-width: 900px) {
+    .stagekitwp-advertiser-wrapper:not(.stagekitwp-adv-lock-cols).stagekitwp-grid-cols-4,
+    .stagekitwp-advertiser-wrapper:not(.stagekitwp-adv-lock-cols).stagekitwp-grid-cols-5,
+    .stagekitwp-advertiser-wrapper:not(.stagekitwp-adv-lock-cols).stagekitwp-grid-cols-6 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .stagekitwp-advertiser-wrapper:not(.stagekitwp-adv-lock-cols) {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
 }
 
 /* Footer/widget placement tends to be narrower; keep cards visually compact. */

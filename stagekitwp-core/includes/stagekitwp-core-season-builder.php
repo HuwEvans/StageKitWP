@@ -242,7 +242,7 @@ function stagekitwp_season_builder_handle_save() {
         'numberposts' => -1,
         'fields' => 'ids',
         'meta_key' => '_stagekitwp_show_season',
-        'meta_value' => $season_id,
+        'meta_value' => (int)$season_id,
     ));
     $existing_show_ids = array_map('intval', $existing_show_ids);
 
@@ -611,7 +611,7 @@ function stagekitwp_render_season_builder_page() {
             'post_type' => 'show',
             'numberposts' => -1,
             'meta_key' => '_stagekitwp_show_season',
-            'meta_value' => $season_id,
+            'meta_value' => (int)$season_id,
             'orderby' => 'title',
             'order' => 'ASC',
         ));

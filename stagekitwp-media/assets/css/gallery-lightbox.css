@@ -1,0 +1,111 @@
+.skwpm-lightbox-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: zoom-in;
+}
+
+.skwpm-lightbox-trigger img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.skwpm-lightbox {
+    position: fixed;
+    z-index: 100000;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.skwpm-lightbox.is-open {
+    display: flex;
+}
+
+.skwpm-lightbox-dialog {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    width: min(1200px, 100%);
+    max-height: 100%;
+    gap: 16px;
+}
+
+.skwpm-lightbox-image-wrap {
+    min-width: 0;
+    text-align: center;
+}
+
+.skwpm-lightbox-image {
+    display: block;
+    max-width: 100%;
+    max-height: calc(100vh - 120px);
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+.skwpm-lightbox-caption {
+    margin: 12px 0 0;
+    color: #ffffff;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.skwpm-lightbox-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.skwpm-lightbox-button:hover,
+.skwpm-lightbox-button:focus-visible {
+    background: #ffffff;
+    color: #111111;
+}
+
+.skwpm-lightbox-close {
+    position: absolute;
+    top: -56px;
+    right: 0;
+    font-size: 30px;
+}
+
+.skwpm-lightbox-button[disabled] {
+    visibility: hidden;
+}
+
+body.skwpm-lightbox-open {
+    overflow: hidden;
+}
+
+@media (max-width: 640px) {
+    .skwpm-lightbox {
+        padding: 16px;
+    }
+
+    .skwpm-lightbox-dialog {
+        grid-template-columns: 40px minmax(0, 1fr) 40px;
+        gap: 8px;
+    }
+
+    .skwpm-lightbox-button {
+        width: 40px;
+        height: 40px;
+    }
+}

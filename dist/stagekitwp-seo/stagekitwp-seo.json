@@ -1,9 +1,9 @@
 {
   "slug": "stagekitwp-seo",
-  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-seo/stagekitwp-seo-1.4.0.zip",
-  "new_version": "1.4.0",
-  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-seo/stagekitwp-seo-1.4.0.zip",
-  "version": "1.4.0",
+  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-seo/stagekitwp-seo-1.4.1.zip",
+  "new_version": "1.4.1",
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-seo/stagekitwp-seo-1.4.1.zip",
+  "version": "1.4.1",
   "tested": "6.6",
   "name": "stagekitwp-seo",
   "requires": "6.0"

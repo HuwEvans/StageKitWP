@@ -1,5 +1,24 @@
 # Changelog
 
+## Version 5.2.1 — 2026-09-07 — Shortcode display, mode, and program selection fixes
+
+### Fixes
+
+- **Advertisers:** Grid columns now honor the shortcode value and use stable grid tracks so cards do not overlap.
+- **Landing page:** An embedded landing-page shortcode uses an H2 on ordinary pages, avoiding a duplicate page H1 while retaining its existing styling. It remains an H1 on show and front-page views.
+- **Auditions:** Always emits the `html.stagekitwp-dark-mode` palette, allowing the frontend light/dark switcher to update every auditions layout independently of an admin setting.
+- **Programs:** Current-program links now select only shows with a PDF, ordered by season dates and the shared Fall → Winter → Spring slot sequence: current, then next, then most recent past.
+
+### Files changed
+
+- `assets/css/shortcodes.css`
+- `includes/stagekitwp-core-shortcodes/advertisers-shortcode.php`
+- `includes/stagekitwp-core-shortcodes/stagekitwp-landingpage.php`
+- `includes/stagekitwp-core-shortcodes/stagekitwp-auditions.php`
+- `includes/stagekitwp-core-shortcodes/programs-shortcode.php`
+- `stagekitwp-core.php`
+- `stagekitwp-core.json`
+
 ## Version 5.2.0 — 2026-08-21 — Admin hub media picker fixes + Documentation link
 
 Patch release fixing broken media upload buttons on hub screens and a broken/warning-prone external Documentation link.

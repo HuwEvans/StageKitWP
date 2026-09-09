@@ -3,16 +3,16 @@
 =================================================== */
 .stagekit-carousel-wrapper {
 	/* Baseline Light Mode Values */
-	--stagekit-card-bg: var(--tm-card-bg, #ffffff);
-	--stagekit-card-border: var(--tm-border-color, #e2e8f0);
-	--stagekit-card-text: var(--tm-text-color, #1e293b);
-	--stagekit-card-title: var(--tm-heading-color, #0f172a);
-	--stagekit-card-meta: var(--tm-muted-color, #64748b);
-	--stagekit-card-link: var(--tm-accent-color, #0284c7);
-	--stagekit-nav-bg: var(--tm-button-bg, #ffffff);
-	--stagekit-nav-text: var(--tm-button-text, #333333);
-	--stagekit-nav-border: var(--tm-border-color, #e2e8f0);
-	--stagekit-dot-color: var(--tm-text-color, #333333);
+	--stagekit-card-bg: var(--stagekitwp-surface-bg, #ffffff);
+	--stagekit-card-border: color-mix(in srgb, var(--stagekitwp-body-text, #1e293b) 16%, transparent);
+	--stagekit-card-text: var(--stagekitwp-body-text, #1e293b);
+	--stagekit-card-title: var(--stagekitwp-heading-text, #0f172a);
+	--stagekit-card-meta: var(--stagekitwp-muted-text, #64748b);
+	--stagekit-card-link: var(--stagekitwp-link, #0284c7);
+	--stagekit-nav-bg: var(--stagekitwp-surface-bg, #ffffff);
+	--stagekit-nav-text: var(--stagekitwp-body-text, #333333);
+	--stagekit-nav-border: color-mix(in srgb, var(--stagekitwp-body-text, #1e293b) 16%, transparent);
+	--stagekit-dot-color: var(--stagekitwp-body-text, #333333);
 
 	position: relative;
 	width: 100%;
@@ -130,19 +130,19 @@
    2. DYNAMIC THEME DARK MODE (Triggers on Toggle)
 =================================================== */
 
-/* Activates whenever body or html has the theme's .tm-dark-mode class */
-body.tm-dark-mode .stagekit-carousel-wrapper:not(.is-light-mode),
-html.tm-dark-mode .stagekit-carousel-wrapper:not(.is-light-mode) {
-	--stagekit-card-bg: var(--tm-card-bg-dark, #182232);
-	--stagekit-card-border: var(--tm-border-color-dark, #2a384c);
-	--stagekit-card-text: var(--tm-text-color-dark, #cbd5e1);
-	--stagekit-card-title: var(--tm-heading-color-dark, #f8fafc);
-	--stagekit-card-meta: var(--tm-muted-color-dark, #94a3b8);
-	--stagekit-card-link: var(--tm-accent-color-dark, #38bdf8);
-	--stagekit-nav-bg: var(--tm-button-bg-dark, #182232);
-	--stagekit-nav-text: var(--tm-button-text-dark, #f8fafc);
-	--stagekit-nav-border: var(--tm-border-color-dark, #2a384c);
-	--stagekit-dot-color: var(--tm-text-color-dark, #ffffff);
+/* Activates whenever body or html has the theme's .stagekitwp-dark-mode class */
+body.stagekitwp-dark-mode .stagekit-carousel-wrapper:not(.is-light-mode),
+html.stagekitwp-dark-mode .stagekit-carousel-wrapper:not(.is-light-mode) {
+	--stagekit-card-bg: var(--stagekitwp-surface-bg, #182232);
+	--stagekit-card-border: color-mix(in srgb, var(--stagekitwp-body-text, #cbd5e1) 16%, transparent);
+	--stagekit-card-text: var(--stagekitwp-body-text, #cbd5e1);
+	--stagekit-card-title: var(--stagekitwp-heading-text, #f8fafc);
+	--stagekit-card-meta: var(--stagekitwp-muted-text, #94a3b8);
+	--stagekit-card-link: var(--stagekitwp-link, #38bdf8);
+	--stagekit-nav-bg: var(--stagekitwp-surface-bg, #182232);
+	--stagekit-nav-text: var(--stagekitwp-body-text, #f8fafc);
+	--stagekit-nav-border: color-mix(in srgb, var(--stagekitwp-body-text, #cbd5e1) 16%, transparent);
+	--stagekit-dot-color: var(--stagekitwp-body-text, #ffffff);
 }
 
 /* ===================================================

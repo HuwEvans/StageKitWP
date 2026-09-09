@@ -1,6 +1,39 @@
 # Theatre Manager Theme — Changelog
 <!-- markdownlint-disable-file MD022 MD024 MD032 -->
 
+## Version 3.1.2 — 2026-09-08 — Homepage auditions feed + single post template
+
+### Updates
+
+- Homepage News & Events feed: audition notices from Shows are now sticky and always lead the feed (when enabled), instead of only appearing if the regular news posts didn't already fill the display limit.
+- Audition notices remain visible until 3 days after their audition date, then drop out of the feed automatically.
+- Audition card feature image now prefers an image found inside the Audition Details field, falling back to the show's SM Image.
+- Audition card image and title now link to the page configured in StageKitWP Core → Settings → Auditions Page, falling back to the show's own page if none is set.
+- Added a dedicated `single.php` template for blog posts: the featured image floats left at 33% width with text wrapping around it, then continuing full-width once the text passes the image.
+
+### Files changed
+
+- `front-page.php`
+- `single.php`
+- `functions.php`
+- `style.css`
+- `stagekitwp-theme.json`
+
+## Version 3.1.1 — 2026-09-07 — Heading hierarchy and contact-page SEO update
+
+### Updates
+
+- Updated single-show sections and booking information to use H2 headings beneath the show title H1.
+- Changed the generated Contact page title to `Contact Our Community Theatre Team`, while retaining `Contact Us` as the concise navigation label.
+
+### Files changed
+
+- `single-shows.php`
+- `inc/theme-dashboard.php`
+- `functions.php`
+- `style.css`
+- `stagekitwp-theme.json`
+
 ## Version 3.1.0 — 2026-08-21 — Ecosystem release sync
 
 ### Updates

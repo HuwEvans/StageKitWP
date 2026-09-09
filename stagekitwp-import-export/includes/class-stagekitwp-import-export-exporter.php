@@ -307,9 +307,13 @@ class STAGEKITWP_IMPORT_EXPORT_Exporter {
 	 *
 	 * Returns an index array: attachment_id → { filename, mime_type, original_url }
 	 *
+	 * Only the original uploaded file is packed — not the size variants (thumbnail,
+	 * medium, large, etc.) WordPress generates from it. The importing site
+	 * regenerates those automatically from the original when it sideloads the file.
+	 *
 	 * @param ZipArchive $zip
 	 * @param int[]      $media_ids
-	 * @param int        $files_packed  (out) total files added, incl. size variants.
+	 * @param int        $files_packed  (out) total files added.
 	 * @return array<int, array<string,string>>
 	 */
 	private function add_media_to_zip( \ZipArchive $zip, array $media_ids, int &$files_packed = 0 ): array {
@@ -332,19 +336,6 @@ class STAGEKITWP_IMPORT_EXPORT_Exporter {
 				'post_title'   => get_the_title( $attachment_id ),
 				'alt_text'     => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ?: '',
 			];
-
-			// Also include any generated image sizes.
-			$meta = wp_get_attachment_metadata( $attachment_id );
-			if ( ! empty( $meta['sizes'] ) ) {
-				$upload_dir = trailingslashit( dirname( $file ) );
-				foreach ( $meta['sizes'] as $size_data ) {
-					$size_file = $upload_dir . $size_data['file'];
-					if ( file_exists( $size_file ) ) {
-						$zip->addFile( $size_file, 'media/' . $size_data['file'] );
-						$files_packed++;
-					}
-				}
-			}
 		}
 
 		return $index;

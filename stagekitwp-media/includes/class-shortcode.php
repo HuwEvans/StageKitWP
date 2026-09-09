@@ -53,8 +53,9 @@ class Shortcode {
 
 		$html  = self::styles();
 		$html .= sprintf(
-			'<div class="skwpm-gallery-list skwpm-gallery-list--%s" style="--skwpm-cols:%d;">',
+			'<div class="skwpm-gallery-list skwpm-gallery-list--%s skwpm-gallery-cols-%d" style="--skwpm-cols:%d;">',
 			esc_attr( $layout ),
+			$cols,
 			$cols
 		);
 
@@ -105,6 +106,11 @@ class Shortcode {
 			. '.skwpm-gallery-list--mosaic .skwpm-gallery-entry:nth-child(5n+1){grid-column:span 2;grid-row:span 2;}'
 			. '.skwpm-gallery-list--mosaic .skwpm-gallery-entry img{width:100%;height:100%;}'
 			. '.skwpm-gallery-list--mosaic .skwpm-gallery-entry-title{position:absolute;inset:auto 0 0 0;margin:0;padding:.5rem;background:rgba(0,0,0,.55);color:#fff;}'
+			. '.skwpm-gallery{display:grid;grid-template-columns:repeat(var(--skwpm-cols,3),minmax(0,1fr));gap:1rem;}'
+			. '.skwpm-gallery figure{min-width:0;margin:0;}'
+			. '@media(max-width:900px){.skwpm-gallery-cols-4,.skwpm-gallery-cols-5,.skwpm-gallery-cols-6{--skwpm-cols:3!important;}}'
+			. '@media(max-width:640px){.skwpm-gallery-cols-3,.skwpm-gallery-cols-4,.skwpm-gallery-cols-5,.skwpm-gallery-cols-6{--skwpm-cols:2!important;}.skwpm-gallery-list--mosaic{grid-auto-rows:100px;}}'
+			. '@media(max-width:420px){.skwpm-gallery-cols-2,.skwpm-gallery-cols-3,.skwpm-gallery-cols-4,.skwpm-gallery-cols-5,.skwpm-gallery-cols-6{--skwpm-cols:1!important;}.skwpm-gallery-list--mosaic .skwpm-gallery-entry:nth-child(5n+1){grid-column:span 1;grid-row:span 1;}}'
 			. '</style>';
 	}
 
@@ -117,7 +123,8 @@ class Shortcode {
 
 		self::enqueue_lightbox_assets();
 		$cols = max( 1, min( 6, $columns ) );
-		$html = '<div class="skwpm-gallery" style="display:grid;grid-template-columns:repeat(' . $cols . ',1fr);gap:1rem;">';
+		$html = self::styles();
+		$html .= '<div class="skwpm-gallery skwpm-gallery-cols-' . $cols . '" style="--skwpm-cols:' . $cols . ';display:grid;grid-template-columns:repeat(var(--skwpm-cols,3),minmax(0,1fr));gap:1rem;">';
 		foreach ( $items as $index => $item ) {
 			$credit = trim( ( $item['author'] ?? '' ) . ( ! empty( $item['author'] ) && ! empty( $item['license'] ) ? ' · ' : '' ) . ( $item['license'] ?? '' ) );
 			$caption_html = $credit ? sprintf( '<figcaption>%s</figcaption>', esc_html( $credit ) ) : '';

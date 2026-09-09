@@ -210,45 +210,22 @@ $cpts_registered = post_type_exists( 'show' ) && post_type_exists( 'season' );
                     $selected_category_slugs  = get_theme_mod( 'stagekitwp_news_post_categories', '' );
                     $include_show_auditions   = get_theme_mod( 'stagekitwp_news_include_auditions', true );
 
-                    $news_query_args = array(
-                        'post_type'      => 'post',
-                        'posts_per_page' => $news_limit,
-                        'ignore_sticky_posts' => true,
-                    );
-
-                    if ( ! empty( $selected_category_slugs ) ) {
-                        $category_slugs = array_filter( array_map( 'sanitize_title', array_map( 'trim', explode( ',', $selected_category_slugs ) ) ) );
-                        if ( ! empty( $category_slugs ) ) {
-                            $news_query_args['category_name'] = implode( ',', $category_slugs );
+                    if ( ! function_exists( 'stagekitwp_news_first_image_src' ) ) {
+                        // Fallback feature image: first <img> found inside the (HTML) audition details.
+                        function stagekitwp_news_first_image_src( $html ) {
+                            if ( empty( $html ) || ! preg_match( '/<img[^>]+src=["\']([^"\']+)["\']/i', $html, $matches ) ) {
+                                return '';
+                            }
+                            return esc_url_raw( $matches[1] );
                         }
                     }
 
-                    $news_query = new WP_Query( $news_query_args );
-
-                    if ( $news_query->have_posts() ) :
-                        while ( $news_query->have_posts() && $news_items_rendered < $news_limit ) : $news_query->the_post();
-                            $news_items_rendered++; ?>
-                            <div style="flex: 0 0 calc((100% - 40px) / 3); min-width: 280px; background: #ffffff; border: 1px solid #e9ecef; border-radius: 6px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); scroll-snap-align: start;">
-                                <?php if ( has_post_thumbnail() ) : ?>
-                                    <div style="aspect-ratio: 16/9; overflow: hidden;">
-                                        <?php the_post_thumbnail( 'medium_large', array( 'style' => 'width:100%; height:100%; object-fit:cover;' ) ); ?>
-                                    </div>
-                                <?php endif; ?>
-                                <div style="padding: 20px;">
-                                    <span style="font-size: 0.75rem; text-transform: uppercase; color: #e50914; font-weight: 700;"><?php echo esc_html( get_the_date() ); ?></span>
-                                    <h3 style="margin: 5px 0 10px 0; font-size: 1.15rem; font-weight: 700;">
-                                        <a href="<?php the_permalink(); ?>" style="color: #111111; text-decoration: none;"><?php the_title(); ?></a>
-                                    </h3>
-                                    <p style="margin: 0; color: #6c757d; font-size: 0.9rem; line-height: 1.5;"><?php echo esc_html( wp_trim_words( get_the_excerpt(), 15 ) ); ?></p>
-                                </div>
-                            </div>
-                        <?php endwhile;
-                    endif;
-                    wp_reset_postdata();
-
+                    // ── Sticky audition notices: lead the feed until 3 days after the audition date ──
                     if ( $include_show_auditions && post_type_exists( 'show' ) ) :
+                        $audition_cutoff = date( 'Y-m-d', strtotime( '-3 days', current_time( 'timestamp' ) ) );
                         $auditions_query = new WP_Query( array(
                             'post_type'      => 'show',
+                            'post_status'    => 'publish',
                             'posts_per_page' => $news_limit,
                             'meta_key'       => '_stagekitwp_show_audition_date',
                             'orderby'        => 'meta_value',
@@ -256,7 +233,7 @@ $cpts_registered = post_type_exists( 'show' ) && post_type_exists( 'season' );
                             'meta_query'     => array(
                                 array(
                                     'key'     => '_stagekitwp_show_audition_date',
-                                    'value'   => current_time( 'Y-m-d' ),
+                                    'value'   => $audition_cutoff,
                                     'compare' => '>=',
                                     'type'    => 'DATE',
                                 ),
@@ -278,21 +255,71 @@ $cpts_registered = post_type_exists( 'show' ) && post_type_exists( 'season' );
                                     $audition_details = get_post_meta( $show_id, '_stagekitwp_show_synopsis', true );
                                 }
 
-                                $raw_img_meta = get_post_meta( $show_id, '_stagekitwp_show_sm_image', true );
-                                $resolved_img = function_exists( 'stagekitwp_get_show_image_url' ) ? stagekitwp_get_show_image_url( $raw_img_meta ) : $raw_img_meta;
+                                // Feature image: prefer an image inside the audition details, then fall back to the show's SM image.
+                                $resolved_img = stagekitwp_news_first_image_src( $audition_details );
+                                if ( empty( $resolved_img ) ) {
+                                    $raw_img_meta  = get_post_meta( $show_id, '_stagekitwp_show_sm_image', true );
+                                    $resolved_img  = function_exists( 'stagekitwp_get_show_image_url' ) ? stagekitwp_get_show_image_url( $raw_img_meta ) : $raw_img_meta;
+                                }
+
+                                // Link to the Core plugin's configured Auditions Page setting; fall back to the show itself.
+                                $audition_page_id  = intval( get_option( 'stagekitwp_auditions_page_id', 0 ) );
+                                $audition_link_url = $audition_page_id ? get_permalink( $audition_page_id ) : get_permalink( $show_id );
                                 ?>
                                 <div style="flex: 0 0 calc((100% - 40px) / 3); min-width: 280px; background: #ffffff; border: 1px solid #e9ecef; border-radius: 6px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); scroll-snap-align: start;">
                                     <?php if ( ! empty( $resolved_img ) ) : ?>
-                                        <div style="aspect-ratio: 16/9; overflow: hidden;">
-                                            <img src="<?php echo esc_url( $resolved_img ); ?>" alt="<?php the_title_attribute(); ?>" style="width:100%; height:100%; object-fit:cover;">
-                                        </div>
+                                        <a href="<?php echo esc_url( $audition_link_url ); ?>" style="display: block;">
+                                            <div style="aspect-ratio: 16/9; overflow: hidden;">
+                                                <img src="<?php echo esc_url( $resolved_img ); ?>" alt="<?php the_title_attribute(); ?>" style="width:100%; height:100%; object-fit:cover;">
+                                            </div>
+                                        </a>
                                     <?php endif; ?>
                                     <div style="padding: 20px;">
                                         <span style="font-size: 0.75rem; text-transform: uppercase; color: #e50914; font-weight: 700;"><?php echo esc_html__( 'Audition', 'stagekitwp-theme' ); ?><?php echo $audition_label ? ' • ' . esc_html( $audition_label ) : ''; ?></span>
                                         <h3 style="margin: 5px 0 10px 0; font-size: 1.15rem; font-weight: 700;">
-                                            <a href="<?php the_permalink(); ?>" style="color: #111111; text-decoration: none;"><?php the_title(); ?></a>
+                                            <a href="<?php echo esc_url( $audition_link_url ); ?>" style="color: #111111; text-decoration: none;"><?php the_title(); ?></a>
                                         </h3>
                                         <p style="margin: 0; color: #6c757d; font-size: 0.9rem; line-height: 1.5;"><?php echo esc_html( wp_trim_words( wp_strip_all_tags( $audition_details ), 15 ) ); ?></p>
+                                    </div>
+                                </div>
+                            <?php endwhile;
+                        endif;
+                        wp_reset_postdata();
+                    endif;
+
+                    // ── Regular news posts fill any slots remaining after sticky auditions ──
+                    $news_remaining_slots = $news_limit - $news_items_rendered;
+                    if ( $news_remaining_slots > 0 ) :
+                        $news_query_args = array(
+                            'post_type'      => 'post',
+                            'posts_per_page' => $news_remaining_slots,
+                            'ignore_sticky_posts' => true,
+                        );
+
+                        if ( ! empty( $selected_category_slugs ) ) {
+                            $category_slugs = array_filter( array_map( 'sanitize_title', array_map( 'trim', explode( ',', $selected_category_slugs ) ) ) );
+                            if ( ! empty( $category_slugs ) ) {
+                                $news_query_args['category_name'] = implode( ',', $category_slugs );
+                            }
+                        }
+
+                        $news_query = new WP_Query( $news_query_args );
+
+                        if ( $news_query->have_posts() ) :
+                            while ( $news_query->have_posts() && $news_items_rendered < $news_limit ) : $news_query->the_post();
+                                $news_items_rendered++; ?>
+                                <div style="flex: 0 0 calc((100% - 40px) / 3); min-width: 280px; background: #ffffff; border: 1px solid #e9ecef; border-radius: 6px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.02); scroll-snap-align: start;">
+                                    <?php if ( has_post_thumbnail() ) : ?>
+                                        <div style="aspect-ratio: 16/9; overflow: hidden;">
+                                            <?php the_post_thumbnail( 'medium_large', array( 'style' => 'width:100%; height:100%; object-fit:cover;' ) ); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div style="padding: 20px;">
+                                        <span style="font-size: 0.75rem; text-transform: uppercase; color: #e50914; font-weight: 700;"><?php echo esc_html( get_the_date() ); ?></span>
+                                        <h3 style="margin: 5px 0 10px 0; font-size: 1.15rem; font-weight: 700;">
+                                            <a href="<?php the_permalink(); ?>" style="color: #111111; text-decoration: none;"><?php the_title(); ?></a>
+                                        </h3>
+                                        <p style="margin: 0; color: #6c757d; font-size: 0.9rem; line-height: 1.5;"><?php echo esc_html( wp_trim_words( get_the_excerpt(), 15 ) ); ?></p>
                                     </div>
                                 </div>
                             <?php endwhile;

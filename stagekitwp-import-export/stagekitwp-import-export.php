@@ -3,7 +3,7 @@
  * Plugin Name:       StageKitWP - Import-Export
  * Plugin URI:        https://github.com/stagekitwp/stagekitwp-import-export
  * Description:       Import and export CPT data, settings, options, and theme customisations for the StageKitWP ecosystem (stagekitwp-core, stagekitwp-members, stagekitwp-rc-library, stagekitwp-sync, stagekitwp-theme). Supports single-module or full-bundle ZIP exports and hybrid sync/async imports.
- * Version:           2.0.0
+ * Version:           2.1.0
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            StageKitWP
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-define( 'STAGEKITWP_IMPORT_EXPORT_VERSION',   '2.0.0' );
+define( 'STAGEKITWP_IMPORT_EXPORT_VERSION',   '2.1.0' );
 define( 'STAGEKITWP_IMPORT_EXPORT_FILE',      __FILE__ );
 define( 'STAGEKITWP_IMPORT_EXPORT_DIR',       plugin_dir_path( __FILE__ ) );
 define( 'STAGEKITWP_IMPORT_EXPORT_URL',       plugin_dir_url( __FILE__ ) );

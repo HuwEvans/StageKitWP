@@ -3,7 +3,7 @@
  * Plugin Name: StageKitWP Core
  * Plugin URI: https://github.com/HuwEvans/StageKitWP
  * Description: Manage stage-production content including board members, shows, and more.
- * Version: 5.2.0
+ * Version: 5.2.1
  * Requires at least: 6.8.2
  * Requires PHP: 7.4
  * Author: Huw Evans
@@ -28,7 +28,7 @@ define( 'STAGEKITWP_CORE_URL', plugin_dir_url( __FILE__ ) );
  * check for a minimum version.
  */
 if ( ! defined( 'STAGEKITWP_CORE_VERSION' ) ) {
-    define( 'STAGEKITWP_CORE_VERSION', '5.2.0' );
+    define( 'STAGEKITWP_CORE_VERSION', '5.2.1' );
 }
 // ---------------------------------------------------------------------------
 // Core class

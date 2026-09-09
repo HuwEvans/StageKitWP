@@ -1,7 +1,7 @@
 {
   "name": "StageKitWP - Import-Export",
   "slug": "stagekitwp-import-export",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": "StageKitWP",
   "author_homepage": "https://github.com/stagekitwp",
   "requires": "6.0",
@@ -13,6 +13,6 @@
   "sections": {
     "description": "The import/export plugin packages selected modules into ZIP or JSON bundles and can import them back with conflict handling, remapping, and queued processing.",
     "installation": "Upload the stagekitwp-import-export plugin folder to wp-content/plugins/, activate it, and open TM I/O in the admin menu.",
-    "changelog": "See CHANGELOG.md for the full release history."
+    "changelog": "2.1.0: added a Pages module, auto-resolved page-ID remaps, fixed a media-remap bug that could corrupt show/season/venue links, fixed same-site media re-import duplicating attachments, and exports now pack only the original media file. See CHANGELOG.md for details."
   }
 }

@@ -63,6 +63,17 @@ class STAGEKITWP_IMPORT_EXPORT_Mod_StageKitWP_Core extends STAGEKITWP_IMPORT_EXP
 	}
 
 	/**
+	 * These CPTs keep a "Name" meta field in sync with post_title.
+	 */
+	protected function title_sync_map(): array {
+		return [
+			'show'   => '_stagekitwp_show_name',
+			'season' => '_stagekitwp_season_name',
+			'venue'  => '_stagekitwp_venue_name',
+		];
+	}
+
+	/**
 	 * Core TM options.
 	 *
 	 * We use a wildcard for the bulk of the stagekitwp_* namespace, but explicitly

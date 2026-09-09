@@ -37,7 +37,7 @@ Installation
 
 Theme integration
 -----------------
-Dark Mode Image detects the Theatre Manager theme's html.tm-dark-mode class. The block displays its light image normally and switches to its dark image when the theme enters dark mode.
+Dark Mode Image detects the Theatre Manager theme's html.stagekitwp-dark-mode class. The block displays its light image normally and switches to its dark image when the theme enters dark mode.
 
 Packaging
 ---------

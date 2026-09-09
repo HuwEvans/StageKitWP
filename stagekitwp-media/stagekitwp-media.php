@@ -2,7 +2,7 @@
 /**
  * Plugin Name: StageKit WP Media
  * Description: High-performance media asset manager, hierarchical folder management, isolated storage outside core WordPress media, and galleries sourced from external media APIs (Pexels, Unsplash, Flickr, YouTube, Vimeo, Dropbox, Google Drive, Google Photos).
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Huw Evans
  * Author URI: https://github.com/HuwEvans
  * Requires at least: 6.5
@@ -12,7 +12,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SKWPM_VERSION', '1.0.0' );
+define( 'SKWPM_VERSION', '1.0.1' );
 define( 'SKWPM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SKWPM_URL', plugin_dir_url( __FILE__ ) );
 

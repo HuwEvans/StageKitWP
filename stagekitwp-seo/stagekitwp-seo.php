@@ -2,7 +2,7 @@
 /**
  * Plugin Name: StageKitWP Search Optimizer
  * Description: Generates SEO tags, OpenGraph, Twitter Cards, JSON-LD Schema, and Microformats2.
- * Version:     1.4.0
+ * Version:     1.4.1
  * Author:      Huw Evans
  */
 

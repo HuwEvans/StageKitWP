@@ -1,7 +1,7 @@
 {
   "name": "StageKit WP Media",
   "slug": "stagekitwp-media",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Huw Evans",
   "author_homepage": "https://github.com/HuwEvans",
   "requires": "6.5",
@@ -13,6 +13,6 @@
   "sections": {
     "description": "StageKit WP Media provides a high-performance, non-attachment media asset management system with virtual/nested folder hierarchy, drag-and-drop uploads, responsive thumbnail generation, storage diagnostics, and direct cloud sync with Google Drive, Google Photos, Dropbox, Pexels, Unsplash, Flickr, YouTube, and Vimeo.",
     "installation": "Upload the stagekitwp-media plugin folder to wp-content/plugins/, activate it, and open the StageKit Media Library in the WordPress admin menu.",
-    "changelog": "See the plugin repository for release notes and updates."
+    "changelog": "1.0.1: added image lightbox navigation, responsive gallery columns, and a Back to Galleries link on single gallery views."
   }
 }

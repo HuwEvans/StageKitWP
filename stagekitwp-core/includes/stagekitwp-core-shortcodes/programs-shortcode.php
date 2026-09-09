@@ -36,102 +36,110 @@ function stagekitwp_programs_query_defaults($args = array()) {
 }
 
 /**
- * Resolve the current show ID for stagekitwp_programs current_link layout.
+ * Return the date window for a season slot. StageKitWP seasons normally run
+ * September through June: Fall, Winter, then Spring.
+ */
+function stagekitwp_programs_slot_date_range($slot, $season_start, $season_end) {
+    $season_year = (int) wp_date('Y', $season_start);
+    $slot_dates = array(
+        'Fall'   => array(strtotime($season_year . '-09-01'), strtotime($season_year . '-11-30') + 86399),
+        'Winter' => array(strtotime($season_year . '-12-01'), strtotime(($season_year + 1) . '-03-31') + 86399),
+        'Spring' => array(strtotime(($season_year + 1) . '-04-01'), strtotime(($season_year + 1) . '-06-30') + 86399),
+    );
+
+    if (!isset($slot_dates[$slot])) {
+        return array('start' => 0, 'end' => 0);
+    }
+
+    return array(
+        'start' => max($season_start, $slot_dates[$slot][0]),
+        'end' => min($season_end, $slot_dates[$slot][1]),
+    );
+}
+
+/**
+ * Resolve the program show by dates: playing now, next upcoming, then latest past.
  */
 function stagekitwp_programs_resolve_current_show_id() {
-    // Reuse the existing helper when available.
-    if (function_exists('stagekitwp_get_current_show')) {
-        $helper_id = intval(stagekitwp_get_current_show());
-        if ($helper_id > 0) {
-            return $helper_id;
-        }
-    }
-
-    // Primary fallback: explicit current season flag used by stagekitwp_tickets.
-    $current_seasons = get_posts(stagekitwp_programs_query_defaults(array(
-        'post_type' => 'season',
-        'posts_per_page' => 1,
-        'post_status' => 'publish',
-        'fields' => 'ids',
-        'meta_query' => array(
-            array(
-                'key' => '_stagekitwp_season_is_current',
-                'value' => 1,
-                'compare' => '=',
-            ),
-        ),
-    )));
-
-    if (!empty($current_seasons)) {
-        $season_id = intval($current_seasons[0]);
-        $season_shows = get_posts(stagekitwp_programs_query_defaults(array(
-            'post_type' => 'show',
-            'posts_per_page' => 1,
-            'post_status' => 'publish',
-            'orderby' => 'date',
-            'order' => 'DESC',
-            'fields' => 'ids',
-            'meta_query' => array(
-                array(
-                    'key' => '_stagekitwp_show_season',
-                    'value' => $season_id,
-                    'compare' => '=',
-                ),
-            ),
-        )));
-        if (!empty($season_shows)) {
-            return intval($season_shows[0]);
-        }
-    }
-
-    // Secondary fallback: derive current season from date range, inclusively.
     $now = current_time('timestamp');
+    $slot_order = stagekitwp_show_slot_order();
     $seasons = get_posts(stagekitwp_programs_query_defaults(array(
         'post_type' => 'season',
         'posts_per_page' => -1,
         'post_status' => 'publish',
+        'orderby' => 'meta_value',
+        'meta_key' => '_stagekitwp_season_start_date',
+        'order' => 'ASC',
     )));
-    if (!empty($seasons)) {
-        foreach ($seasons as $season) {
-            $start_raw = get_post_meta($season->ID, '_stagekitwp_season_start_date', true);
-            $end_raw = get_post_meta($season->ID, '_stagekitwp_season_end_date', true);
-            $start_ts = $start_raw ? strtotime($start_raw) : 0;
-            $end_ts = $end_raw ? (strtotime($end_raw) + 86399) : 0;
+    $candidates = array('current' => array(), 'upcoming' => array(), 'past' => array());
 
-            if ($start_ts && $end_ts && $now >= $start_ts && $now <= $end_ts) {
-                $season_shows = get_posts(stagekitwp_programs_query_defaults(array(
-                    'post_type' => 'show',
-                    'posts_per_page' => 1,
-                    'post_status' => 'publish',
-                    'orderby' => 'date',
-                    'order' => 'DESC',
-                    'fields' => 'ids',
-                    'meta_query' => array(
-                        array(
-                            'key' => '_stagekitwp_show_season',
-                            'value' => intval($season->ID),
-                            'compare' => '=',
-                        ),
-                    ),
-                )));
-                if (!empty($season_shows)) {
-                    return intval($season_shows[0]);
-                }
+    foreach ($seasons as $season) {
+        $season_start = strtotime(get_post_meta($season->ID, '_stagekitwp_season_start_date', true));
+        $season_end_raw = strtotime(get_post_meta($season->ID, '_stagekitwp_season_end_date', true));
+        $season_end = $season_end_raw ? $season_end_raw + 86399 : 0;
+        if (!$season_start || !$season_end) {
+            continue;
+        }
+
+        $shows = get_posts(stagekitwp_programs_query_defaults(array(
+            'post_type' => 'show',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'meta_query' => array(array(
+                'key' => '_stagekitwp_show_season',
+                'value' => $season->ID,
+                'compare' => '=',
+            )),
+        )));
+
+        foreach ($shows as $show) {
+            if (!stagekitwp_get_program_url_for_show($show->ID)) {
+                continue;
+            }
+            $slot = get_post_meta($show->ID, '_stagekitwp_show_time_slot', true);
+            if (!isset($slot_order[$slot])) {
+                continue;
+            }
+            $range = stagekitwp_programs_slot_date_range($slot, $season_start, $season_end);
+            if (!$range['start'] || !$range['end'] || $range['start'] > $range['end']) {
+                continue;
+            }
+            $candidate = array(
+                'id' => $show->ID,
+                'season_start' => $season_start,
+                'season_end' => $season_end,
+                'slot_order' => $slot_order[$slot],
+            );
+            if ($range['start'] <= $now && $range['end'] >= $now) {
+                $candidates['current'][] = $candidate;
+            } elseif ($range['start'] > $now) {
+                $candidates['upcoming'][] = $candidate;
+            } elseif ($range['end'] < $now) {
+                $candidates['past'][] = $candidate;
             }
         }
     }
 
-    // Last fallback: most recent published show.
-    $latest = get_posts(stagekitwp_programs_query_defaults(array(
-        'post_type' => 'show',
-        'posts_per_page' => 1,
-        'post_status' => 'publish',
-        'orderby' => 'date',
-        'order' => 'DESC',
-        'fields' => 'ids',
-    )));
+    if (!empty($candidates['current'])) {
+        usort($candidates['current'], static function($left, $right) {
+            return $left['season_start'] <=> $right['season_start'] ?: $left['slot_order'] <=> $right['slot_order'];
+        });
+        return intval($candidates['current'][0]['id']);
+    }
+    if (!empty($candidates['upcoming'])) {
+        usort($candidates['upcoming'], static function($left, $right) {
+            return $left['season_start'] <=> $right['season_start'] ?: $left['slot_order'] <=> $right['slot_order'];
+        });
+        return intval($candidates['upcoming'][0]['id']);
+    }
+    if (!empty($candidates['past'])) {
+        usort($candidates['past'], static function($left, $right) {
+            return $right['season_end'] <=> $left['season_end'] ?: $right['slot_order'] <=> $left['slot_order'];
+        });
+        return intval($candidates['past'][0]['id']);
+    }
 
-    return !empty($latest) ? intval($latest[0]) : 0;
+    return 0;
 }
 
 /**
@@ -203,14 +211,8 @@ function stagekitwp_get_previous_program_show($current_show_id = 0) {
  * Render current_link layout output for stagekitwp_programs shortcode.
  */
 function stagekitwp_render_programs_current_link_layout($atts) {
-    $current_show_id = stagekitwp_programs_resolve_current_show_id();
-    $selected_show_id = $current_show_id;
+    $selected_show_id = stagekitwp_programs_resolve_current_show_id();
     $program_url = $selected_show_id ? stagekitwp_get_program_url_for_show($selected_show_id) : '';
-
-    if (!$program_url) {
-        $selected_show_id = stagekitwp_get_previous_program_show($current_show_id);
-        $program_url = $selected_show_id ? stagekitwp_get_program_url_for_show($selected_show_id) : '';
-    }
 
     if (!$program_url || !$selected_show_id) {
         return '<p class="stagekitwp-programs-current-link-empty">No program available.</p>';

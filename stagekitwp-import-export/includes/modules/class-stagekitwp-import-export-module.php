@@ -66,6 +66,45 @@ abstract class STAGEKITWP_IMPORT_EXPORT_Module {
 		return [];
 	}
 
+	/**
+	 * Post type => meta key map for CPTs that keep a separate "Name" field in
+	 * sync with post_title (e.g. show/season/venue). Override in a subclass
+	 * that owns such CPTs. On import, save_post hooks are suspended for speed,
+	 * so the source site's own title↔name sync handler doesn't run here — this
+	 * re-applies it directly so the two values can never drift apart.
+	 *
+	 * @return array<string,string> post_type => meta_key
+	 */
+	protected function title_sync_map(): array {
+		return [];
+	}
+
+	/**
+	 * If this post type has a designated "Name" meta field, make sure post_title
+	 * matches it after import.
+	 *
+	 * @param int                  $post_id
+	 * @param array<string,mixed>  $data  The exported post record.
+	 */
+	protected function sync_title_from_name_meta( int $post_id, array $data ): void {
+		$map       = $this->title_sync_map();
+		$post_type = $data['post_type'] ?? '';
+		if ( ! isset( $map[ $post_type ] ) ) {
+			return;
+		}
+
+		$name_key = $map[ $post_type ];
+		$name     = $data['meta'][ $name_key ] ?? '';
+		if ( ! is_string( $name ) || '' === trim( $name ) ) {
+			return;
+		}
+
+		$name = sanitize_text_field( $name );
+		if ( $name !== ( $data['post_title'] ?? '' ) ) {
+			wp_update_post( [ 'ID' => $post_id, 'post_title' => $name ] );
+		}
+	}
+
 	// ── Optional overrides ────────────────────────────────────────────────────
 
 	/**
@@ -352,6 +391,7 @@ abstract class STAGEKITWP_IMPORT_EXPORT_Module {
 				if ( ! is_wp_error( $result ) ) {
 					$this->import_post_meta( $result, $data['meta'] ?? [] );
 					$this->import_post_terms( $result, $data['terms'] ?? [] );
+					$this->sync_title_from_name_meta( $result, $data );
 				}
 				return $result;
 			}
@@ -373,6 +413,7 @@ abstract class STAGEKITWP_IMPORT_EXPORT_Module {
 			}
 			$this->import_post_meta( $result, $data['meta'] ?? [], true );
 			$this->import_post_terms( $result, $data['terms'] ?? [] );
+			$this->sync_title_from_name_meta( $result, $data );
 		}
 
 		return $result;

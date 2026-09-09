@@ -26,6 +26,9 @@ class STAGEKITWP_IMPORT_EXPORT_Importer {
 	/** @var array<string,string>  old upload URL => new upload URL */
 	private array $media_url_map = [];
 
+	/** @var array<string,true>|null  cache: relationship meta keys across every registered module */
+	private ?array $relationship_meta_key_set = null;
+
 	/**
 	 * @param STAGEKITWP_IMPORT_EXPORT_Module[] $modules
 	 */
@@ -44,6 +47,29 @@ class STAGEKITWP_IMPORT_EXPORT_Importer {
 	public function set_media_maps( array $id_map, array $url_map ): void {
 		$this->media_id_map  = $id_map;
 		$this->media_url_map = $url_map;
+	}
+
+	/**
+	 * Meta keys that store a related POST ID (show→season, cast→show, etc.),
+	 * gathered from every registered module. These must never be rewritten by
+	 * the media (attachment) ID map — a post ID and an attachment ID are drawn
+	 * from the same numeric ID space, so a small season/show/venue ID can
+	 * coincidentally collide with an old attachment ID and get corrupted if it
+	 * isn't explicitly excluded here. Relationship values are remapped later,
+	 * correctly, by STAGEKITWP_IMPORT_EXPORT_Module::remap_relationships().
+	 *
+	 * @return array<string,true>
+	 */
+	private function relationship_meta_key_set(): array {
+		if ( null === $this->relationship_meta_key_set ) {
+			$this->relationship_meta_key_set = [];
+			foreach ( $this->modules as $module ) {
+				foreach ( $module->relationship_meta_keys() as $key ) {
+					$this->relationship_meta_key_set[ $key ] = true;
+				}
+			}
+		}
+		return $this->relationship_meta_key_set;
 	}
 
 	/**
@@ -232,8 +258,53 @@ class STAGEKITWP_IMPORT_EXPORT_Importer {
 			}
 		}
 		$summary['relationships_remapped'] = $remapped;
+		$summary['page_remaps_resolved']   = $this->auto_resolve_page_remaps( $post_id_map );
 
 		return $summary;
+	}
+
+	/**
+	 * Known "staging option" → "live option" pairs for page-ID references. A
+	 * module's import_options() stores the raw old page ID under a
+	 * stagekitwp_import_export_remap_* staging key (see admin/views/remap.php)
+	 * instead of writing straight to the live option, since that ID is only
+	 * valid on the source site. Filterable so other modules can register pairs.
+	 *
+	 * @return array<string,string>  staging_option_key => live_option_key
+	 */
+	private function page_remap_option_pairs(): array {
+		return apply_filters( 'stagekitwp_import_export_page_remap_pairs', [
+			'stagekitwp_import_export_remap_auditions_page_id'    => 'stagekitwp_auditions_page_id',
+			'stagekitwp_import_export_remap_ma_directory_page_id' => 'stagekitwp_members_directory_page_id',
+		] );
+	}
+
+	/**
+	 * Auto-resolve staged page-ID remaps when the referenced page was included in
+	 * this same import (its old ID is present in $post_id_map, e.g. the Pages
+	 * module was selected). Anything that can't be resolved this way is left for
+	 * the admin to resolve manually on the Page ID Remap screen.
+	 *
+	 * @param array<int,int> $post_id_map  old post ID => new post ID (this run).
+	 * @return int  number of options auto-resolved.
+	 */
+	private function auto_resolve_page_remaps( array $post_id_map ): int {
+		if ( empty( $post_id_map ) ) {
+			return 0;
+		}
+
+		$resolved = 0;
+		foreach ( $this->page_remap_option_pairs() as $staging_key => $live_key ) {
+			$old_page_id = (int) get_option( $staging_key, 0 );
+			if ( ! $old_page_id || ! isset( $post_id_map[ $old_page_id ] ) ) {
+				continue;
+			}
+			update_option( $live_key, $post_id_map[ $old_page_id ] );
+			delete_option( $staging_key );
+			$resolved++;
+		}
+
+		return $resolved;
 	}
 
 	// ── Dry-run ───────────────────────────────────────────────────────────────
@@ -669,6 +740,17 @@ class STAGEKITWP_IMPORT_EXPORT_Importer {
 				'fields'     => 'ids',
 				'numberposts'=> 1,
 			] );
+
+			// Same-site re-import (or a URL collision): the exact original upload
+			// already exists here even though it was never tagged by a previous
+			// TM IO import. Reuse it instead of sideloading a duplicate file.
+			if ( ! $existing && ! empty( $info['original_url'] ) ) {
+				$local_id = attachment_url_to_postid( $info['original_url'] );
+				if ( $local_id ) {
+					$existing = [ $local_id ];
+				}
+			}
+
 			if ( $existing ) {
 				$new_id = (int) $existing[0];
 				$summary['skipped']++;
@@ -767,9 +849,15 @@ class STAGEKITWP_IMPORT_EXPORT_Importer {
 				}
 			}
 
-			// Meta values (IDs and URLs, scalar or nested).
+			// Meta values (IDs and URLs, scalar or nested) — except relationship keys,
+			// which point at OTHER exported posts, not attachments, and are remapped
+			// separately (correctly) once every post has landed.
 			if ( ! empty( $post['meta'] ) && is_array( $post['meta'] ) ) {
+				$relationship_keys = $this->relationship_meta_key_set();
 				foreach ( $post['meta'] as $key => $value ) {
+					if ( isset( $relationship_keys[ $key ] ) ) {
+						continue;
+					}
 					$post['meta'][ $key ] = $this->remap_value( $value );
 				}
 			}

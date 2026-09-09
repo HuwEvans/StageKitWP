@@ -1,19 +1,19 @@
 {
   "$schema": "https://miltonplayers.example/schema/stagekitwp-plugin-bundle.json",
-  "generated": "2026-08-10",
+  "generated": "2026-09-09",
   "plugin": {
     "name": "StageKitWP - Import-Export",
     "slug": "stagekitwp-import-export",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "author": "StageKitWP",
     "author_homepage": "https://github.com/stagekitwp",
     "homepage": "https://github.com/stagekitwp/stagekitwp-import-export",
-    "download_url": "https://github.com/stagekitwp/stagekitwp-import-export/releases/download/2.0.0/stagekitwp-import-export-2.0.0.zip",
+    "download_url": "https://github.com/stagekitwp/stagekitwp-import-export/releases/download/2.1.0/stagekitwp-import-export-2.1.0.zip",
     "requires": "6.0",
     "tested": "6.6",
     "requires_php": "8.0",
     "requires_plugins": [],
-    "last_updated": "2026-08-10"
+    "last_updated": "2026-09-09"
   },
   "description": {
     "short": "Import and export CPT data, plugin settings, and theme customisations across the StageKitWP ecosystem — ZIP bundles, a CSV Season Builder, page-ID remapping, batched Clear Data, and WP-CLI.",

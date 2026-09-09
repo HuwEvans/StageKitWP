@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( ! defined( '_S_VERSION' ) ) {
     // Define theme version matching development cycle
-    define( '_S_VERSION', '3.1.0' );
+    define( '_S_VERSION', '3.1.2' );
 }
 
 /**

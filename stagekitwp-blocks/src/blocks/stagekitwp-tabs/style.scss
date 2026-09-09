@@ -3,18 +3,18 @@
 =================================================== */
 .stagekit-tabs-wrapper {
 	/* Baseline Colors (Light Mode) */
-	--stagekit-tabs-bg: #ffffff;
-	--stagekit-tabs-border: #e2e8f0;
-	--stagekit-tabs-text: #1e293b;
+	--stagekit-tabs-bg: var(--stagekitwp-surface-bg, #ffffff);
+	--stagekit-tabs-border: color-mix(in srgb, var(--stagekitwp-body-text, #1e293b) 16%, transparent);
+	--stagekit-tabs-text: var(--stagekitwp-body-text, #1e293b);
 	--stagekit-nav-bg: var(--stagekit-tabs-bg);
-	--stagekit-nav-border: #e2e8f0;
+	--stagekit-nav-border: var(--stagekit-tabs-border);
 
-	--stagekit-inactive-color-default: #64748b;
+	--stagekit-inactive-color-default: var(--stagekitwp-muted-text, #64748b);
 	--stagekit-inactive-bg-default: transparent;
-	--stagekit-hover-color-default: #1e293b;
-	--stagekit-hover-bg-default: #f1f5f9;
-	--stagekit-active-color-default: #2563eb;
-	--stagekit-active-bg-default: #ffffff;
+	--stagekit-hover-color-default: var(--stagekitwp-heading-text, #1e293b);
+	--stagekit-hover-bg-default: color-mix(in srgb, var(--stagekitwp-body-text, #1e293b) 8%, transparent);
+	--stagekit-active-color-default: var(--stagekitwp-link, #2563eb);
+	--stagekit-active-bg-default: var(--stagekitwp-surface-bg, #ffffff);
 
 	margin: 20px 0;
 	border-radius: var(--stagekit-radius, 8px);
@@ -272,11 +272,11 @@
    2. DYNAMIC THEME DARK MODE (Triggers on Toggle)
 =================================================== */
 
-body.tm-dark-mode .stagekit-tabs-wrapper,
-html.tm-dark-mode .stagekit-tabs-wrapper {
-	--stagekit-tabs-bg: var(--tm-card-bg-dark, #182232);
-	--stagekit-tabs-border: var(--tm-border-color-dark, #2a384c);
-	--stagekit-tabs-text: var(--tm-text-color-dark, #cbd5e1);
+body.stagekitwp-dark-mode .stagekit-tabs-wrapper,
+html.stagekitwp-dark-mode .stagekit-tabs-wrapper {
+	--stagekit-tabs-bg: var(--stagekitwp-surface-bg, #182232);
+	--stagekit-tabs-border: color-mix(in srgb, var(--stagekitwp-body-text, #cbd5e1) 16%, transparent);
+	--stagekit-tabs-text: var(--stagekitwp-body-text, #cbd5e1);
 	--stagekit-nav-bg: var(--stagekit-tabs-bg);
-	--stagekit-nav-border: var(--tm-border-color-dark, #2a384c);
+	--stagekit-nav-border: var(--stagekit-tabs-border);
 }

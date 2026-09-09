@@ -179,6 +179,7 @@ final class StageKitWP_Import_Export_Plugin {
 	 */
 	public function register_modules(): void {
 		$defaults = [
+			'stagekitwp-pages'      => new STAGEKITWP_IMPORT_EXPORT_Mod_Pages(),
 			'stagekitwp-core'       => new STAGEKITWP_IMPORT_EXPORT_Mod_StageKitWP_Core(),
 			'stagekitwp-members'    => new STAGEKITWP_IMPORT_EXPORT_Mod_Members_Area(),
 			'stagekitwp-rc-library' => new STAGEKITWP_IMPORT_EXPORT_Mod_Rc_Library(),

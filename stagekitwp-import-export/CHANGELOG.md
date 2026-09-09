@@ -3,6 +3,20 @@
 All notable changes to **TM IO – Import & Export** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] — 2026-09-09
+
+### Added
+- **Pages module** — WordPress Pages (content, featured image, hierarchy) can now be exported and imported like any other module, with automatic old→new ID mapping.
+- **Auto-resolved page-ID remaps** — options that reference a page (Auditions Page, Members Directory Page) are now remapped automatically when that page is included in the same import. The Page ID Remap screen remains as a fallback only when a reference can't be resolved automatically.
+
+### Fixed
+- **Season/venue links could get corrupted during import.** Media (attachment) ID remapping was previously applied to every numeric meta value, so a show's `_stagekitwp_show_season` or `_stagekitwp_show_venue` value could collide with an old attachment ID and get silently rewritten to point at an image instead of its season/venue. Relationship meta keys are now excluded from media remapping and are only ever resolved by the correct post-ID map.
+- **Re-importing your own export duplicated every image.** Media dedup previously only matched attachments already tagged by a prior TM I/O import. It now also checks the original upload URL against this site's existing media library, so a same-site re-import reuses existing files instead of creating duplicates.
+- **Post title now stays in sync with the "Name" field** for Shows, Seasons, and Venues after import, even though per-post save hooks are intentionally suspended during bulk import for performance.
+
+### Changed
+- **Exports now pack only the original media file**, not the thumbnail/medium/large size variants WordPress generates from it. The importing site regenerates those automatically when the file is sideloaded, so bundles are smaller with no loss of functionality.
+
 ## [2.0.0] — 2026-08-10
 
 ### Added — Tabbed ecosystem admin release

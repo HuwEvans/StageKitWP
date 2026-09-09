@@ -1,7 +1,7 @@
 {
   "name": "StageKitWP Theme",
   "slug": "stagekitwp-theme",
-  "version": "3.1.0",
+  "version": "3.1.2",
   "author": "StageKitWP",
   "author_homepage": "https://github.com/stagekitwp",
   "requires": "6.3",
@@ -13,6 +13,6 @@
   "sections": {
     "description": "The StageKitWP Theme provides the front-end presentation layer for StageKitWP content, including customizer controls, dark/light mode, and flexible homepage layouts.",
     "installation": "Upload the stagekitwp-theme folder to wp-content/themes/, activate it from Appearance > Themes, and configure it through the Customizer.",
-    "changelog": "See the theme changelog in the repository for full release notes."
+    "changelog": "3.1.2: sticky homepage audition notices with a 3-day grace period, audition-details/SM image fallback, Auditions Page linking, and a new single.php post template."
   }
 }

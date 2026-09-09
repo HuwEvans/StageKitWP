@@ -245,40 +245,37 @@ function stagekitwp_auditions_enqueue_css() {
     $css .= stagekitwp_auditions_layout_css();
 
     // ---- Dark overrides ----
-    if ( function_exists( 'stagekitwp_dark_mode_admin_enabled' ) && stagekitwp_dark_mode_admin_enabled() ) {
-        // Luminance-guarded readers: reject near-black text / near-white bg mistakes.
-        $lum = function ( $hex ) {
-            $h = ltrim( $hex, '#' );
-            if ( strlen( $h ) === 3 ) { $h = $h[0].$h[0].$h[1].$h[1].$h[2].$h[2]; }
-            if ( strlen( $h ) !== 6 ) { return -1; }
-            return 0.2126 * hexdec( substr( $h, 0, 2 ) ) / 255
-                 + 0.7152 * hexdec( substr( $h, 2, 2 ) ) / 255
-                 + 0.0722 * hexdec( substr( $h, 4, 2 ) ) / 255;
-        };
-        $ok_bg = function ( $v, $fb ) use ( $lum ) {
-            $v2 = stagekitwp_sanitize_css_color( $v ); if ( ! $v2 ) { return $fb; }
-            return ( $lum( $v2 ) < 0.04 || $lum( $v2 ) > 0.85 ) ? $fb : $v2; };
-        $ok_tx = function ( $v, $fb ) use ( $lum ) {
-            $v2 = stagekitwp_sanitize_css_color( $v ); if ( ! $v2 ) { return $fb; }
-            $l = $lum( $v2 ); return ( $l > 0.85 || $l < 0.04 ) ? $fb : $v2; };
+    // Always emit this selector: the frontend switcher applies the mode on the
+    // html element at runtime, independently of any server-side admin setting.
+    $lum = function ( $hex ) {
+        $h = ltrim( $hex, '#' );
+        if ( strlen( $h ) === 3 ) { $h = $h[0].$h[0].$h[1].$h[1].$h[2].$h[2]; }
+        if ( strlen( $h ) !== 6 ) { return -1; }
+        return 0.2126 * hexdec( substr( $h, 0, 2 ) ) / 255
+             + 0.7152 * hexdec( substr( $h, 2, 2 ) ) / 255
+             + 0.0722 * hexdec( substr( $h, 4, 2 ) ) / 255;
+    };
+    $ok_bg = function ( $v, $fb ) use ( $lum ) {
+        $v2 = stagekitwp_sanitize_css_color( $v ); if ( ! $v2 ) { return $fb; }
+        return ( $lum( $v2 ) < 0.04 || $lum( $v2 ) > 0.85 ) ? $fb : $v2; };
+    $ok_tx = function ( $v, $fb ) use ( $lum ) {
+        $v2 = stagekitwp_sanitize_css_color( $v ); if ( ! $v2 ) { return $fb; }
+        $l = $lum( $v2 ); return ( $l > 0.85 || $l < 0.04 ) ? $fb : $v2; };
 
-        $d_bg  = $ok_bg( get_option( 'stagekitwp_auditions_bg_color_dark', '' ),   '#1e1e1e' );
-        $d_tx  = $ok_tx( get_option( 'stagekitwp_auditions_text_color_dark', '' ), '#e0e0e0' );
-        $d_h2  = $ok_tx( get_option( 'stagekitwp_auditions_h2_color_dark', '' ),   '#e0e0e0' );
-        $d_h3  = $ok_tx( get_option( 'stagekitwp_auditions_h3_color_dark', '' ),   '#7fb2e6' );
+    $d_bg  = $ok_bg( get_option( 'stagekitwp_auditions_bg_color_dark', '' ),   '#1e1e1e' );
+    $d_tx  = $ok_tx( get_option( 'stagekitwp_auditions_text_color_dark', '' ), '#e0e0e0' );
+    $d_h2  = $ok_tx( get_option( 'stagekitwp_auditions_h2_color_dark', '' ),   '#e0e0e0' );
+    $d_h3  = $ok_tx( get_option( 'stagekitwp_auditions_h3_color_dark', '' ),   '#7fb2e6' );
 
-        // Border: reject near-black so it stays visible on the dark card.
-        $d_brd_raw = stagekitwp_sanitize_css_color( get_option( 'stagekitwp_auditions_border_color_dark', '' ), '' ) ?: '';
-        $d_brd = ( $d_brd_raw && $lum( $d_brd_raw ) >= 0.04 ) ? $d_brd_raw : 'rgba(255,255,255,0.15)';
+    $d_brd_raw = stagekitwp_sanitize_css_color( get_option( 'stagekitwp_auditions_border_color_dark', '' ), '' ) ?: '';
+    $d_brd = ( $d_brd_raw && $lum( $d_brd_raw ) >= 0.04 ) ? $d_brd_raw : 'rgba(255,255,255,0.15)';
+    $d_acc = $d_h3 ?: '#1a78c2';
 
-        $d_acc = $d_h3 ?: '#1a78c2';
-
-        $css .= "html.stagekitwp-dark-mode .stagekitwp-auditions{"
-            . "--stagekitwp-aud-bg:{$d_bg}!important;--stagekitwp-aud-text:{$d_tx}!important;"
-            . "--stagekitwp-aud-border:{$d_brd}!important;--stagekitwp-aud-h2:{$d_h2}!important;"
-            . "--stagekitwp-aud-h3:{$d_h3}!important;--stagekitwp-aud-acc:{$d_acc}!important;"
-            . "--stagekitwp-aud-badge-bg:{$d_acc}!important;--stagekitwp-aud-badge-text:#ffffff!important}";
-    }
+    $css .= "html.stagekitwp-dark-mode .stagekitwp-auditions{"
+        . "--stagekitwp-aud-bg:{$d_bg}!important;--stagekitwp-aud-text:{$d_tx}!important;"
+        . "--stagekitwp-aud-border:{$d_brd}!important;--stagekitwp-aud-h2:{$d_h2}!important;"
+        . "--stagekitwp-aud-h3:{$d_h3}!important;--stagekitwp-aud-acc:{$d_acc}!important;"
+        . "--stagekitwp-aud-badge-bg:{$d_acc}!important;--stagekitwp-aud-badge-text:#ffffff!important}";
 
     stagekitwp_add_shortcode_inline_style( 'auditions', $css );
 }

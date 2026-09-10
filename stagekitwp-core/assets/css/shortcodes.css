@@ -541,6 +541,70 @@
     margin-top: 0;
 }
 
+/* current_link: single clickable card (image + title + CTA) with an align option */
+.stagekitwp-programs-current-link-wrap {
+    display: flex;
+    width: 100%;
+}
+.stagekitwp-programs-current-link-align-left   { justify-content: flex-start; }
+.stagekitwp-programs-current-link-align-center { justify-content: center; }
+.stagekitwp-programs-current-link-align-right  { justify-content: flex-end; }
+
+.stagekitwp-programs-current-link-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+    text-decoration: none;
+    color: inherit;
+    text-align: center;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.stagekitwp-programs-current-link-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .14);
+}
+.stagekitwp-programs-current-link-align-left .stagekitwp-programs-current-link-card {
+    align-items: flex-start;
+    text-align: left;
+}
+.stagekitwp-programs-current-link-align-right .stagekitwp-programs-current-link-card {
+    align-items: flex-end;
+    text-align: right;
+}
+.stagekitwp-programs-current-link-card .stagekitwp-program-preview {
+    display: block;
+    width: 100%;
+}
+.stagekitwp-programs-current-link-show {
+    display: block;
+    font-weight: 700;
+    font-size: 1.05em;
+    color: #111111;
+}
+.stagekitwp-programs-current-link {
+    display: inline-block;
+    padding: 10px 22px;
+    background-color: #0073aa;
+    color: #ffffff;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: .85em;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+.stagekitwp-programs-current-link-empty {
+    text-align: center;
+    color: #666666;
+}
+
 /* Shows Shortcode Styles */
 .stagekitwp-season-section {
     margin-bottom: 40px;
@@ -770,14 +834,15 @@
 /* -----------------------------------------------------------------------
    Cast grid responsive breakpoints
    The grid uses repeat(var(--cast-cols,3), 1fr) at full width.
-   At each breakpoint we override with explicit column counts so that
-   cards always have enough room regardless of the castcols= attr.
+   Each breakpoint caps the column count with min() so a smaller castcols=
+   value is always respected (columns only ever collapse further, never
+   increase, as the viewport narrows).
    ----------------------------------------------------------------------- */
 
 /* Landscape tablet / small desktop (≤ 1024px): max 3 columns */
 @media (max-width: 1024px) {
     .stagekitwp-landingpage-castwithbio {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(min(var(--cast-cols, 3), 3), 1fr);
         gap: 20px;
     }
     .stagekitwp-cast-column { padding: 12px; }
@@ -787,7 +852,7 @@
 /* Portrait tablet (≤ 768px): max 2 columns */
 @media (max-width: 768px) {
     .stagekitwp-landingpage-castwithbio {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(min(var(--cast-cols, 3), 2), 1fr);
         gap: 14px;
     }
     .stagekitwp-cast-column { padding: 12px; }
@@ -799,7 +864,7 @@
 /* Small mobile (≤ 480px): 1 column - full width cards */
 @media (max-width: 480px) {
     .stagekitwp-landingpage-castwithbio {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(min(var(--cast-cols, 3), 1), 1fr);
         gap: 12px;
     }
     .stagekitwp-cast-column { padding: 10px; }
@@ -1061,14 +1126,8 @@
     text-align: center;
 }
 
-/* Cast with bio grid - inherit alignment and respect castcols */
+/* Cast with bio grid alignment (column count + responsive breakpoints are defined once, above) */
 .stagekitwp-landingpage-castwithbio {
-    display: grid;
-    grid-template-columns: repeat(var(--cast-cols, 3), 1fr);
-    gap: 25px;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
     text-align: inherit;
 }
 

@@ -13,11 +13,13 @@ get_header();
     while ( have_posts() ) : the_post();
         ?>
         <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+            <?php if ( stagekitwp_theme_display_title() ) : ?>
             <h1 class="entry-title" style="font-size: 2.5rem; margin-bottom: 20px; font-weight: 800;">
                 <?php the_title(); ?>
             </h1>
 
             <div class="title-accent" style="width: 50px; height: 3px; background-color: #e50914; margin-bottom: 40px;"></div>
+            <?php endif; ?>
 
             <div class="entry-content" style="line-height: 1.8; font-size: 1.1rem;">
                 <?php the_content(); ?>

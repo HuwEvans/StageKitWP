@@ -36,7 +36,9 @@ get_header();
                         <header class="entry-header" style="margin-bottom: 15px;">
                             <?php
                             if ( is_singular() ) :
-                                the_title( '<h1 class="entry-title" style="font-size: 2.25rem; margin: 0 0 10px 0; color: #111111;">', '</h1>' );
+                                if ( stagekitwp_theme_display_title() ) :
+                                    the_title( '<h1 class="entry-title" style="font-size: 2.25rem; margin: 0 0 10px 0; color: #111111;">', '</h1>' );
+                                endif;
                             else :
                                 the_title( '<h2 class="entry-title" style="font-size: 1.75rem; margin: 0 0 10px 0; text-transform: uppercase;"><a href="' . esc_url( get_permalink() ) . '" rel="bookmark" style="color: #111111; text-decoration: none;">', '</a></h2>' );
                             endif;

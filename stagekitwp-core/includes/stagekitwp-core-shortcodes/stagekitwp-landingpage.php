@@ -276,8 +276,7 @@ function stagekitwp_render_landingpage_field($show_id, $field_name, $hard_breaks
                         
                         $character = get_post_meta($cast_member->ID, '_stagekitwp_cast_character_name', true);
                         $actor = get_post_meta($cast_member->ID, '_stagekitwp_cast_actor_name', true);
-                        $bio = $cast_id ? get_the_excerpt( $cast_id ) : '';
-                      //  $bio="Not";
+                        $bio = get_post_meta($cast_member->ID, '_stagekitwp_cast_bio', true);
                         if ($character) {
                             $output .= '<strong>' . esc_html($character) . '</strong>';
                             if ($actor) {
@@ -1221,8 +1220,10 @@ function stagekitwp_lp_info_sections( $fields_data, $show_id, $use_button, $butt
     }
 
     // Ticket
-    $tk = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat );
-    if ( $tk ) { $out .= $tk; }
+    if ( isset( $fields_data['ticket_url'] ) ) {
+        $tk = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat );
+        if ( $tk ) { $out .= $tk; }
+    }
 
     return $out;
 }
@@ -1493,9 +1494,10 @@ function stagekitwp_shortcode_landingpage($atts) {
                 <?php if ( $has_image && $img_url ) : ?>
                 <div class="stagekitwp-lp-image-col">
                     <img src="<?php echo esc_url( $img_url ); ?>" alt="<?php echo $show_title; ?>">
-                    <?php $tk_img = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat ); if ( $tk_img ) : ?>
+                    <?php if ( isset( $fields_data['ticket_url'] ) ) :
+                        $tk_img = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat ); if ( $tk_img ) : ?>
                     <div class="stagekitwp-lp-image-ticket"><?php echo $tk_img; ?></div>
-                    <?php endif; ?>
+                    <?php endif; endif; ?>
                     <?php if ( $show_program_button ) :
                         $pg_img = stagekitwp_lp_program_button_html( $show_id, $buttonformat );
                         if ( $pg_img ) : ?>
@@ -1556,9 +1558,10 @@ function stagekitwp_shortcode_landingpage($atts) {
                 <?php if ( $has_image && $img_url ) : ?>
                 <div class="stagekitwp-lp-prog-poster">
                     <img src="<?php echo esc_url( $img_url ); ?>" alt="<?php echo $show_title; ?>">
-                    <?php $tk_img = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat ); if ( $tk_img ) : ?>
+                    <?php if ( isset( $fields_data['ticket_url'] ) ) :
+                        $tk_img = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat ); if ( $tk_img ) : ?>
                     <div class="stagekitwp-lp-image-ticket"><?php echo $tk_img; ?></div>
-                    <?php endif; ?>
+                    <?php endif; endif; ?>
                 </div>
                 <?php endif; ?>
                 <div class="stagekitwp-lp-prog-titleblock">
@@ -1620,8 +1623,10 @@ function stagekitwp_shortcode_landingpage($atts) {
                     }
                 }
                 // Ticket
-                $tk = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat );
-                if ( $tk ) { echo '<div class="stagekitwp-lp-prog-ticket">' . $tk . '</div>'; }
+                if ( isset( $fields_data['ticket_url'] ) ) {
+                    $tk = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat );
+                    if ( $tk ) { echo '<div class="stagekitwp-lp-prog-ticket">' . $tk . '</div>'; }
+                }
                 ?>
             </div>
             <?php echo $banner_html; ?>
@@ -1640,9 +1645,10 @@ function stagekitwp_shortcode_landingpage($atts) {
             <?php if ( $has_image && $img_url ) : ?>
             <div class="stagekitwp-lp-minimal-image">
                 <img src="<?php echo esc_url( $img_url ); ?>" alt="<?php echo $show_title; ?>">
-                <?php $tk_img = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat ); if ( $tk_img ) : ?>
+                <?php if ( isset( $fields_data['ticket_url'] ) ) :
+                    $tk_img = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat ); if ( $tk_img ) : ?>
                 <div class="stagekitwp-lp-image-ticket"><?php echo $tk_img; ?></div>
-                <?php endif; ?>
+                <?php endif; endif; ?>
             </div>
             <?php endif; ?>
             <div class="stagekitwp-lp-minimal-body">

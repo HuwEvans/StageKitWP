@@ -633,16 +633,9 @@ function stagekitwp_show_front_display_redirect() {
         return do_shortcode( $shortcode );
     }, 1 );
 
-    // Suppress duplicate show title when landing page already renders show_name.
-    add_filter( 'the_title', function( $title, $id ) use ( $post_id, $view ) {
-        if ( $id !== $post_id || ! in_the_loop() || ! is_main_query() ) { return $title; }
-        if ( $view === 'landing_page' ) {
-            $fields = array_map( 'trim', explode( ',',
-                get_post_meta( $post_id, '_stagekitwp_show_lp_field_list', true ) ?: STAGEKITWP_LP_DEFAULT_FIELDS ) );
-            if ( in_array( 'show_name', $fields, true ) ) { return ''; }
-        }
-        return $title;
-    }, 10, 2 );
+    // NOTE: no 'the_title' filter here — single-show.php renders no title of its own,
+    // and filtering get_the_title() during the loop also blanked the shortcode's own
+    // internal show_name lookup, causing the landing page title to disappear.
 }
 
 /**

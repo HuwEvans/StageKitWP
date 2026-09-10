@@ -18,6 +18,7 @@ get_header();
         the_post();
         ?>
         <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+            <?php if ( stagekitwp_theme_display_title() ) : ?>
             <header class="entry-header" style="margin-bottom: 20px;">
                 <h1 class="entry-title" style="font-size: 2.5rem; margin: 0 0 10px 0; font-weight: 800; color: #111111;">
                     <?php the_title(); ?>
@@ -29,6 +30,7 @@ get_header();
             </header>
 
             <div class="title-accent" style="width: 50px; height: 3px; background-color: #e50914; margin-bottom: 30px;"></div>
+            <?php endif; ?>
 
             <div class="stagekitwp-single-post-body">
                 <?php if ( has_post_thumbnail() ) : ?>

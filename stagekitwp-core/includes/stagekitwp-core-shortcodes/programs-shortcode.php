@@ -208,6 +208,58 @@ function stagekitwp_get_previous_program_show($current_show_id = 0) {
 }
 
 /**
+ * Extract a pixel count from a CSS width value (e.g. "220px" -> 220) for the
+ * PDF.js canvas data-width attribute. Falls back when no digits are found.
+ */
+function stagekitwp_program_preview_canvas_width($css_value, $fallback = 300) {
+    if (preg_match('/([0-9]+)/', (string) $css_value, $m)) {
+        return max(80, intval($m[1]));
+    }
+    return $fallback;
+}
+
+/**
+ * Render a program preview: attachment image size, generated PDF thumbnail,
+ * or (as a last resort) a client-side PDF.js canvas. Works for image attachments
+ * and PDFs alike, and for direct URLs with no attachment ID.
+ *
+ * @param bool $wrap_link When true (default) the media is wrapped in its own <a>.
+ *                        Pass false when the caller already wraps the whole card in a link.
+ */
+function stagekitwp_render_program_preview_html($program_id, $program_url, $size = 'medium', $canvas_width = 300, $wrap_link = true) {
+    if (!$program_url) {
+        return '';
+    }
+
+    $program_id = absint($program_id);
+    if (!$program_id) {
+        $program_id = attachment_url_to_postid($program_url);
+    }
+
+    $media = '';
+    if ($program_id) {
+        $preview = wp_get_attachment_image_src($program_id, $size);
+        if ($preview) {
+            $media = '<img class="stagekitwp-program-preview-img" src="' . esc_url($preview[0]) . '" alt="Program preview" />';
+        } else {
+            $generated = get_post_meta($program_id, '_stagekitwp_pdf_preview', true);
+            if ($generated) {
+                $media = '<img class="stagekitwp-program-preview-img" src="' . esc_url($generated) . '" alt="Program preview" />';
+            }
+        }
+    }
+    if ($media === '') {
+        // No server-generated preview available: render the PDF's first page client-side.
+        $media = '<canvas class="stagekitwp-pdf-canvas" data-pdf="' . esc_attr($program_url) . '" data-width="' . esc_attr($canvas_width) . '" aria-label="Program preview"></canvas>';
+    }
+
+    if (!$wrap_link) {
+        return $media;
+    }
+    return '<a href="' . esc_url($program_url) . '" target="_blank" rel="noopener noreferrer" class="stagekitwp-program-link">' . $media . '</a>';
+}
+
+/**
  * Render current_link layout output for stagekitwp_programs shortcode.
  */
 function stagekitwp_render_programs_current_link_layout($atts) {
@@ -218,18 +270,33 @@ function stagekitwp_render_programs_current_link_layout($atts) {
         return '<p class="stagekitwp-programs-current-link-empty">No program available.</p>';
     }
 
+    stagekitwp_enqueue_pdf_preview_assets();
+
+    $program_id = absint(get_post_meta($selected_show_id, '_stagekitwp_show_program', true));
     $link_text = !empty($atts['link_text']) ? $atts['link_text'] : 'View Program';
     $target = ($atts['open_new'] === 'false' || $atts['open_new'] === '0') ? '' : ' target="_blank" rel="noopener noreferrer"';
     $show_title = get_the_title($selected_show_id);
 
-    $output = '<div class="stagekitwp-programs-current-link-wrap">';
-    $output .= '<a class="stagekitwp-programs-current-link" href="' . esc_url($program_url) . '"' . $target . '>' . esc_html($link_text) . '</a>';
-    if ($show_title) {
-        $output .= '<div class="stagekitwp-programs-current-link-show">' . esc_html($show_title) . '</div>';
-    }
-    $output .= '</div>';
+    // Not constrained by a grid column, so give it a sensible default width when none is set.
+    $preview_width = trim((string) ($atts['preview_width'] ?? ''));
+    if ($preview_width === '') { $preview_width = '260px'; }
+    $canvas_width = stagekitwp_program_preview_canvas_width($preview_width);
 
-    return $output;
+    $align = strtolower(trim((string) ($atts['align'] ?? '')));
+    if (!in_array($align, array('left', 'center', 'right'), true)) { $align = 'left'; }
+
+    $media_html = stagekitwp_render_program_preview_html($program_id, $program_url, $atts['size'] ?? 'medium', $canvas_width, false);
+
+    // Whole card (image + title + CTA) is a single link so it behaves as one clickable unit.
+    $card = '<a class="stagekitwp-programs-current-link-card" href="' . esc_url($program_url) . '"' . $target . ' style="max-width:' . esc_attr($preview_width) . ';">';
+    $card .= '<span class="stagekitwp-program-preview">' . $media_html . '</span>';
+    if ($show_title) {
+        $card .= '<span class="stagekitwp-programs-current-link-show">' . esc_html($show_title) . '</span>';
+    }
+    $card .= '<span class="stagekitwp-programs-current-link">' . esc_html($link_text) . '</span>';
+    $card .= '</a>';
+
+    return '<div class="stagekitwp-programs-current-link-wrap stagekitwp-programs-current-link-align-' . esc_attr($align) . '">' . $card . '</div>';
 }
 
 function stagekitwp_programs_shortcode($atts) {
@@ -238,6 +305,8 @@ function stagekitwp_programs_shortcode($atts) {
         'season' => '',
         'columns' => 3,
         'size' => 'medium',
+        'preview_width' => '',
+        'align' => 'left',
         'link_text' => 'View Program',
         'open_new' => 'true',
     ), $atts);
@@ -273,92 +342,62 @@ function stagekitwp_programs_shortcode($atts) {
             )
         );
 
-        $query = new WP_Query(stagekitwp_programs_query_defaults(array('post_type' => 'show', 'posts_per_page' => -1, 'meta_query' => $meta_query)));
+        $shows = get_posts(stagekitwp_programs_query_defaults(array('post_type' => 'show', 'posts_per_page' => -1, 'meta_query' => $meta_query)));
+        $shows = stagekitwp_sort_shows_by_slot($shows);
         echo '<div class="stagekitwp-programs-gallery stagekitwp-programs-season-' . esc_attr($season_id) . '">';
-        $i = 0;
-        while ($query->have_posts()) {
-            $query->the_post();
-            $id = get_the_ID();
+        foreach ($shows as $show) {
+            $id = $show->ID;
             $program_id = get_post_meta($id, '_stagekitwp_show_program', true);
             $program_url = get_post_meta($id, '_stagekitwp_show_program_url', true);
             if (!$program_url && $program_id) $program_url = wp_get_attachment_url($program_id);
 
             echo '<div class="stagekitwp-program-item" style="width:' . esc_attr(100 / $columns) . '%;float:left;padding:8px;box-sizing:border-box;">';
-            echo '<h4>' . esc_html(get_the_title()) . '</h4>';
-                if ($program_id) {
-                    // Try to get preview image (WP creates image preview for PDFs)
-                    $preview = wp_get_attachment_image_src($program_id, $atts['size']);
-                    if ($preview) {
-                        echo '<a href="' . esc_url($program_url) . '" target="_blank"><img src="' . esc_url($preview[0]) . '" style="max-width:100%;height:auto;" /></a>';
-                    } else {
-                        // Check for generated preview saved in attachment meta
-                        $generated = get_post_meta($program_id, '_stagekitwp_pdf_preview', true);
-                        if ($generated) {
-                            echo '<a href="' . esc_url($program_url) . '" target="_blank"><img src="' . esc_url($generated) . '" style="max-width:100%;height:auto;" /></a>';
-                        } else {
-                            // No server preview: output a canvas placeholder that will be rendered client-side by PDF.js
-                            echo '<div class="stagekitwp-program-preview">';
-                            echo '<a href="' . esc_url($program_url) . '" target="_blank">';
-                            echo '<canvas class="stagekitwp-pdf-canvas" data-pdf="' . esc_attr($program_url) . '" data-width="300" aria-label="Program preview"></canvas>';
-                            echo '</a>';
-                            echo '</div>';
-                        }
-                    }
-                } elseif ($program_url) {
-                    // No attachment ID (direct URL) — attempt client-side rendering
-                    echo '<div class="stagekitwp-program-preview">';
-                    echo '<a href="' . esc_url($program_url) . '" target="_blank">';
-                    echo '<canvas class="stagekitwp-pdf-canvas" data-pdf="' . esc_attr($program_url) . '" data-width="300" aria-label="Program preview"></canvas>';
-                    echo '</a>';
-                    echo '</div>';
+            echo '<h4>' . esc_html(get_the_title($id)) . '</h4>';
+                if ($program_url) {
+                    $preview_style = $atts['preview_width'] !== '' ? ' style="max-width:' . esc_attr($atts['preview_width']) . ';margin-left:auto;margin-right:auto;"' : '';
+                    $canvas_width = stagekitwp_program_preview_canvas_width($atts['preview_width']);
+                    echo '<div class="stagekitwp-program-preview"' . $preview_style . '>' . stagekitwp_render_program_preview_html($program_id, $program_url, $atts['size'], $canvas_width) . '</div>';
                 } else {
                     echo '<p>No program available</p>';
                 }
             echo '</div>';
-
-            $i++;
         }
         echo '<div style="clear:both;"></div>';
         echo '</div>';
-        wp_reset_postdata();
     } else {
-        // No season provided: group shows by season
-        $seasons = get_posts(stagekitwp_programs_query_defaults(array('post_type' => 'season', 'numberposts' => -1)));
+        // No season provided: group shows by season, most current season first
+        $season_ids = get_posts(stagekitwp_programs_query_defaults(array('post_type' => 'season', 'numberposts' => -1, 'fields' => 'ids')));
+        $seasons = array();
+        foreach ($season_ids as $sid) {
+            $start_raw = get_post_meta($sid, '_stagekitwp_season_start_date', true);
+            $seasons[] = array('id' => $sid, 'title' => get_the_title($sid), 'start_ts' => $start_raw ? strtotime($start_raw) : 0);
+        }
+        usort($seasons, function($a, $b) { return $b['start_ts'] <=> $a['start_ts']; });
+
         echo '<div class="stagekitwp-programs-by-season">';
-        foreach ($seasons as $s) {
-            echo '<h3>' . esc_html($s->post_title) . '</h3>';
-            $query = new WP_Query(stagekitwp_programs_query_defaults(array('post_type' => 'show', 'posts_per_page' => -1, 'meta_key' => '_stagekitwp_show_season', 'meta_value' => $s->ID)));
-            if ($query->have_posts()) {
-                echo '<div class="stagekitwp-programs-season-' . esc_attr($s->ID) . '">';
-                while ($query->have_posts()) {
-                    $query->the_post();
-                    $id = get_the_ID();
+        foreach ($seasons as $season) {
+            $sid = $season['id'];
+            echo '<h3>' . esc_html($season['title']) . '</h3>';
+            $shows = get_posts(stagekitwp_programs_query_defaults(array(
+                'post_type' => 'show',
+                'posts_per_page' => -1,
+                'meta_query' => array(array('key' => '_stagekitwp_show_season', 'value' => $sid, 'compare' => '=')),
+            )));
+            if ($shows) {
+                $shows = stagekitwp_sort_shows_by_slot($shows);
+                echo '<div class="stagekitwp-programs-season-' . esc_attr($sid) . '">';
+                foreach ($shows as $show) {
+                    $id = $show->ID;
                     $program_id = get_post_meta($id, '_stagekitwp_show_program', true);
                     $program_url = get_post_meta($id, '_stagekitwp_show_program_url', true);
                     if (!$program_url && $program_id) $program_url = wp_get_attachment_url($program_id);
 
                     echo '<div class="stagekitwp-program-item" style="width:' . esc_attr(100 / $columns) . '%;float:left;padding:8px;box-sizing:border-box;">';
-                    echo '<h4>' . esc_html(get_the_title()) . '</h4>';
-                    if ($program_id) {
-                        $preview = wp_get_attachment_image_src($program_id, $atts['size']);
-                        if ($preview) {
-                            echo '<a href="' . esc_url($program_url) . '" target="_blank"><img src="' . esc_url($preview[0]) . '" style="max-width:100%;height:auto;" /></a>';
-                        } else {
-                            $generated = get_post_meta($program_id, '_stagekitwp_pdf_preview', true);
-                            if ($generated) {
-                                echo '<a href="' . esc_url($program_url) . '" target="_blank"><img src="' . esc_url($generated) . '" style="max-width:100%;height:auto;" /></a>';
-                            } else {
-                                // No server preview: render client-side canvas
-                                echo '<a href="' . esc_url($program_url) . '" target="_blank">';
-                                echo '<canvas class="stagekitwp-pdf-canvas" data-pdf="' . esc_attr($program_url) . '" data-width="300" aria-label="Program preview"></canvas>';
-                                echo '</a>';
-                            }
-                        }
-                    } elseif ($program_url) {
-                        // No attachment ID but URL present: attempt client-side rendering
-                        echo '<a href="' . esc_url($program_url) . '" target="_blank">';
-                        echo '<canvas class="stagekitwp-pdf-canvas" data-pdf="' . esc_attr($program_url) . '" data-width="300" aria-label="Program preview"></canvas>';
-                        echo '</a>';
+                    echo '<h4>' . esc_html(get_the_title($id)) . '</h4>';
+                    if ($program_url) {
+                        $preview_style = $atts['preview_width'] !== '' ? ' style="max-width:' . esc_attr($atts['preview_width']) . ';margin-left:auto;margin-right:auto;"' : '';
+                        $canvas_width = stagekitwp_program_preview_canvas_width($atts['preview_width']);
+                        echo '<div class="stagekitwp-program-preview"' . $preview_style . '>' . stagekitwp_render_program_preview_html($program_id, $program_url, $atts['size'], $canvas_width) . '</div>';
                     } else {
                         echo '<p>No program available</p>';
                     }
@@ -369,7 +408,6 @@ function stagekitwp_programs_shortcode($atts) {
             } else {
                 echo '<p>No programs for this season.</p>';
             }
-            wp_reset_postdata();
         }
         echo '</div>';
     }

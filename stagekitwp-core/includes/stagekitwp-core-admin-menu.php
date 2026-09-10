@@ -1963,12 +1963,14 @@ function stagekitwp_instructions_page() {
 	echo "<li><code>layout</code> (string, default: <code>gallery</code>) - <code>gallery</code> or <code>current_link</code></li>";
 	echo "<li><code>season</code> (integer or slug) - Display programs for specific season</li>";
 	echo "<li><code>columns</code> (integer, default: 3) - Number of columns in gallery</li>";
-	echo "<li><code>size</code> (string, default: \"medium\") - Thumbnail size</li>";
+	echo "<li><code>size</code> (string, default: \"medium\") - Thumbnail size (WordPress image size name)</li>";
+	echo "<li><code>preview_width</code> (CSS width, e.g. \"220px\", default: \"260px\" for <code>current_link</code>, auto for <code>gallery</code>) - Constrains the displayed preview width</li>";
+	echo "<li><code>align</code> (left|center|right, default: \"left\") - Aligns the <code>current_link</code> card within its container</li>";
 	echo "<li><code>link_text</code> (string, default: \"View Program\") - Link text for <code>current_link</code> layout</li>";
 	echo "<li><code>open_new</code> (true|false, default: true) - Open link in a new tab for <code>current_link</code> layout</li>";
 	echo "</ul>";
 	echo "<p><strong>Example:</strong> <code>[stagekitwp_programs season=\"177\" columns=\"2\"]</code></p>";
-	echo "<p><strong>Example:</strong> <code>[stagekitwp_programs layout=\"current_link\" link_text=\"View Current Program\"]</code></p>";
+	echo "<p><strong>Example:</strong> <code>[stagekitwp_programs layout=\"current_link\" link_text=\"View Current Program\" preview_width=\"180px\" align=\"center\"]</code></p>";
 	echo "<p><strong>Colours:</strong> Uses the <strong>Show</strong> Display Options tab.</p>";
 
 	echo "<h3>14. [stagekitwp_tickets]</h3>";

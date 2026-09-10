@@ -681,6 +681,9 @@ add_action( 'wp_enqueue_scripts', 'stagekitwp_theme_fix_customizer_import_maps',
 // Include the custom theme administration dashboard layout interface
 require_once get_template_directory() . '/inc/theme-dashboard.php';
 
+// Per-post / per-page "Show Title" toggle (Post Options / Page Options meta boxes)
+require_once get_template_directory() . '/inc/post-page-options.php';
+
 
 // =============================================================================
 // DYNAMIC LIVE MENU OVERRIDES & CUSTOMIZER GENERATORS

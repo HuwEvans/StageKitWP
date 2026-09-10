@@ -1,16 +1,16 @@
 {
-  "new_version": "5.2.6",
-  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-core/stagekitwp-core-5.2.6.zip",
+  "new_version": "5.2.7",
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-core/stagekitwp-core-5.2.7.zip",
   "short_description": "Core StageKitWP plugin for seasons, shows, cast, awards, venues, board members, sponsors, contributors, testimonials, advertisers, and display options.",
   "sections": {
     "description": "The StageKitWP Core plugin provides the content management foundation for the full StageKitWP ecosystem, including custom post types, block support, admin hub screens, and the shared display options system.",
     "installation": "Upload the stagekitwp-core plugin folder to wp-content/plugins/, activate it, and open the StageKitWP admin hub to begin managing content.",
-    "changelog": "5.2.6: [stagekitwp_programs] gallery layout now sorts seasons newest-first and shows by time slot (Fall/Winter/Spring), matching the sorting used by season/show shortcodes elsewhere."
+    "changelog": "5.2.7: fixed castwithbio cast photos being cropped at the single-column mobile breakpoint (object-fit was set to cover instead of contain)."
   },
   "author": "Huw Evans",
-  "version": "5.2.6",
+  "version": "5.2.7",
   "slug": "stagekitwp-core",
-  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-core/stagekitwp-core-5.2.6.zip",
+  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-core/stagekitwp-core-5.2.7.zip",
   "homepage": "https://github.com/HuwEvans/StageKitWP/tree/StageKitWP/dist/stagekitwp-core",
   "requires": "6.8.2",
   "author_homepage": "https://github.com/HuwEvans",

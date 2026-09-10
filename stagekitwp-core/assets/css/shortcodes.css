@@ -872,7 +872,7 @@
         height: auto;
         aspect-ratio: 3/4;
         max-height: 260px;   /* cap portrait image height on phone */
-        object-fit: cover;
+        object-fit: contain; /* letterbox rather than crop the image */
         margin-bottom: 8px;
     }
 }

@@ -155,7 +155,7 @@ function stagekitwp_ss_render_spotlight($shows,$show_aud=true,$aud_url=''){
         echo '<div class="stagekitwp-ss-spotlight-meta">';
         if($auth){echo '<p><strong>Author:</strong> '.esc_html($auth).'</p>';}
         if($sub) {echo '<p><strong>Music/Lyrics/Book:</strong> '.esc_html($sub).'</p>';}
-        $dl=trim($dir.($adir?' / Ass. Dir. '.$adir:''));
+        $dl=trim($dir.($adir?' / Asst. Dir. '.$adir:''));
         if($dl)  {echo '<p><strong>Directed by:</strong> '.esc_html($dl).'</p>';}
         if($prod){echo '<p><strong>Produced by:</strong> '.esc_html($prod).'</p>';}
         if($sm)  {echo '<p><strong>Stage Managed by:</strong> '.esc_html($sm).'</p>';}
@@ -213,7 +213,7 @@ function stagekitwp_ss_render_cards($shows,$show_aud=true,$aud_url=''){
         if($dates)   {echo '<p class="stagekitwp-ss-card-field"><strong>Dates:</strong> '.esc_html($dates).'</p>';}
         if($auth)    {echo '<p class="stagekitwp-ss-card-field"><strong>Author:</strong> '.esc_html($auth).'</p>';}
         if($sub)     {echo '<p class="stagekitwp-ss-card-field"><strong>Music/Lyrics/Book:</strong> '.esc_html($sub).'</p>';}
-        $dl=trim($dir.($adir?' / Ass. Dir. '.$adir:''));
+        $dl=trim($dir.($adir?' / Asst. Dir. '.$adir:''));
         if($dl)      {echo '<p class="stagekitwp-ss-card-field"><strong>Directed by:</strong> '.esc_html($dl).'</p>';}
         if($prod)    {echo '<p class="stagekitwp-ss-card-field"><strong>Produced by:</strong> '.esc_html($prod).'</p>';}
         if($sm)      {echo '<p class="stagekitwp-ss-card-field"><strong>Stage Managed by:</strong> '.esc_html($sm).'</p>';}

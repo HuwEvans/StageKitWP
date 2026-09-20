@@ -1,6 +1,36 @@
 # Theatre Manager Theme — Changelog
 <!-- markdownlint-disable-file MD022 MD024 MD032 -->
 
+## Version 3.1.4 — 2026-09-19 — Data-driven Upcoming Season Grid toggle
+
+### Updates
+
+- The "Display Upcoming Season Grid" homepage toggle is now a 4-way select: Off, On, On if a next season exists, or On if the next season has show(s) — resolved via StageKitWP Core's next-season helpers instead of a plain on/off checkbox.
+
+### Files changed
+
+- `inc/customizer.php`
+- `front-page.php`
+- `style.css`
+- `stagekitwp-theme.json`
+
+## Version 3.1.3 — 2026-09-15 — Lazy-loaded hero media and metadata prefetch + Hero overlay controls
+
+### Updates
+
+- Hero videos now specify `preload="metadata"` to prefetch only media metadata and use IntersectionObserver for responsive viewport-based lazy loading and playback management.
+- Hero background images now render dedicated elements with `loading="lazy"` and `decoding="async"`.
+- Single show hero headers now lazy load featured background images.
+- Added Customizer controls for hero overlay color and opacity percentage (0–100%) with instant postMessage live preview.
+
+### Files changed
+
+- `inc/customizer.php`
+- `template-parts/sections/section-hero.php`
+- `functions.php`
+- `single-shows.php`
+- `assets/js/customizer-preview.js`
+
 ## Version 3.1.2 — 2026-09-08 — Homepage auditions feed + single post template
 
 ### Updates

@@ -1,5 +1,33 @@
 # Changelog
 
+## Version 5.2.9 — 2026-09-19 — Landing Page awards section + second Get Tickets button
+
+### Added
+
+- **Awards on the Landing Page:** `[stagekitwp_landingpage]` (and the Show CPT's built-in front-end display) can now show the show's Awards CPT entries (name, recipient, winner/nominated/not-eligible badge) directly after the cast list. Enable via the `field_list` shortcode attribute or the "Awards" checkbox in the Show's Front-end Display meta box. Per-show/global heading override supported like other sections (`awards` heading key).
+- **Second Get Tickets button:** For the two-column (`card`) and hero (`hero`) layouts only, a second "Get Tickets" button now renders right below the performances (show_dates) list and before the venue, in addition to the existing button at the end of the info block.
+
+### Files changed
+
+- `includes/stagekitwp-core-shortcodes/stagekitwp-landingpage.php`
+- `includes/stagekitwp-core-show-front-display.php`
+- `stagekitwp-core.php`
+- `stagekitwp-core.json`
+
+## Version 5.2.8 — 2026-09-19 — Menu builder season/show display conditions
+
+### Added
+
+- **Menu editor:** Appearance > Menus items now have a "Display" option: Show always (default), Show if there is a next season, or Show if there are shows in the next season. Hidden parent items also hide their child items on the front end.
+- New helpers: `stagekitwp_get_next_season()` (resolves the season following the currently-running one, or the earliest future season), `stagekitwp_season_has_shows()`, and `stagekitwp_next_season_has_shows()` (returns false when there is no next season).
+
+### Files changed
+
+- `includes/stagekitwp-core-nav-menu-conditions.php` (new)
+- `includes/stagekitwp-core-helpers.php`
+- `stagekitwp-core.php`
+- `stagekitwp-core.json`
+
 ## Version 5.2.1 — 2026-09-07 — Shortcode display, mode, and program selection fixes
 
 ### Fixes

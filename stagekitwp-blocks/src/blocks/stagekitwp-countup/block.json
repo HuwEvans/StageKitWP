@@ -1,0 +1,82 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "stagekitwp/countup",
+	"title": "Count Up",
+	"category": "stagekitwp-blocks",
+	"icon": "chart-line",
+	"description": "Animated count up number.",
+	"supports": {
+		"html": false
+	},
+	"attributes": {
+		"preText": {
+			"type": "string",
+			"default": ""
+		},
+		"startValue": {
+			"type": "number",
+			"default": 0
+		},
+		"number": {
+			"type": "number",
+			"default": 100
+		},
+		"postText": {
+			"type": "string",
+			"default": ""
+		},
+		"colorMode": {
+			"type": "string",
+			"default": "auto"
+		},
+		"duration": {
+			"type": "number",
+			"default": 2000
+		},
+		"delay": {
+			"type": "number",
+			"default": 0
+		},
+		"animationStyle": {
+			"type": "string",
+			"default": "ease-out"
+		},
+		"separator": {
+			"type": "boolean",
+			"default": true
+		},
+		"alignment": {
+			"type": "string",
+			"default": "center"
+		},
+		"numberSize": {
+			"type": "number",
+			"default": 48
+		},
+		"textSize": {
+			"type": "number",
+			"default": 24
+		},
+		"marginTop": {
+			"type": "number",
+			"default": 0
+		},
+		"marginBottom": {
+			"type": "number",
+			"default": 20
+		},
+		"textColor": {
+			"type": "string",
+			"default": ""
+		},
+		"numberColor": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js"
+}

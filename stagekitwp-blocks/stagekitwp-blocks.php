@@ -81,6 +81,13 @@ function stagekitwp_register_blocks() {
 		'bookshelf-container',
 		'bookshelf-item',
 		'stagekitwp-dual-image',
+		'stagekitwp-lottie',
+		'stagekitwp-countup',
+		'stagekitwp-countdown',
+		'stagekitwp-accordion',
+		'stagekitwp-accordion-item',
+		'stagekitwp-thermometer',
+		'stagekitwp-divider',
 	);
 
 	foreach ( $blocks as $block ) {
@@ -123,4 +130,130 @@ function stagekitwp_new_block_category( $cats ) {
 	$cats = array_slice( $cats, 0, $position, true ) + $new + array_slice( $cats, $position, null, true );
 
 	return array_values( $cats );
+}
+
+add_filter(
+	'upload_mimes',
+	function ( $mimes ) {
+		$mimes['json'] = 'application/json';
+		return $mimes;
+	}
+);
+
+/**
+ * Allow JSON uploads for Lottie animations.
+ */
+add_filter(
+	'upload_mimes',
+	function ( $mimes ) {
+
+		$mimes['json'] = 'application/json';
+
+		return $mimes;
+	}
+);
+
+/**
+ * Ensure JSON files are recognized properly.
+ */
+add_filter(
+	'wp_check_filetype_and_ext',
+	function ( $data, $file, $filename ) {
+
+		if ( 'json' === pathinfo( $filename, PATHINFO_EXTENSION ) ) {
+
+			$data['ext']  = 'json';
+			$data['type'] = 'application/json';
+
+		}
+
+		return $data;
+
+	},
+	10,
+	3
+);
+
+/**
+ * Register a REST proxy for the Canadian Play Outlet title search.
+ *
+ * The storefront's predictive-search endpoint doesn't send CORS headers, so the
+ * block editor can't call it directly from the browser. This route fetches it
+ * server-side instead. The target host is fixed and the only user input is the
+ * search title, so this can't be used to reach arbitrary URLs.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'stagekitwp-blocks/v1',
+			'/canadian-play-outlet-search',
+			array(
+				'methods'             => 'GET',
+				'callback'            => 'stagekitwp_canadian_play_outlet_search',
+				'permission_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+				'args'                => array(
+					'title' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
+	}
+);
+
+/**
+ * Look up plays by title on the Canadian Play Outlet (Playwrights Guild of Canada) storefront.
+ *
+ * @param WP_REST_Request $request The REST request.
+ * @return WP_REST_Response|WP_Error
+ */
+function stagekitwp_canadian_play_outlet_search( $request ) {
+	$title = sanitize_text_field( $request->get_param( 'title' ) );
+
+	if ( '' === $title ) {
+		return new WP_Error( 'stagekitwp_missing_title', __( 'A title is required.', 'stagekitwp-blocks' ), array( 'status' => 400 ) );
+	}
+
+	$url = add_query_arg(
+		array(
+			'q'                 => rawurlencode( $title ),
+			'resources[type]'   => 'product',
+			'resources[limit]'  => 5,
+		),
+		'https://www.canadianplayoutlet.com/search/suggest.json'
+	);
+
+	$response = wp_remote_get(
+		$url,
+		array(
+			'timeout' => 8,
+			'headers' => array( 'Accept' => 'application/json' ),
+		)
+	);
+
+	if ( is_wp_error( $response ) ) {
+		return new WP_Error( 'stagekitwp_lookup_failed', __( 'The Canadian Play Outlet lookup failed.', 'stagekitwp-blocks' ), array( 'status' => 502 ) );
+	}
+
+	$body     = json_decode( wp_remote_retrieve_body( $response ), true );
+	$products = $body['resources']['results']['products'] ?? array();
+
+	$results = array_map(
+		function ( $product ) {
+			$path = isset( $product['url'] ) ? ltrim( wp_parse_url( $product['url'], PHP_URL_PATH ), '/' ) : '';
+			return array(
+				'title'       => isset( $product['title'] ) ? sanitize_text_field( $product['title'] ) : '',
+				'path'        => $path,
+				'coverImage'  => isset( $product['featured_image']['url'] ) ? esc_url_raw( $product['featured_image']['url'] ) : '',
+				'description' => isset( $product['body'] ) ? sanitize_text_field( wp_strip_all_tags( $product['body'] ) ) : '',
+			);
+		},
+		$products
+	);
+
+	return rest_ensure_response( array( 'results' => $results ) );
 }

@@ -535,34 +535,34 @@
 }
 
 /* Media Table List View */
-.skwpm-items-list {
+table.skwpm-items-list {
 	width: 100%;
 	border-collapse: collapse;
 	font-size: 13px;
 }
 
-.skwpm-items-list th,
-.skwpm-items-list td {
+table.skwpm-items-list th,
+table.skwpm-items-list td {
 	padding: 8px 12px;
 	border-bottom: 1px solid #dcdcde;
 	text-align: left;
 }
 
-.skwpm-items-list th {
+table.skwpm-items-list th {
 	background: #f6f7f7;
 	font-weight: 600;
 	color: #50575e;
 }
 
-.skwpm-items-list tr:hover td {
+table.skwpm-items-list tr:hover td {
 	background: #f6f7f7;
 }
 
-.skwpm-items-list tr.selected td {
+table.skwpm-items-list tr.selected td {
 	background: #e7f1f9;
 }
 
-.skwpm-list-thumb {
+table.skwpm-items-list .skwpm-list-thumb {
 	width: 42px;
 	height: 42px;
 	object-fit: cover;

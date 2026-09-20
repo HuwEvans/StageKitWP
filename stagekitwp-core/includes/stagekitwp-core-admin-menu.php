@@ -1264,6 +1264,31 @@ function stagekitwp_settings_page() {
 
 function stagekitwp_register_settings() {
 	add_settings_section(
+		'stagekitwp_organization_section',
+		'Organization',
+		'stagekitwp_organization_section_callback',
+		'stagekitwp-settings'
+	);
+
+	add_settings_field(
+		'stagekitwp_organization_name',
+		'Organization Name',
+		'stagekitwp_organization_name_callback',
+		'stagekitwp-settings',
+		'stagekitwp_organization_section'
+	);
+	register_setting( 'stagekitwp_settings_group', 'stagekitwp_organization_name', 'sanitize_text_field' );
+
+	add_settings_field(
+		'stagekitwp_organization_address',
+		'Organization Address',
+		'stagekitwp_organization_address_callback',
+		'stagekitwp-settings',
+		'stagekitwp_organization_section'
+	);
+	register_setting( 'stagekitwp_settings_group', 'stagekitwp_organization_address', 'sanitize_text_field' );
+
+	add_settings_section(
 		'stagekitwp_season_builder_section',
 		'Season Builder',
 		null,
@@ -1294,6 +1319,24 @@ function stagekitwp_register_settings() {
 		'stagekitwp_google_maps_section'
 	);
 	register_setting( 'stagekitwp_settings_group', 'stagekitwp_google_maps_api_key' );
+
+	add_settings_section(
+		'stagekitwp_ticketing_section',
+		'Ticketing',
+		'stagekitwp_ticketing_section_callback',
+		'stagekitwp-settings'
+	);
+
+	add_settings_field(
+		'stagekitwp_default_ticket_price',
+		'Default Ticket Price (CAD)',
+		'stagekitwp_default_ticket_price_callback',
+		'stagekitwp-settings',
+		'stagekitwp_ticketing_section'
+	);
+	register_setting( 'stagekitwp_settings_group', 'stagekitwp_default_ticket_price', array(
+		'sanitize_callback' => 'stagekitwp_sanitize_ticket_price',
+	) );
 
 	add_settings_section(
 		'stagekitwp_auditions_section',
@@ -1389,6 +1432,23 @@ add_action( 'admin_init', function() {
     }
 } );
 
+function stagekitwp_organization_section_callback() {
+	echo '<p>Configure theatre or organization details used across schemas and metadata.</p>';
+}
+
+function stagekitwp_organization_name_callback() {
+	$value = get_option( 'stagekitwp_organization_name', '' );
+	$site_name = get_bloginfo( 'name' );
+	echo '<input type="text" id="stagekitwp_organization_name" name="stagekitwp_organization_name" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="' . esc_attr( $site_name ) . '" />';
+	echo '<p class="description">Overrides the WordPress Site Identity (<code>' . esc_html( $site_name ) . '</code>) in SEO structured data, schema markup (such as organizer, publisher, and performer fallback), and metadata.</p>';
+}
+
+function stagekitwp_organization_address_callback() {
+	$value = get_option( 'stagekitwp_organization_address', '' );
+	echo '<input type="text" id="stagekitwp_organization_address" name="stagekitwp_organization_address" value="' . esc_attr( $value ) . '" class="regular-text" />';
+	echo '<p class="description">Used as the schema markup <code>location</code> address for shows that have no Venue assigned.</p>';
+}
+
 function stagekitwp_google_maps_section_callback() {
 	echo '<p>Configure Google Maps integration for venue map thumbnails in the [stagekitwp_venues] shortcode.</p>';
 }
@@ -1401,6 +1461,24 @@ function stagekitwp_google_maps_api_key_callback() {
 
 function stagekitwp_auditions_section_callback() {
 	echo '<p>Set the page that contains your <code>[stagekitwp_auditions]</code> shortcode. When configured, the “Audition Info” button in <code>[stagekitwp_season_shows]</code> will link directly to this page.</p>';
+}
+
+function stagekitwp_ticketing_section_callback() {
+	echo '<p>Set the default ticket price used for the Offer schema price (in CAD) when a show does not specify its own price.</p>';
+}
+
+function stagekitwp_sanitize_ticket_price( $value ) {
+	$value = str_replace( array( '$', ',' ), '', (string) $value );
+	if ( '' === trim( $value ) ) {
+		return '';
+	}
+	return number_format( (float) $value, 2, '.', '' );
+}
+
+function stagekitwp_default_ticket_price_callback() {
+	$value = get_option( 'stagekitwp_default_ticket_price', '' );
+	echo '<input type="text" id="stagekitwp_default_ticket_price" name="stagekitwp_default_ticket_price" value="' . esc_attr( $value ) . '" size="10" placeholder="e.g. 45.00" />';
+	echo '<p class="description">Used as the Offer price (CAD) in show schema markup when no show-specific price is available.</p>';
 }
 
 function stagekitwp_auditions_page_id_callback() {

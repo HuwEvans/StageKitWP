@@ -9,8 +9,15 @@ get_header();
 ?>
 
 <?php while ( have_posts() ) : the_post(); ?>
-    <header class="show-hero-banner" style="background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, #111111 100%), url('<?php echo esc_url( get_the_post_thumbnail_url( get_the_ID(), 'full' ) ); ?>') center/cover no-repeat; padding: 120px 0 60px 0; color: #ffffff;">
-        <div class="stagekitwp-container" style="max-width: var(--stagekitwp-site-max-width, 1200px); margin: 0 auto; padding: 0 20px;">
+    <?php $thumb_url = get_the_post_thumbnail_url( get_the_ID(), 'full' ); ?>
+    <header class="show-hero-banner" style="position: relative; overflow: hidden; background-color: #111111; padding: 120px 0 60px 0; color: #ffffff;">
+        <?php if ( $thumb_url ) : ?>
+            <div class="show-hero-image-wrapper" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+                <img src="<?php echo esc_url( $thumb_url ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" class="show-hero-image" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;" />
+            </div>
+            <div class="show-hero-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, #111111 100%); z-index: 2;"></div>
+        <?php endif; ?>
+        <div class="stagekitwp-container" style="position: relative; z-index: 3; max-width: var(--stagekitwp-site-max-width, 1200px); margin: 0 auto; padding: 0 20px;">
             <span class="show-badge" style="background-color: #e50914; color: #fff; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; border-radius: 2px;">
                 <?php _e( 'On Stage', 'stagekitwp-theme' ); ?>
             </span>

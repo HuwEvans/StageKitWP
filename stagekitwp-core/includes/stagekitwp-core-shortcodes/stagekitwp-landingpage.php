@@ -428,6 +428,59 @@ function stagekitwp_render_landingpage_field($show_id, $field_name, $hard_breaks
                 }
             }
             break;
+
+        case 'awards':
+            $award_args = [
+                'post_type' => 'award',
+                'posts_per_page' => -1,
+                'meta_query' => [
+                    [
+                        'key' => '_stagekitwp_award_show_id',
+                        'value' => $show_id,
+                        'compare' => '='
+                    ]
+                ]
+            ];
+            $award_posts = get_posts($award_args);
+
+            if ($award_posts) {
+                usort($award_posts, function ($a, $b) {
+                    $status_a = get_post_meta($a->ID, '_stagekitwp_award_status', true);
+                    $status_b = get_post_meta($b->ID, '_stagekitwp_award_status', true);
+                    $win_a = ($status_a === 'THEA Winner') ? 0 : 1;
+                    $win_b = ($status_b === 'THEA Winner') ? 0 : 1;
+                    return ($win_a !== $win_b) ? $win_a - $win_b : strcasecmp($a->post_title, $b->post_title);
+                });
+
+                if ($hard_breaks) {
+                    $output .= '<ul class="stagekitwp-landingpage-awards-list">';
+                    foreach ($award_posts as $award) {
+                        $award_name = get_post_meta($award->ID, '_stagekitwp_award_name', true) ?: $award->post_title;
+                        $recipient  = get_post_meta($award->ID, '_stagekitwp_award_recipient', true);
+                        $status     = get_post_meta($award->ID, '_stagekitwp_award_status', true);
+
+                        $output .= '<li class="stagekitwp-landingpage-award-item">';
+                        if (function_exists('stagekitwp_awards_badge')) {
+                            $output .= stagekitwp_awards_badge($status);
+                        }
+                        $output .= '<strong class="stagekitwp-landingpage-award-name">' . esc_html($award_name) . '</strong>';
+                        if ($recipient) {
+                            $output .= '<span class="stagekitwp-landingpage-award-recipient">' . esc_html($recipient) . '</span>';
+                        }
+                        $output .= '</li>';
+                    }
+                    $output .= '</ul>';
+                } else {
+                    $award_texts = [];
+                    foreach ($award_posts as $award) {
+                        $award_name = get_post_meta($award->ID, '_stagekitwp_award_name', true) ?: $award->post_title;
+                        $recipient  = get_post_meta($award->ID, '_stagekitwp_award_recipient', true);
+                        $award_texts[] = $recipient ? esc_html($award_name) . ' - ' . esc_html($recipient) : esc_html($award_name);
+                    }
+                    $output .= implode(', ', $award_texts);
+                }
+            }
+            break;
     }
 
     return $output;
@@ -808,6 +861,27 @@ function stagekitwp_landingpage_styles() {
     font-size: .9rem;
     line-height: 1.55;
 }
+/* Awards list */
+.stagekitwp-landingpage-awards-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.stagekitwp-landingpage-award-item {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: .9rem;
+    color: var(--stagekitwp-lp-text);
+}
+.stagekitwp-landingpage-award-recipient {
+    opacity: .8;
+    font-size: .87em;
+}
 /* Ticket button */
 .stagekitwp-lp-ticket-btn {
     display: inline-block;
@@ -1015,6 +1089,7 @@ function stagekitwp_landingpage_styles() {
 }
 .stagekitwp-lp-prog-logistics-item { flex: 1 1 200px; }
 .stagekitwp-lp-prog-cast { margin-bottom: 24px; }
+.stagekitwp-lp-prog-awards { margin-bottom: 24px; }
 .stagekitwp-lp-prog-ticket { padding-top: 16px; border-top: 1px solid var(--stagekitwp-lp-border); }
 @media (max-width: 680px) {
     .stagekitwp-lp-prog-poster { flex: 0 0 120px; max-width: 120px; }
@@ -1068,6 +1143,7 @@ function stagekitwp_lp_heading( $key, $show_id ) {
         'program_pdf'   => 'Programme',
         'venue'         => 'Venue',
         'cast'          => 'Cast',
+        'awards'        => 'Awards',
     ];
     // 1. Per-show meta (set in Front-end Display meta box)
     $meta = get_post_meta( $show_id, '_stagekitwp_lp_heading_' . $key, true );
@@ -1144,10 +1220,14 @@ function stagekitwp_lp_season_banner( $show_id ) {
 }
 
 /**
- * Shared crew + synopsis + logistics + cast + ticket block used by multiple layouts.
+ * Shared crew + synopsis + logistics + cast + awards + ticket block used by multiple layouts.
  * Returns HTML string.
+ *
+ * @param string $layout Current layout slug ('card', 'hero', 'programme', 'minimal').
+ *                        When 'card' or 'hero', an extra ticket button is inserted right
+ *                        below the performances (show_dates) list and before the venue.
  */
-function stagekitwp_lp_info_sections( $fields_data, $show_id, $use_button, $buttonformat ) {
+function stagekitwp_lp_info_sections( $fields_data, $show_id, $use_button, $buttonformat, $layout = '' ) {
     $out = '';
 
     // Creative team
@@ -1189,6 +1269,12 @@ function stagekitwp_lp_info_sections( $fields_data, $show_id, $use_button, $butt
                    . '<span class="stagekitwp-lp-label">' . stagekitwp_lp_heading( 'show_dates', $show_id ) . '</span>'
                    . '<span class="stagekitwp-lp-value">' . $fields_data['show_dates'] . '</span>'
                    . '</div>';
+        // Extra "Get Tickets" button right below the performances list, before the venue —
+        // only for the two-column (card) and hero layouts.
+        if ( in_array( $layout, [ 'card', 'hero' ], true ) && isset( $fields_data['ticket_url'] ) ) {
+            $tk_dates = stagekitwp_lp_ticket_html( $show_id, $use_button, $buttonformat );
+            if ( $tk_dates ) { $log_html .= $tk_dates; }
+        }
     }
     if ( isset( $fields_data['program_pdf'] ) ) {
         $log_html .= '<div class="stagekitwp-lp-field stagekitwp-lp-field-program_pdf">'
@@ -1217,6 +1303,16 @@ function stagekitwp_lp_info_sections( $fields_data, $show_id, $use_button, $butt
                   . '</div></div>';
             break;
         }
+    }
+
+    // Awards (shown after the cast list)
+    if ( isset( $fields_data['awards'] ) ) {
+        $out .= '<hr class="stagekitwp-lp-divider">'
+              . '<div class="stagekitwp-lp-section stagekitwp-lp-section-awards">'
+              . '<div class="stagekitwp-lp-field stagekitwp-lp-field-awards">'
+              . '<span class="stagekitwp-lp-label">' . stagekitwp_lp_heading( 'awards', $show_id ) . '</span>'
+              . '<span class="stagekitwp-lp-value">' . $fields_data['awards'] . '</span>'
+              . '</div></div>';
     }
 
     // Ticket
@@ -1471,7 +1567,7 @@ function stagekitwp_shortcode_landingpage($atts) {
     $has_title   = isset( $fields_data['show_name'] );
     $show_title  = $has_title ? esc_html( get_the_title( $show_id ) ) : '';
     $show_heading_tag = ( is_singular( 'show' ) || is_front_page() ) ? 'h1' : 'h2';
-    $info_html   = stagekitwp_lp_info_sections( $fields_data, $show_id, $use_button, $buttonformat );
+    $info_html   = stagekitwp_lp_info_sections( $fields_data, $show_id, $use_button, $buttonformat, $layout );
     $banner_html = $show_banner ? stagekitwp_lp_season_banner( $show_id ) : '';
     $img_url     = '';
     if ( $has_image ) {
@@ -1621,6 +1717,13 @@ function stagekitwp_shortcode_landingpage($atts) {
                            . '</div>';
                         break;
                     }
+                }
+                // Awards (shown after the cast list)
+                if ( isset( $fields_data['awards'] ) ) {
+                    echo '<div class="stagekitwp-lp-prog-awards">'
+                       . '<h2 class="stagekitwp-lp-section-heading">' . stagekitwp_lp_heading( 'awards', $show_id ) . '</h2>'
+                       . '<div class="stagekitwp-lp-value">' . $fields_data['awards'] . '</div>'
+                       . '</div>';
                 }
                 // Ticket
                 if ( isset( $fields_data['ticket_url'] ) ) {

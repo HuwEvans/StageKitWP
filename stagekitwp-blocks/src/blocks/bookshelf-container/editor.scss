@@ -7,6 +7,9 @@
     border: 2px dashed #8b5e3c;
     padding: 20px;
     min-height: 200px;
+    /* The frontend clips overflow for the wood shelf edges, but that would also clip block
+       toolbars, selection outlines, and items in later rows/shelves while editing. */
+    overflow: visible;
 }
 
 .stagekitwp-bookshelf-editor-preview {

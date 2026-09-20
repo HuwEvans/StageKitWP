@@ -163,7 +163,6 @@ function stagekitwp_theme_customize_register( $wp_customize ) {
     $blocks = array(
         'stagekitwp_enable_hero'           => __( 'Display Hero Video/Image Banner', 'stagekitwp-theme' ),
         'stagekitwp_enable_current_season' => __( 'Display Current Season Grid', 'stagekitwp-theme' ),
-        'stagekitwp_enable_upcoming_season'=> __( 'Display Upcoming Season Grid', 'stagekitwp-theme' ),
         'stagekitwp_enable_news'           => __( 'Display News & Auditions Feed', 'stagekitwp-theme' ),
         'stagekitwp_enable_testimonials'   => __( 'Display Audience Testimonials Panel', 'stagekitwp-theme' ),
     );
@@ -181,6 +180,27 @@ function stagekitwp_theme_customize_register( $wp_customize ) {
             'active_callback' => 'is_front_page',
         ) );
     }
+
+    // Upcoming Season Grid gets its own control: on/off plus two data-driven modes
+    // that key off the StageKitWP Core "next season" helpers.
+    $wp_customize->add_setting( 'stagekitwp_enable_upcoming_season', array(
+        'default'           => 'on',
+        'sanitize_callback' => 'stagekitwp_sanitize_upcoming_season_mode',
+        'transport'         => 'postMessage',
+    ) );
+    $wp_customize->add_control( 'stagekitwp_enable_upcoming_season', array(
+        'label'           => __( 'Display Upcoming Season Grid', 'stagekitwp-theme' ),
+        'description'     => __( 'Choose when the "Coming Soon" grid appears on the homepage.', 'stagekitwp-theme' ),
+        'section'         => 'stagekitwp_homepage_visibility_section',
+        'type'            => 'select',
+        'choices'         => array(
+            'off'          => __( 'Off', 'stagekitwp-theme' ),
+            'on'           => __( 'On', 'stagekitwp-theme' ),
+            'on_if_season' => __( 'On, if a next season exists', 'stagekitwp-theme' ),
+            'on_if_shows'  => __( 'On, if the next season has show(s)', 'stagekitwp-theme' ),
+        ),
+        'active_callback' => 'is_front_page',
+    ) );
 
     // =========================================================================
     // SECTION: Homepage News & Auditions Feed Options
@@ -487,6 +507,37 @@ function stagekitwp_theme_customize_register( $wp_customize ) {
         'active_callback' => 'is_front_page',
     ) ) );
 
+    // ── Hero Overlay Controls ─────────────────────────────────────────────────
+    $wp_customize->add_setting( 'stagekitwp_hero_overlay_color', array(
+        'default'           => '#000000',
+        'sanitize_callback' => 'sanitize_hex_color',
+        'transport'         => 'postMessage',
+    ) );
+    $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'stagekitwp_hero_overlay_color', array(
+        'label'           => __( 'Overlay Colour', 'stagekitwp-theme' ),
+        'description'     => __( 'Tint colour for the overlay sheet placed over hero media.', 'stagekitwp-theme' ),
+        'section'         => 'stagekitwp_hero_section',
+        'active_callback' => 'is_front_page',
+    ) ) );
+
+    $wp_customize->add_setting( 'stagekitwp_hero_overlay_opacity', array(
+        'default'           => 60,
+        'sanitize_callback' => 'stagekitwp_sanitize_hero_overlay_opacity',
+        'transport'         => 'postMessage',
+    ) );
+    $wp_customize->add_control( 'stagekitwp_hero_overlay_opacity', array(
+        'label'           => __( 'Overlay Opacity (%)', 'stagekitwp-theme' ),
+        'description'     => __( 'Percentage of overlay opacity (0% = transparent, 100% = fully opaque).', 'stagekitwp-theme' ),
+        'section'         => 'stagekitwp_hero_section',
+        'type'            => 'number',
+        'input_attrs'     => array(
+            'min'  => 0,
+            'max'  => 100,
+            'step' => 5,
+        ),
+        'active_callback' => 'is_front_page',
+    ) );
+
     // =========================================================================
     // SECTION: Show Card — Term Badge
     // =========================================================================
@@ -663,6 +714,35 @@ function stagekitwp_sanitize_checkbox( $checked ) {
     // Accept boolean true, integer 1, or string "1" — all valid truthy checkbox states.
     return ( isset( $checked ) && ( $checked === true || $checked === 1 || $checked === '1' ) );
 }
+
+function stagekitwp_sanitize_upcoming_season_mode( $value ) {
+    $valid = array( 'off', 'on', 'on_if_season', 'on_if_shows' );
+    return in_array( $value, $valid, true ) ? $value : 'on';
+}
+
+/**
+ * Whether the homepage Upcoming Season Grid should render, based on the
+ * `stagekitwp_enable_upcoming_season` mode and (for the data-driven modes)
+ * the StageKitWP Core "next season" helpers.
+ *
+ * @return bool
+ */
+function stagekitwp_theme_should_display_upcoming_season() {
+    $mode = get_theme_mod( 'stagekitwp_enable_upcoming_season', 'on' );
+
+    switch ( $mode ) {
+        case 'off':
+            return false;
+        case 'on_if_season':
+            return function_exists( 'stagekitwp_get_next_season' ) && (bool) stagekitwp_get_next_season();
+        case 'on_if_shows':
+            return function_exists( 'stagekitwp_next_season_has_shows' ) && stagekitwp_next_season_has_shows();
+        case 'on':
+        default:
+            return true;
+    }
+}
+
 function stagekitwp_sanitize_radio_alignment( $input ) {
     $valid = array( 'left' => 'left', 'center' => 'center', 'right' => 'right' );
     return array_key_exists( $input, $valid ) ? $input : 'center';
@@ -698,6 +778,16 @@ function stagekitwp_sanitize_hero_cta_padding( $value ) {
 
     if ( $value > 160 ) {
         $value = 160;
+    }
+
+    return $value;
+}
+
+function stagekitwp_sanitize_hero_overlay_opacity( $value ) {
+    $value = absint( $value );
+
+    if ( $value > 100 ) {
+        $value = 100;
     }
 
     return $value;

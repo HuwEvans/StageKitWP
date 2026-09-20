@@ -2,7 +2,7 @@
 /**
  * Plugin Name: StageKitWP Search Optimizer
  * Description: Generates SEO tags, OpenGraph, Twitter Cards, JSON-LD Schema, and Microformats2.
- * Version:     1.4.1
+ * Version:     1.4.3
  * Author:      Huw Evans
  */
 
@@ -276,7 +276,7 @@ function stagekitwp_seo_landingpage_show( $post ) {
     return $show && 'show' === $show->post_type ? $show : null;
 }
 
-function stagekitwp_seo_landingpage_image( $show ) {
+function stagekitwp_seo_show_sm_image( $show ) {
     $image = get_post_meta( $show->ID, '_stagekitwp_show_sm_image', true );
     $image_id = absint( $image );
     $image_url = $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '';
@@ -292,6 +292,49 @@ function stagekitwp_seo_landingpage_image( $show ) {
         'url' => $image_url,
         'alt' => $image_id ? get_post_meta( $image_id, '_wp_attachment_image_alt', true ) : '',
     );
+}
+
+function stagekitwp_seo_get_organization_name() {
+    if ( function_exists( 'stagekitwp_get_organization_name' ) ) {
+        return stagekitwp_get_organization_name();
+    }
+    $org = get_option( 'stagekitwp_organization_name', '' );
+    if ( is_string( $org ) && '' !== trim( $org ) ) {
+        return trim( $org );
+    }
+    return get_bloginfo( 'name' );
+}
+
+function stagekitwp_seo_get_organization_address() {
+    if ( function_exists( 'stagekitwp_get_organization_address' ) ) {
+        return stagekitwp_get_organization_address();
+    }
+    $address = get_option( 'stagekitwp_organization_address', '' );
+    return is_string( $address ) ? trim( $address ) : '';
+}
+
+/**
+ * Fallback startDate for a show missing show dates: derived from the season's
+ * start date plus a per-slot offset (Fall +4 months, Winter +7 months, Spring +10 months).
+ * If the time slot isn't set/recognized, the season start date itself is used.
+ */
+function stagekitwp_seo_slot_fallback_date( $time_slot, $season_start_date ) {
+    $season_start_timestamp = $season_start_date ? strtotime( $season_start_date ) : false;
+    if ( ! $season_start_timestamp ) {
+        return '';
+    }
+    $slot_offsets = array(
+        'Fall'   => '+4 months',
+        'Winter' => '+7 months',
+        'Spring' => '+10 months',
+    );
+    if ( isset( $slot_offsets[ $time_slot ] ) ) {
+        $offset_timestamp = strtotime( $slot_offsets[ $time_slot ], $season_start_timestamp );
+        if ( $offset_timestamp ) {
+            return gmdate( 'Y-m-d', $offset_timestamp );
+        }
+    }
+    return gmdate( 'Y-m-d', $season_start_timestamp );
 }
 
 function stagekitwp_seo_has_competing_plugin() {
@@ -359,7 +402,7 @@ function stagekitwp_seo_render_llms_file() {
     status_header( 200 );
     nocache_headers();
     header( 'Content-Type: text/plain; charset=utf-8' );
-    echo '# ' . wp_strip_all_tags( get_bloginfo( 'name' ) ) . "\n\n";
+    echo '# ' . wp_strip_all_tags( stagekitwp_seo_get_organization_name() ) . "\n\n";
     echo '> ' . wp_strip_all_tags( get_bloginfo( 'description' ) ) . "\n\n";
     echo '## Public Content' . "\n\n";
     foreach ( $posts as $post ) {
@@ -420,11 +463,12 @@ function seo_schema_render_head_tags() {
         $image_url     = get_the_post_thumbnail_url( $post, 'full' );
         $image_id      = get_post_thumbnail_id( $post );
         $image_alt     = $image_id ? get_post_meta( $image_id, '_wp_attachment_image_alt', true ) : '';
-        if ( $landingpage_show ) {
-            $landingpage_image = stagekitwp_seo_landingpage_image( $landingpage_show );
-            if ( $landingpage_image['url'] ) {
-                $image_url = $landingpage_image['url'];
-                $image_alt = $landingpage_image['alt'];
+        // SM_image is the canonical image for shows: used for Twitter/OG tags and JSON-LD schema alike.
+        if ( $seo_source_post instanceof WP_Post && 'show' === $seo_source_post->post_type ) {
+            $show_sm_image = stagekitwp_seo_show_sm_image( $seo_source_post );
+            if ( $show_sm_image['url'] ) {
+                $image_url = $show_sm_image['url'];
+                $image_alt = $show_sm_image['alt'];
             }
         }
     } elseif ( is_front_page() || is_home() ) {
@@ -473,6 +517,7 @@ function seo_schema_render_head_tags() {
         '@type'    => is_singular() ? 'Article' : 'WebSite',
         '@id'      => esc_url( $permalink ) . ( is_singular() ? '#article' : '#website' ),
         'headline' => $meta_title,
+		'name'	   => $meta_title,
         'url'      => esc_url( $permalink ),
     );
 
@@ -495,31 +540,218 @@ function seo_schema_render_head_tags() {
 
     if ( 'show' === $schema_source_post_type ) {
         $schema['@type'] = 'TheaterEvent';
-        $genre = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_genre', true );
-        $director = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_director', true );
+        $schema['eventStatus'] = 'https://schema.org/EventScheduled';
+
+        $show_author = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_author', true );
+        $sub_authors = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_sub_authors', true );
+        $genre       = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_genre', true );
+        $director    = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_director', true );
+        $synopsis    = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_synopsis', true );
+
+        // Default description for past shows lacking any configured/derived description.
+        if ( empty( $schema['description'] ) ) {
+            $schema['description'] = sprintf( 'Past show performed by %s.', stagekitwp_seo_get_organization_name() );
+        }
+
+        // Resolve the show's season and its start date up front; reused for validFrom and the startDate fallback below.
+        $show_season_id    = absint( get_post_meta( $schema_source_post->ID, '_stagekitwp_show_season', true ) );
+        $season_start_date = $show_season_id ? get_post_meta( $show_season_id, '_stagekitwp_season_start_date', true ) : '';
+
+        if ( $show_author ) {
+            $schema['author'] = array(
+                '@type' => 'Person',
+                'name'  => $show_author,
+            );
+        }
+
+        // Appropriate CreativeWork property for TheaterEvent (Play).
+        $play_schema = array(
+            '@type' => 'Play',
+            'name'  => get_the_title( $schema_source_post ),
+        );
+        if ( $show_author ) {
+            $play_schema['author'] = array(
+                '@type' => 'Person',
+                'name'  => $show_author,
+            );
+        }
+        if ( $sub_authors ) {
+            $play_schema['contributor'] = array(
+                '@type' => 'Person',
+                'name'  => $sub_authors,
+            );
+        }
+        if ( $genre ) {
+            $play_schema['genre'] = $genre;
+        }
+        if ( $synopsis ) {
+            $play_schema['abstract'] = wp_strip_all_tags( $synopsis );
+        }
+        $schema['workPerformed'] = $play_schema;
+
         if ( $genre ) {
             $schema['genre'] = $genre;
         }
         if ( $director ) {
             $schema['director'] = array( '@type' => 'Person', 'name' => $director );
         }
-        $tickets_url = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_tickets_url', true );
-        if ( $tickets_url ) {
-            $schema['offers'] = array( '@type' => 'Offer', 'url' => esc_url_raw( $tickets_url ) );
+
+        $org_name = stagekitwp_seo_get_organization_name();
+
+        // Performers based on the Cast list, falling back to Organization.
+        $cast_members = get_posts( array(
+            'post_type'      => 'cast',
+            'posts_per_page' => -1,
+            'meta_key'       => '_stagekitwp_cast_show',
+            'meta_value'     => $schema_source_post->ID,
+            'orderby'        => 'menu_order title',
+            'order'          => 'ASC',
+        ) );
+
+        $performers = array();
+        if ( ! empty( $cast_members ) ) {
+            foreach ( $cast_members as $cast_member ) {
+                $actor_name     = get_post_meta( $cast_member->ID, '_stagekitwp_cast_actor_name', true );
+                $character_name = get_post_meta( $cast_member->ID, '_stagekitwp_cast_character_name', true );
+                $performer_name = $actor_name ? $actor_name : ( $character_name ? $character_name : get_the_title( $cast_member ) );
+                if ( ! empty( $performer_name ) ) {
+                    $performers[] = array(
+                        '@type' => 'Person',
+                        'name'  => $performer_name,
+                    );
+                }
+            }
         }
-        preg_match_all( '/\b\d{4}-\d{2}-\d{2}\b/', get_post_meta( $schema_source_post->ID, '_stagekitwp_show_show_dates', true ), $show_dates );
+
+        if ( ! empty( $performers ) ) {
+            $schema['performer'] = $performers;
+        } else {
+            $schema['performer'] = array(
+                '@type' => 'PerformingGroup',
+                'name'  => $org_name,
+                'url'   => home_url( '/' ),
+            );
+        }
+
+        // Organizer reflects the configured Organization Name or Site Identity.
+        $schema['organizer'] = array(
+            '@type' => 'Organization',
+            'name'  => $org_name,
+            'url'   => home_url( '/' ),
+        );
+
+        $tickets_url = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_tickets_url', true );
+        $offer = array( '@type' => 'Offer', 'availability' => 'https://schema.org/InStock' );
+        if ( $tickets_url ) {
+            $offer['url'] = esc_url_raw( $tickets_url );
+        }
+        $ticket_price = get_option( 'stagekitwp_default_ticket_price', '' );
+        if ( '' !== $ticket_price ) {
+            $offer['price'] = $ticket_price;
+            $offer['priceCurrency'] = 'CAD';
+        }
+
+        // validFrom mirrors the associated season's start date (tickets go on sale/are valid from then).
+        if ( $season_start_date ) {
+            $season_start_timestamp = strtotime( $season_start_date );
+            if ( $season_start_timestamp ) {
+                $offer['validFrom'] = gmdate( 'Y-m-d', $season_start_timestamp );
+            }
+        }
+
+        if ( isset( $offer['url'] ) || isset( $offer['price'] ) ) {
+            $schema['offers'] = $offer;
+        }
+
+        $show_dates_raw = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_show_dates', true );
+        $first_date_line = strtok( trim( (string) $show_dates_raw ), "\r\n" );
+        if ( $first_date_line ) {
+            $parsed_timestamp = strtotime( $first_date_line );
+            if ( $parsed_timestamp ) {
+                $schema['startDate'] = gmdate( 'Y-m-d', $parsed_timestamp );
+            }
+        }
+        preg_match_all( '/\b\d{4}-\d{2}-\d{2}\b/', $show_dates_raw, $show_dates );
         if ( ! empty( $show_dates[0] ) ) {
-            $schema['startDate'] = $show_dates[0][0];
+            if ( empty( $schema['startDate'] ) ) {
+                $schema['startDate'] = $show_dates[0][0];
+            }
             if ( count( $show_dates[0] ) > 1 ) {
                 $schema['endDate'] = end( $show_dates[0] );
             }
         }
+
+        // Fall back to a date derived from the show's season + time slot when no show dates are set.
+        if ( empty( $schema['startDate'] ) && $season_start_date ) {
+            $time_slot     = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_time_slot', true );
+            $fallback_date = stagekitwp_seo_slot_fallback_date( $time_slot, $season_start_date );
+            if ( $fallback_date ) {
+                $schema['startDate'] = $fallback_date;
+            }
+        }
+
+        // Last resort so a TheaterEvent never ships without a startDate: use the show's publish date.
+        if ( empty( $schema['startDate'] ) ) {
+            $schema['startDate'] = get_the_date( 'Y-m-d', $schema_source_post );
+        }
+
+        // Location cross-references the full set of Venue CPT properties.
         $venue_id = absint( get_post_meta( $schema_source_post->ID, '_stagekitwp_show_venue', true ) );
         if ( $venue_id ) {
-            $schema['location'] = array( '@type' => 'PerformingArtsTheater', 'name' => get_the_title( $venue_id ), 'url' => get_permalink( $venue_id ) );
+            $location = array(
+                '@type' => 'Place',
+                'name'  => get_the_title( $venue_id ),
+                'url'   => get_permalink( $venue_id ),
+            );
+            $venue_address = get_post_meta( $venue_id, '_stagekitwp_venue_address', true );
+            $venue_phone   = get_post_meta( $venue_id, '_stagekitwp_venue_phone', true );
+            $venue_website = get_post_meta( $venue_id, '_stagekitwp_venue_website', true );
+            $venue_lat     = get_post_meta( $venue_id, '_stagekitwp_venue_latitude', true );
+            $venue_lng     = get_post_meta( $venue_id, '_stagekitwp_venue_longitude', true );
+            $venue_image   = get_post_meta( $venue_id, '_stagekitwp_venue_image', true );
+
+            if ( $venue_address ) {
+                $location['address'] = $venue_address;
+            }
+            if ( $venue_phone ) {
+                $location['telephone'] = $venue_phone;
+            }
+            if ( $venue_website ) {
+                $location['sameAs'] = esc_url_raw( $venue_website );
+            }
+            if ( is_numeric( $venue_lat ) && is_numeric( $venue_lng ) ) {
+                $location['geo'] = array(
+                    '@type'     => 'GeoCoordinates',
+                    'latitude'  => (float) $venue_lat,
+                    'longitude' => (float) $venue_lng,
+                );
+            }
+            if ( function_exists( 'stagekitwp_get_venue_image_url' ) ) {
+                $venue_image_url = stagekitwp_get_venue_image_url( $venue_image );
+                if ( $venue_image_url ) {
+                    $location['image'] = array(
+                        '@type'      => 'ImageObject',
+                        'contentUrl' => esc_url_raw( $venue_image_url ),
+                        'url'        => esc_url_raw( $venue_image_url ),
+                    );
+                }
+            }
+
+            $schema['location'] = $location;
+        } else {
+            // No Venue assigned: default the location to Site Identity, letting the Organization Address setting override/add the address.
+            $schema['location'] = array(
+                '@type' => 'Place',
+                'name'  => $org_name,
+                'url'   => home_url( '/' ),
+            );
+            $org_address = stagekitwp_seo_get_organization_address();
+            if ( $org_address ) {
+                $schema['location']['address'] = $org_address;
+            }
         }
     } elseif ( 'venue' === $schema_source_post_type ) {
-        $schema['@type'] = 'PerformingArtsTheater';
+        $schema['@type'] = 'Place';
         $telephone = get_post_meta( $schema_source_post->ID, '_stagekitwp_venue_phone', true );
         $address = get_post_meta( $schema_source_post->ID, '_stagekitwp_venue_address', true );
         $website = get_post_meta( $schema_source_post->ID, '_stagekitwp_venue_website', true );
@@ -557,13 +789,17 @@ function seo_schema_render_head_tags() {
             if ( $end_time ) {
                 $schema['endDate'] = $event_date . 'T' . $end_time;
             }
+        } else {
+            // No date set on the event: fall back to its publish date so the schema always has a startDate.
+            $schema['startDate'] = get_the_date( 'Y-m-d', $schema_source_post );
         }
     }
 
     if ( $image_url ) {
         $schema['image'] = array(
-            '@type'       => 'ImageObject',
-            'contentUrl'  => esc_url( $image_url ),
+            '@type'      => 'ImageObject',
+            'contentUrl' => esc_url( $image_url ),
+            'url'        => esc_url( $image_url ),
         );
         if ( $image_alt ) {
             $schema['image']['description'] = $image_alt;
@@ -577,7 +813,7 @@ function seo_schema_render_head_tags() {
     if ( is_front_page() || is_home() ) {
         $schema['publisher'] = array(
             '@type' => 'PerformingGroup',
-            'name'  => get_bloginfo( 'name' ),
+            'name'  => stagekitwp_seo_get_organization_name(),
             'url'   => home_url( '/' ),
         );
     }

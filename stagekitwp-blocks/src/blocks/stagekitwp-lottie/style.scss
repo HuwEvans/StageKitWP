@@ -1,0 +1,133 @@
+/*
+=========================================
+StageKitWP Lottie Block
+Frontend Styles
+=========================================
+*/
+
+.stagekitwp-lottie-wrapper {
+
+	width: var(--stagekitwp-lottie-width, 100%);
+	max-width: var(
+		--stagekitwp-lottie-max-width,
+		500px
+	);
+
+	margin-left: auto;
+	margin-right: auto;
+
+	.stagekitwp-lottie-player {
+
+		width: 100%;
+
+		aspect-ratio: var(
+			--stagekitwp-lottie-ratio,
+			1 / 1
+		);
+
+		overflow: hidden;
+
+		display: flex;
+
+		align-items: center;
+
+		justify-content: center;
+
+	}
+
+	svg {
+
+		width: 100% !important;
+
+		height: 100% !important;
+
+		display: block;
+
+	}
+
+	canvas {
+
+		width: 100% !important;
+
+		height: 100% !important;
+
+		display: block;
+
+	}
+
+}
+
+/*
+=========================================
+Alignment Support
+=========================================
+*/
+
+.wp-block-stagekitwp-lottie {
+
+	&.alignleft {
+
+		margin-left: 0;
+		margin-right: auto;
+
+	}
+
+	&.aligncenter {
+
+		margin-left: auto;
+		margin-right: auto;
+
+	}
+
+	&.alignright {
+
+		margin-left: auto;
+		margin-right: 0;
+
+	}
+
+	&.alignwide,
+	&.alignfull {
+
+		max-width: 100%;
+
+	}
+
+}
+
+/*
+=========================================
+Reduced Motion Fallback
+=========================================
+*/
+
+@media (prefers-reduced-motion: reduce) {
+
+	.stagekitwp-lottie-wrapper {
+
+		.stagekitwp-lottie-player {
+
+			transition: none !important;
+
+			animation: none !important;
+
+		}
+
+	}
+
+}
+.stagekitwp-lottie-empty {
+
+	padding: 20px;
+
+	text-align: center;
+
+	border: 1px dashed #dcdcde;
+
+	border-radius: 6px;
+
+	color: #646970;
+
+	font-size: 14px;
+
+}

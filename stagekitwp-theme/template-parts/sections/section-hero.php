@@ -17,6 +17,11 @@ $media_type_saved = get_theme_mod( 'stagekitwp_hero_media_type', null );
 $uploaded_img = get_theme_mod( 'stagekitwp_hero_bg_image', '' );
 $uploaded_vid = get_theme_mod( 'stagekitwp_hero_bg_video', '' );
 $uploaded_mobile_vid = get_theme_mod( 'stagekitwp_hero_bg_video_mobile', '' );
+$overlay_color = get_theme_mod( 'stagekitwp_hero_overlay_color', '#000000' );
+$overlay_opacity = absint( get_theme_mod( 'stagekitwp_hero_overlay_opacity', 60 ) );
+if ( $overlay_opacity > 100 ) {
+    $overlay_opacity = 100;
+}
 
 // The media type control defaults to "image" and is easy to leave untouched
 // after uploading a video directly into the video control. When it was never
@@ -37,14 +42,28 @@ if ( $btn_safe_area ) {
 }
 
 $hero_style = sprintf(
-    '--stagekitwp-hero-cta-pad-x:%1$dpx; --stagekitwp-hero-cta-pad-y:%2$dpx;',
+    '--stagekitwp-hero-cta-pad-x:%1$dpx; --stagekitwp-hero-cta-pad-y:%2$dpx; --stagekitwp-hero-overlay-color:%3$s; --stagekitwp-hero-overlay-opacity:%4$s;',
     $btn_pad_x,
-    $btn_pad_y
+    $btn_pad_y,
+    esc_attr( $overlay_color ),
+    esc_attr( number_format( $overlay_opacity / 100, 2, '.', '' ) )
 );
 ?>
 
 <section class="<?php echo esc_attr( implode( ' ', $hero_classes ) ); ?>" style="<?php echo esc_attr( $hero_style ); ?>">
     
+    <?php if ( 'image' === $media_type && ! empty( $final_bg_image ) ) : ?>
+        <div class="stagekitwp-hero-image-wrapper">
+            <img
+                src="<?php echo esc_url( $final_bg_image ); ?>"
+                alt="<?php echo esc_attr( $headline ); ?>"
+                class="stagekitwp-hero-image"
+                loading="lazy"
+                decoding="async"
+            />
+        </div>
+    <?php endif; ?>
+
     <?php if ( 'video' === $media_type && ! empty( $uploaded_vid ) ) : ?>
         <div class="stagekitwp-video-wrapper">
             <video
@@ -52,6 +71,7 @@ $hero_style = sprintf(
                 muted
                 loop
                 playsinline
+                preload="metadata"
                 class="stagekitwp-hero-video"
                 data-desktop-src="<?php echo esc_url( $uploaded_vid ); ?>"
                 data-mobile-src="<?php echo esc_url( $uploaded_mobile_vid ); ?>"
@@ -103,9 +123,29 @@ $hero_style = sprintf(
     text-align: center;
 }
 
-/* Fallback handling for standard Image backgrounds */
+/* Handling for standard Image backgrounds */
 .stagekitwp-hero-banner.media-type-image {
-    background: url('<?php echo esc_url( $final_bg_image ); ?>') no-repeat center center/cover;
+    background-color: #111111;
+}
+
+.stagekitwp-hero-image-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.stagekitwp-hero-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
 }
 
 .stagekitwp-hero-banner.media-type-video {
@@ -132,14 +172,15 @@ $hero_style = sprintf(
     object-position: center;
 }
 
-/* Black translucent sheet over the media so the white text is readable */
+/* Translucent sheet over the media so the text is readable */
 .stagekitwp-hero-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8));
+    background-color: var(--stagekitwp-hero-overlay-color, #000000);
+    opacity: var(--stagekitwp-hero-overlay-opacity, 0.6);
     z-index: 2;
 }
 
@@ -318,7 +359,29 @@ $hero_style = sprintf(
         heroVideo.load();
     }
 
-    syncHeroVideoSource();
+    if ( 'IntersectionObserver' in window ) {
+        var videoObserver = new IntersectionObserver( function ( entries ) {
+            entries.forEach( function ( entry ) {
+                if ( entry.isIntersecting ) {
+                    syncHeroVideoSource();
+                    if ( heroVideo.paused ) {
+                        var playPromise = heroVideo.play();
+                        if ( playPromise !== undefined ) {
+                            playPromise.catch( function () {} );
+                        }
+                    }
+                } else {
+                    if ( ! heroVideo.paused ) {
+                        heroVideo.pause();
+                    }
+                }
+            } );
+        }, { rootMargin: '200px 0px' } );
+
+        videoObserver.observe( heroVideo );
+    } else {
+        syncHeroVideoSource();
+    }
 
     window.stagekitwpSyncHeroVideoSource = syncHeroVideoSource;
     window.addEventListener( 'resize', syncHeroVideoSource );

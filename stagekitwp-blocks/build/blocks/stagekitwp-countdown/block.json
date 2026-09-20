@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "stagekitwp/countdown",
+  "title": "Countdown",
+  "category": "stagekitwp-blocks",
+  "icon": "clock",
+  "description": "Counts down to a selected date and time.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "targetDate": {
+      "type": "string",
+      "default": ""
+    },
+    "expiredText": {
+      "type": "string",
+      "default": "The event has started."
+    },
+    "showDays": {
+      "type": "boolean",
+      "default": true
+    },
+    "showHours": {
+      "type": "boolean",
+      "default": true
+    },
+    "showMinutes": {
+      "type": "boolean",
+      "default": true
+    },
+    "showSeconds": {
+      "type": "boolean",
+      "default": true
+    },
+    "alignment": {
+      "type": "string",
+      "default": "center"
+    },
+    "colorMode": {
+      "type": "string",
+      "default": "auto"
+    },
+    "numberSize": {
+      "type": "number",
+      "default": 48
+    },
+    "labelSize": {
+      "type": "number",
+      "default": 14
+    },
+    "numberColor": {
+      "type": "string",
+      "default": ""
+    },
+    "labelColor": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js"
+}

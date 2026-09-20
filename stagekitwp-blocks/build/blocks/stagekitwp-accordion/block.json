@@ -1,0 +1,82 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "stagekitwp/accordion",
+  "title": "Accordion",
+  "category": "stagekitwp-blocks",
+  "icon": "list-view",
+  "description": "Expandable content panels.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "allowMultiple": {
+      "type": "boolean",
+      "default": false
+    },
+    "openFirst": {
+      "type": "boolean",
+      "default": true
+    },
+    "stylePreset": {
+      "type": "string",
+      "default": "minimal"
+    },
+    "colorMode": {
+      "type": "string",
+      "default": "auto"
+    },
+    "headerTextLight": {
+      "type": "string",
+      "default": "#1e293b"
+    },
+    "headerBackgroundLight": {
+      "type": "string",
+      "default": "#f8fafc"
+    },
+    "bodyTextLight": {
+      "type": "string",
+      "default": "#334155"
+    },
+    "bodyBackgroundLight": {
+      "type": "string",
+      "default": "#ffffff"
+    },
+    "borderLight": {
+      "type": "string",
+      "default": "#cbd5e1"
+    },
+    "accentLight": {
+      "type": "string",
+      "default": "#b42318"
+    },
+    "headerTextDark": {
+      "type": "string",
+      "default": "#f8fafc"
+    },
+    "headerBackgroundDark": {
+      "type": "string",
+      "default": "#1e293b"
+    },
+    "bodyTextDark": {
+      "type": "string",
+      "default": "#e2e8f0"
+    },
+    "bodyBackgroundDark": {
+      "type": "string",
+      "default": "#0f172a"
+    },
+    "borderDark": {
+      "type": "string",
+      "default": "#475569"
+    },
+    "accentDark": {
+      "type": "string",
+      "default": "#f59e0b"
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js"
+}

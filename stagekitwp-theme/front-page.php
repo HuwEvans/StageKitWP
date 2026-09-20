@@ -175,7 +175,7 @@ $cpts_registered = post_type_exists( 'show' ) && post_type_exists( 'season' );
             </section>
         <?php endif; ?>
 
-        <?php if ( get_theme_mod( 'stagekitwp_enable_upcoming_season', true ) ) : ?>
+        <?php if ( stagekitwp_theme_should_display_upcoming_season() ) : ?>
             <section class="stagekitwp-upcoming-grid-section" style="background: #fafafa; padding: 10px 0; border-top: 1px solid #f0f0f1; border-bottom: 1px solid #f0f0f1;">
                 <div class="stagekitwp-container" style="max-width: var(--stagekitwp-site-max-width, 1200px); margin: 0 auto; padding: 0 20px;">
                     <?php stagekitwp_render_homepage_season_grid( __( 'Coming Soon', 'stagekitwp-theme' ), '_stagekitwp_season_is_upcoming', __( 'Preview', 'stagekitwp-theme' ) ); ?>

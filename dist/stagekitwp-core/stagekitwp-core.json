@@ -1,20 +1,20 @@
 {
-  "new_version": "5.2.7",
-  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-core/stagekitwp-core-5.2.7.zip",
   "short_description": "Core StageKitWP plugin for seasons, shows, cast, awards, venues, board members, sponsors, contributors, testimonials, advertisers, and display options.",
+  "requires_php": "7.4",
+  "author": "Huw Evans",
+  "requires": "6.8.2",
+  "tested": "6.8.2",
+  "author_homepage": "https://github.com/HuwEvans",
+  "version": "5.2.9",
+  "new_version": "5.2.9",
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-core/stagekitwp-core-5.2.9.zip",
+  "name": "stagekitwp-core",
+  "homepage": "https://github.com/HuwEvans/StageKitWP/tree/StageKitWP/dist/stagekitwp-core",
+  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-core/stagekitwp-core-5.2.9.zip",
   "sections": {
     "description": "The StageKitWP Core plugin provides the content management foundation for the full StageKitWP ecosystem, including custom post types, block support, admin hub screens, and the shared display options system.",
     "installation": "Upload the stagekitwp-core plugin folder to wp-content/plugins/, activate it, and open the StageKitWP admin hub to begin managing content.",
-    "changelog": "5.2.7: fixed castwithbio cast photos being cropped at the single-column mobile breakpoint (object-fit was set to cover instead of contain)."
+    "changelog": "5.2.9: Landing Page (`[stagekitwp_landingpage]` + Show CPT front-end display) now supports an 'awards' field that lists the show's awards/nominations after the cast list (toggle via field_list attr or the Front-end Display meta box). Card and hero layouts also gain a second 'Get Tickets' button placed right after the performances list and before the venue."
   },
-  "author": "Huw Evans",
-  "version": "5.2.7",
-  "slug": "stagekitwp-core",
-  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-core/stagekitwp-core-5.2.7.zip",
-  "homepage": "https://github.com/HuwEvans/StageKitWP/tree/StageKitWP/dist/stagekitwp-core",
-  "requires": "6.8.2",
-  "author_homepage": "https://github.com/HuwEvans",
-  "name": "stagekitwp-core",
-  "requires_php": "7.4",
-  "tested": "6.8.2"
+  "slug": "stagekitwp-core"
 }

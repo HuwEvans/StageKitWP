@@ -1,0 +1,76 @@
+.stagekitwp-countdown {
+	--stagekitwp-countdown-text: var(--stagekitwp-body-text, #1e293b);
+	--stagekitwp-countdown-surface: var(--stagekitwp-surface-bg, transparent);
+	--stagekitwp-countdown-border: color-mix(in srgb, currentColor 18%, transparent);
+	color: var(--stagekitwp-countdown-text);
+	background: var(--stagekitwp-countdown-surface);
+
+	&__units {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		justify-content: center;
+	}
+
+	&__unit {
+		min-width: 76px;
+		padding: 12px 16px;
+		border: 1px solid var(--stagekitwp-countdown-border);
+		border-radius: 6px;
+		text-align: center;
+	}
+
+	&__number {
+		display: block;
+		font-size: var(--stagekitwp-countdown-number-size, 48px);
+		font-weight: 800;
+		line-height: 1.1;
+		color: var(--stagekitwp-countdown-number-color, currentColor);
+		font-variant-numeric: tabular-nums;
+	}
+
+	&__label {
+		display: block;
+		margin-top: 6px;
+		font-size: var(--stagekitwp-countdown-label-size, 14px);
+		color: var(--stagekitwp-countdown-label-color, currentColor);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	&__expired {
+		margin: 14px 0 0;
+		font-weight: 600;
+	}
+}
+
+.stagekitwp-countdown.align-left .stagekitwp-countdown__units {
+	justify-content: flex-start;
+}
+
+.stagekitwp-countdown.align-center .stagekitwp-countdown__units {
+	justify-content: center;
+}
+
+.stagekitwp-countdown.align-right .stagekitwp-countdown__units {
+	justify-content: flex-end;
+}
+
+body.stagekitwp-dark-mode .stagekitwp-countdown:not(.is-light-mode),
+html.stagekitwp-dark-mode .stagekitwp-countdown:not(.is-light-mode) {
+	--stagekitwp-countdown-text: #f8fafc;
+	--stagekitwp-countdown-surface: rgba(255, 255, 255, 0.04);
+	--stagekitwp-countdown-border: rgba(255, 255, 255, 0.2);
+}
+
+.stagekitwp-countdown.is-dark-mode {
+	--stagekitwp-countdown-text: #f8fafc !important;
+	--stagekitwp-countdown-surface: rgba(255, 255, 255, 0.04);
+	--stagekitwp-countdown-border: rgba(255, 255, 255, 0.2);
+}
+
+.stagekitwp-countdown.is-light-mode {
+	--stagekitwp-countdown-text: #1e293b !important;
+	--stagekitwp-countdown-surface: transparent;
+	--stagekitwp-countdown-border: rgba(30, 41, 59, 0.18);
+}

@@ -3,7 +3,7 @@
  * Plugin Name: StageKitWP Core
  * Plugin URI: https://github.com/HuwEvans/StageKitWP
  * Description: Manage stage-production content including board members, shows, and more.
- * Version: 5.2.7
+ * Version: 5.2.9
  * Requires at least: 6.8.2
  * Requires PHP: 7.4
  * Author: Huw Evans
@@ -138,6 +138,9 @@ class StageKitWP_Core {
 
         // Show front-end display (template_redirect + meta box + global setting)
         require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-show-front-display.php';
+
+        // Menu editor "Display" condition (next season / next season shows) + front-end filtering.
+        require_once STAGEKITWP_CORE_DIR . 'includes/stagekitwp-core-nav-menu-conditions.php';
     }
 
     /**

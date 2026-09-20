@@ -154,6 +154,325 @@ return array(
 			)
 		)
 	),
+	'stagekitwp-accordion' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'stagekitwp/accordion',
+		'title' => 'Accordion',
+		'category' => 'stagekitwp-blocks',
+		'icon' => 'list-view',
+		'description' => 'Expandable content panels.',
+		'supports' => array(
+			'html' => false
+		),
+		'attributes' => array(
+			'allowMultiple' => array(
+				'type' => 'boolean',
+				'default' => false
+			),
+			'openFirst' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
+			'stylePreset' => array(
+				'type' => 'string',
+				'default' => 'minimal'
+			),
+			'colorMode' => array(
+				'type' => 'string',
+				'default' => 'auto'
+			),
+			'headerTextLight' => array(
+				'type' => 'string',
+				'default' => '#1e293b'
+			),
+			'headerBackgroundLight' => array(
+				'type' => 'string',
+				'default' => '#f8fafc'
+			),
+			'bodyTextLight' => array(
+				'type' => 'string',
+				'default' => '#334155'
+			),
+			'bodyBackgroundLight' => array(
+				'type' => 'string',
+				'default' => '#ffffff'
+			),
+			'borderLight' => array(
+				'type' => 'string',
+				'default' => '#cbd5e1'
+			),
+			'accentLight' => array(
+				'type' => 'string',
+				'default' => '#b42318'
+			),
+			'headerTextDark' => array(
+				'type' => 'string',
+				'default' => '#f8fafc'
+			),
+			'headerBackgroundDark' => array(
+				'type' => 'string',
+				'default' => '#1e293b'
+			),
+			'bodyTextDark' => array(
+				'type' => 'string',
+				'default' => '#e2e8f0'
+			),
+			'bodyBackgroundDark' => array(
+				'type' => 'string',
+				'default' => '#0f172a'
+			),
+			'borderDark' => array(
+				'type' => 'string',
+				'default' => '#475569'
+			),
+			'accentDark' => array(
+				'type' => 'string',
+				'default' => '#f59e0b'
+			)
+		),
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css',
+		'viewScript' => 'file:./view.js'
+	),
+	'stagekitwp-accordion-item' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'stagekitwp/accordion-item',
+		'title' => 'Accordion Item',
+		'category' => 'stagekitwp-blocks',
+		'icon' => 'excerpt-view',
+		'description' => 'One expandable accordion panel.',
+		'parent' => array(
+			'stagekitwp/accordion'
+		),
+		'supports' => array(
+			'html' => false
+		),
+		'attributes' => array(
+			'title' => array(
+				'type' => 'string',
+				'default' => 'Accordion item'
+			),
+			'open' => array(
+				'type' => 'boolean',
+				'default' => false
+			)
+		),
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css'
+	),
+	'stagekitwp-countdown' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'stagekitwp/countdown',
+		'title' => 'Countdown',
+		'category' => 'stagekitwp-blocks',
+		'icon' => 'clock',
+		'description' => 'Counts down to a selected date and time.',
+		'supports' => array(
+			'html' => false
+		),
+		'attributes' => array(
+			'targetDate' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'expiredText' => array(
+				'type' => 'string',
+				'default' => 'The event has started.'
+			),
+			'showDays' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
+			'showHours' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
+			'showMinutes' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
+			'showSeconds' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
+			'alignment' => array(
+				'type' => 'string',
+				'default' => 'center'
+			),
+			'colorMode' => array(
+				'type' => 'string',
+				'default' => 'auto'
+			),
+			'numberSize' => array(
+				'type' => 'number',
+				'default' => 48
+			),
+			'labelSize' => array(
+				'type' => 'number',
+				'default' => 14
+			),
+			'numberColor' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'labelColor' => array(
+				'type' => 'string',
+				'default' => ''
+			)
+		),
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css',
+		'viewScript' => 'file:./view.js'
+	),
+	'stagekitwp-countup' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'stagekitwp/countup',
+		'title' => 'Count Up',
+		'category' => 'stagekitwp-blocks',
+		'icon' => 'chart-line',
+		'description' => 'Animated count up number.',
+		'supports' => array(
+			'html' => false
+		),
+		'attributes' => array(
+			'preText' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'startValue' => array(
+				'type' => 'number',
+				'default' => 0
+			),
+			'number' => array(
+				'type' => 'number',
+				'default' => 100
+			),
+			'postText' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'colorMode' => array(
+				'type' => 'string',
+				'default' => 'auto'
+			),
+			'duration' => array(
+				'type' => 'number',
+				'default' => 2000
+			),
+			'delay' => array(
+				'type' => 'number',
+				'default' => 0
+			),
+			'animationStyle' => array(
+				'type' => 'string',
+				'default' => 'ease-out'
+			),
+			'separator' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
+			'alignment' => array(
+				'type' => 'string',
+				'default' => 'center'
+			),
+			'numberSize' => array(
+				'type' => 'number',
+				'default' => 48
+			),
+			'textSize' => array(
+				'type' => 'number',
+				'default' => 24
+			),
+			'marginTop' => array(
+				'type' => 'number',
+				'default' => 0
+			),
+			'marginBottom' => array(
+				'type' => 'number',
+				'default' => 20
+			),
+			'textColor' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'numberColor' => array(
+				'type' => 'string',
+				'default' => ''
+			)
+		),
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css',
+		'viewScript' => 'file:./view.js'
+	),
+	'stagekitwp-divider' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'stagekitwp/divider',
+		'title' => 'Custom Divider',
+		'category' => 'stagekitwp-blocks',
+		'icon' => 'minus',
+		'description' => 'A themed divider with line, icon, image, and shape presets.',
+		'supports' => array(
+			'html' => false
+		),
+		'attributes' => array(
+			'dividerType' => array(
+				'type' => 'string',
+				'default' => 'line'
+			),
+			'lineStyle' => array(
+				'type' => 'string',
+				'default' => 'solid'
+			),
+			'shape' => array(
+				'type' => 'string',
+				'default' => 'wave'
+			),
+			'icon' => array(
+				'type' => 'string',
+				'default' => '✦'
+			),
+			'imageUrl' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'imageAlt' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'color' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'thickness' => array(
+				'type' => 'number',
+				'default' => 2
+			),
+			'width' => array(
+				'type' => 'number',
+				'default' => 80
+			),
+			'spacing' => array(
+				'type' => 'number',
+				'default' => 28
+			),
+			'colorMode' => array(
+				'type' => 'string',
+				'default' => 'auto'
+			)
+		),
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css'
+	),
 	'stagekitwp-dual-image' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
 		'apiVersion' => 3,
@@ -235,6 +554,76 @@ return array(
 				'borderRadius' => 8
 			)
 		)
+	),
+	'stagekitwp-lottie' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'stagekitwp/lottie',
+		'title' => 'Dark Mode Lottie',
+		'category' => 'stagekitwp-blocks',
+		'icon' => 'format-image',
+		'description' => 'Display light and dark Lottie animations with automatic theme switching.',
+		'supports' => array(
+			'html' => false,
+			'align' => array(
+				'left',
+				'center',
+				'right',
+				'wide',
+				'full'
+			)
+		),
+		'attributes' => array(
+			'lightAnimationId' => array(
+				'type' => 'number',
+				'default' => 0
+			),
+			'lightAnimationUrl' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'darkAnimationId' => array(
+				'type' => 'number',
+				'default' => 0
+			),
+			'darkAnimationUrl' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'colorMode' => array(
+				'type' => 'string',
+				'default' => 'auto'
+			),
+			'autoplay' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
+			'loop' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
+			'speed' => array(
+				'type' => 'number',
+				'default' => 1
+			),
+			'width' => array(
+				'type' => 'number',
+				'default' => 100
+			),
+			'maxWidth' => array(
+				'type' => 'number',
+				'default' => 500
+			),
+			'aspectRatio' => array(
+				'type' => 'string',
+				'default' => '1 / 1'
+			)
+		),
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css',
+		'render' => 'file:./render.php',
+		'viewScript' => 'file:./view.js'
 	),
 	'stagekitwp-post-carousel' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
@@ -424,5 +813,58 @@ return array(
 				)
 			)
 		)
+	),
+	'stagekitwp-thermometer' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'stagekitwp/thermometer',
+		'title' => 'Fundraising Thermometer',
+		'category' => 'stagekitwp-blocks',
+		'icon' => 'chart-bar',
+		'description' => 'Shows fundraising progress toward a goal.',
+		'supports' => array(
+			'html' => false
+		),
+		'attributes' => array(
+			'title' => array(
+				'type' => 'string',
+				'default' => 'Our fundraising goal'
+			),
+			'current' => array(
+				'type' => 'number',
+				'default' => 2500
+			),
+			'goal' => array(
+				'type' => 'number',
+				'default' => 10000
+			),
+			'currency' => array(
+				'type' => 'string',
+				'default' => '$'
+			),
+			'theme' => array(
+				'type' => 'string',
+				'default' => 'horizontal'
+			),
+			'showAmounts' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
+			'showPercentage' => array(
+				'type' => 'boolean',
+				'default' => true
+			),
+			'colorMode' => array(
+				'type' => 'string',
+				'default' => 'auto'
+			),
+			'accentColor' => array(
+				'type' => 'string',
+				'default' => '#c2410c'
+			)
+		),
+		'editorScript' => 'file:./index.js',
+		'editorStyle' => 'file:./index.css',
+		'style' => 'file:./style-index.css'
 	)
 );

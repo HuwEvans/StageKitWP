@@ -235,3 +235,121 @@ function stagekitwp_get_level_display_labels( $context, $atts = array() ) {
 
     return $labels;
 }
+
+/**
+ * Get the configured Organization Name, falling back to Site Identity (blog name).
+ *
+ * @return string
+ */
+function stagekitwp_get_organization_name() {
+    $org = get_option( 'stagekitwp_organization_name', '' );
+    if ( is_string( $org ) && '' !== trim( $org ) ) {
+        return trim( $org );
+    }
+    return get_bloginfo( 'name' );
+}
+
+/**
+ * Get the configured Organization Address, used as a location fallback in schema markup.
+ *
+ * @return string
+ */
+function stagekitwp_get_organization_address() {
+    $address = get_option( 'stagekitwp_organization_address', '' );
+    return is_string( $address ) ? trim( $address ) : '';
+}
+
+/**
+ * Resolve the "next" season: the season immediately after the current one
+ * (by date range), or the earliest future season if no season is currently
+ * running. Returns null when there is no next season.
+ *
+ * @return WP_Post|null
+ */
+function stagekitwp_get_next_season() {
+    static $cached      = null;
+    static $has_resolved = false;
+    if ( $has_resolved ) {
+        return $cached;
+    }
+    $has_resolved = true;
+
+    $season_ids = get_posts( array(
+        'post_type'      => 'season',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+    ) );
+    if ( empty( $season_ids ) ) {
+        return $cached;
+    }
+
+    $now     = current_time( 'timestamp' );
+    $seasons = array();
+    foreach ( $season_ids as $season_id ) {
+        $start_raw = get_post_meta( $season_id, '_stagekitwp_season_start_date', true );
+        $end_raw   = get_post_meta( $season_id, '_stagekitwp_season_end_date', true );
+        $seasons[] = array(
+            'id'    => $season_id,
+            'start' => $start_raw ? strtotime( $start_raw ) : 0,
+            'end'   => $end_raw ? strtotime( $end_raw ) + 86399 : 0,
+        );
+    }
+    usort( $seasons, function ( $a, $b ) {
+        return $a['start'] - $b['start'];
+    } );
+
+    $current_index = null;
+    foreach ( $seasons as $index => $season ) {
+        if ( $season['start'] && $season['end'] && $now >= $season['start'] && $now <= $season['end'] ) {
+            $current_index = $index;
+            break;
+        }
+    }
+
+    if ( null !== $current_index ) {
+        $next = isset( $seasons[ $current_index + 1 ] ) ? $seasons[ $current_index + 1 ] : null;
+        return $cached = ( $next ? get_post( $next['id'] ) : null );
+    }
+
+    foreach ( $seasons as $season ) {
+        if ( $season['start'] > $now ) {
+            return $cached = get_post( $season['id'] );
+        }
+    }
+
+    return $cached;
+}
+
+/**
+ * Whether a given season has any published shows assigned to it.
+ *
+ * @param int $season_id
+ * @return bool
+ */
+function stagekitwp_season_has_shows( $season_id ) {
+    $season_id = absint( $season_id );
+    if ( ! $season_id ) {
+        return false;
+    }
+    $show_ids = get_posts( array(
+        'post_type'      => 'show',
+        'post_status'    => 'publish',
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+        'meta_key'       => '_stagekitwp_show_season',
+        'meta_value'     => $season_id,
+    ) );
+    return ! empty( $show_ids );
+}
+
+/**
+ * Whether the next season (if any) has any published shows. No next season
+ * always resolves to false.
+ *
+ * @return bool
+ */
+function stagekitwp_next_season_has_shows() {
+    $season = stagekitwp_get_next_season();
+    return $season ? stagekitwp_season_has_shows( $season->ID ) : false;
+}

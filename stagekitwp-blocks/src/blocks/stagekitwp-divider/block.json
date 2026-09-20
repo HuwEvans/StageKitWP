@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "stagekitwp/divider",
+	"title": "Custom Divider",
+	"category": "stagekitwp-blocks",
+	"icon": "minus",
+	"description": "A themed divider with line, icon, image, and shape presets.",
+	"supports": { "html": false },
+	"attributes": {
+		"dividerType": { "type": "string", "default": "line" },
+		"lineStyle": { "type": "string", "default": "solid" },
+		"shape": { "type": "string", "default": "wave" },
+		"icon": { "type": "string", "default": "✦" },
+		"imageUrl": { "type": "string", "default": "" },
+		"imageAlt": { "type": "string", "default": "" },
+		"color": { "type": "string", "default": "" },
+		"thickness": { "type": "number", "default": 2 },
+		"width": { "type": "number", "default": 80 },
+		"spacing": { "type": "number", "default": 28 },
+		"colorMode": { "type": "string", "default": "auto" }
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css"
+}

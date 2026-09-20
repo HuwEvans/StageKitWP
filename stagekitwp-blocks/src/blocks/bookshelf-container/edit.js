@@ -1,7 +1,7 @@
 import {
     InspectorControls,
-    InnerBlocks,
-    useBlockProps
+    useBlockProps,
+    useInnerBlocksProps
 } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
 
@@ -27,6 +27,16 @@ export default function Edit({ attributes, setAttributes, clientId }) {
         '--stagekitwp-bookcase-width': `${attributes.bookcaseWidth}px`,
         '--stagekitwp-shelf-gap': `${attributes.shelfGap}px`
     };
+
+    // Spread onto the container itself so book items are real direct children (grid/flex layout requires that),
+    // instead of the extra wrapper <div>s that the <InnerBlocks /> component would otherwise add.
+    const innerBlocksProps = useInnerBlocksProps(
+        useBlockProps({
+            className: `stagekitwp-bookshelf-container layout-${attributes.layoutStyle} theme-${attributes.shelfTheme}`,
+            style: containerStyle
+        }),
+        { allowedBlocks: ALLOWED }
+    );
 
     return (
         <>
@@ -136,12 +146,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
             </InspectorControls>
 
-            <div
-                {...useBlockProps({
-                    className: `stagekitwp-bookshelf-container layout-${attributes.layoutStyle} theme-${attributes.shelfTheme}`,
-                    style: containerStyle
-                })}
-            >
+            <div {...innerBlocksProps}>
                 {!childBlocks.length && (
                     <div className="stagekitwp-bookshelf-editor-preview" aria-hidden="true">
                         <span className="stagekitwp-bookshelf-editor-preview__label">
@@ -154,9 +159,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
                         </div>
                     </div>
                 )}
-                <InnerBlocks
-                    allowedBlocks={ALLOWED}
-                />
+                {innerBlocksProps.children}
             </div>
 
         </>

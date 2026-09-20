@@ -1,9 +1,14 @@
 export function isISBN(
     value = ''
 ) {
-    return /^(97(8|9))?\d{9}(\d|X)$/i
-        .test(value);
+        const candidate = normalizeISBN( value );
+        return /^(97(8|9))?\d{9}(\d|X)$/i.test( candidate );
 }
+    export function normalizeISBN( value = '' ) {
+        return String( value )
+            .toUpperCase()
+            .replace( /[^0-9X]/g, '' );
+    }
 
 export function isASIN(
     value = ''

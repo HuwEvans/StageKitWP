@@ -1,0 +1,109 @@
+.stagekitwp-countup {
+
+	--stagekitwp-countup-text:
+		var(
+			--stagekitwp-body-text,
+			#1e293b
+		);
+
+	text-align: inherit;
+
+	color:
+		var(
+			--stagekitwp-countup-text
+		);
+
+	&__number {
+
+		font-size:
+			var(
+				--stagekitwp-countup-number-size,
+				48px
+			);
+
+		font-weight: 800;
+
+		display: block;
+
+		line-height: 1.1;
+
+		color:
+			var(
+				--stagekitwp-countup-number-color,
+				currentColor
+			);
+
+	}
+
+	&__pre,
+	&__post {
+
+		font-size:
+			var(
+				--stagekitwp-countup-text-size,
+				24px
+			);
+
+		color:
+			var(
+				--stagekitwp-countup-text-color,
+				currentColor
+			);
+
+	}
+
+	&__screen-reader-text {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+}
+
+/*
+=========================================
+Auto Theme
+=========================================
+*/
+
+body.stagekitwp-dark-mode
+.stagekitwp-countup:not(.is-light-mode),
+
+html.stagekitwp-dark-mode
+.stagekitwp-countup:not(.is-light-mode) {
+
+	--stagekitwp-countup-text:
+		#f8fafc;
+
+}
+
+/*
+=========================================
+Forced Dark
+=========================================
+*/
+
+.stagekitwp-countup.is-dark-mode {
+
+	--stagekitwp-countup-text:
+		#f8fafc !important;
+
+}
+
+/*
+=========================================
+Forced Light
+=========================================
+*/
+
+.stagekitwp-countup.is-light-mode {
+
+	--stagekitwp-countup-text:
+		#1e293b !important;
+
+}

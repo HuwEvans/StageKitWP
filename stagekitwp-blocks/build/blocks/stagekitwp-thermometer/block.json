@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "stagekitwp/thermometer",
+  "title": "Fundraising Thermometer",
+  "category": "stagekitwp-blocks",
+  "icon": "chart-bar",
+  "description": "Shows fundraising progress toward a goal.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "Our fundraising goal"
+    },
+    "current": {
+      "type": "number",
+      "default": 2500
+    },
+    "goal": {
+      "type": "number",
+      "default": 10000
+    },
+    "currency": {
+      "type": "string",
+      "default": "$"
+    },
+    "theme": {
+      "type": "string",
+      "default": "horizontal"
+    },
+    "showAmounts": {
+      "type": "boolean",
+      "default": true
+    },
+    "showPercentage": {
+      "type": "boolean",
+      "default": true
+    },
+    "colorMode": {
+      "type": "string",
+      "default": "auto"
+    },
+    "accentColor": {
+      "type": "string",
+      "default": "#c2410c"
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css"
+}

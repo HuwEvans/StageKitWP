@@ -1360,6 +1360,13 @@ function stagekitwp_inject_customizer_css_variables() {
     $hero_subtitle_light = get_theme_mod( 'stagekitwp_hero_subtitle_color_light', '#dddddd' );
     $hero_subtitle_dark  = get_theme_mod( 'stagekitwp_hero_subtitle_color_dark',  '#dddddd' );
 
+    // ── Hero overlay ──────────────────────────────────────────────────────────
+    $hero_overlay_color   = get_theme_mod( 'stagekitwp_hero_overlay_color',   '#000000' );
+    $hero_overlay_opacity = absint( get_theme_mod( 'stagekitwp_hero_overlay_opacity', 60 ) );
+    if ( $hero_overlay_opacity > 100 ) {
+        $hero_overlay_opacity = 60;
+    }
+
     // ── Layout ────────────────────────────────────────────────────────────────
     $site_max_width   = absint( get_theme_mod( 'stagekitwp_site_max_width', 1200 ) );
     if ( $site_max_width < 960 || $site_max_width > 1920 ) {
@@ -1406,6 +1413,10 @@ function stagekitwp_inject_customizer_css_variables() {
             --stagekitwp-hero-title-dark:     <?php echo esc_attr( $hero_title_dark ); ?>;
             --stagekitwp-hero-subtitle-light: <?php echo esc_attr( $hero_subtitle_light ); ?>;
             --stagekitwp-hero-subtitle-dark:  <?php echo esc_attr( $hero_subtitle_dark ); ?>;
+
+            /* Hero overlay */
+            --stagekitwp-hero-overlay-color:   <?php echo esc_attr( $hero_overlay_color ); ?>;
+            --stagekitwp-hero-overlay-opacity: <?php echo esc_attr( number_format( $hero_overlay_opacity / 100, 2, '.', '' ) ); ?>;
 
             /* Legacy aliases so existing code keeps working */
             --stagekitwp-accent:           <?php echo esc_attr( $legacy_accent ); ?>;

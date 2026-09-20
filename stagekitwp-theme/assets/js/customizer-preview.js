@@ -291,8 +291,13 @@
 
 	wp.customize( 'stagekitwp_hero_bg_image', function ( value ) {
 		value.bind( function ( v ) {
-			var el = document.querySelector( '.stagekitwp-hero-banner.media-type-image' );
-			if ( el && v ) { el.style.backgroundImage = 'url(' + v + ')'; }
+			var banner = document.querySelector( '.stagekitwp-hero-banner.media-type-image' );
+			var img = document.querySelector( '.stagekitwp-hero-image' );
+			if ( img && v ) {
+				img.src = v;
+			} else if ( banner && v ) {
+				banner.style.backgroundImage = 'url(' + v + ')';
+			}
 		} );
 	} );
 
@@ -508,6 +513,26 @@
 	wp.customize( 'stagekitwp_hero_subtitle_color_dark', function ( value ) {
 		value.bind( function ( v ) {
 			document.documentElement.style.setProperty( '--stagekitwp-hero-subtitle-dark', v );
+		} );
+	} );
+
+	// =========================================================================
+	// Hero overlay — live postMessage bindings
+	// =========================================================================
+	wp.customize( 'stagekitwp_hero_overlay_color', function ( value ) {
+		value.bind( function ( v ) {
+			document.documentElement.style.setProperty( '--stagekitwp-hero-overlay-color', v );
+			var el = document.querySelector( '.stagekitwp-hero-banner' );
+			if ( el ) { el.style.setProperty( '--stagekitwp-hero-overlay-color', v ); }
+		} );
+	} );
+
+	wp.customize( 'stagekitwp_hero_overlay_opacity', function ( value ) {
+		value.bind( function ( v ) {
+			var opacityVal = ( parseFloat( v ) / 100 ).toFixed( 2 );
+			document.documentElement.style.setProperty( '--stagekitwp-hero-overlay-opacity', opacityVal );
+			var el = document.querySelector( '.stagekitwp-hero-banner' );
+			if ( el ) { el.style.setProperty( '--stagekitwp-hero-overlay-opacity', opacityVal ); }
 		} );
 	} );
 

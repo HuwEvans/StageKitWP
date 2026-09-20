@@ -1,0 +1,82 @@
+.stagekitwp-accordion {
+	--stagekitwp-accordion-header-text: var(--stagekitwp-accordion-header-text-light, #1e293b);
+	--stagekitwp-accordion-header-bg: var(--stagekitwp-accordion-header-bg-light, #f8fafc);
+	--stagekitwp-accordion-body-text: var(--stagekitwp-accordion-body-text-light, #334155);
+	--stagekitwp-accordion-body-bg: var(--stagekitwp-accordion-body-bg-light, #ffffff);
+	--stagekitwp-accordion-border: var(--stagekitwp-accordion-border-light, #cbd5e1);
+	--stagekitwp-accordion-accent: var(--stagekitwp-accordion-accent-light, #b42318);
+	color: var(--stagekitwp-accordion-body-text);
+
+	&__item {
+		border: 1px solid var(--stagekitwp-accordion-border);
+		background: var(--stagekitwp-accordion-body-bg);
+		color: var(--stagekitwp-accordion-body-text);
+	}
+
+	&__heading { margin: 0; }
+
+	&__trigger {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		padding: 16px 18px;
+		border: 0;
+		background: var(--stagekitwp-accordion-header-bg);
+		color: var(--stagekitwp-accordion-header-text);
+		font: inherit;
+		font-weight: 700;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	&__trigger:focus-visible { outline: 2px solid var(--stagekitwp-accordion-accent); outline-offset: 3px; }
+	&__icon { color: var(--stagekitwp-accordion-accent); font-size: 24px; line-height: 1; }
+	&__panel { padding: 0 18px 18px; background: var(--stagekitwp-accordion-body-bg); }
+	&__content > :first-child { margin-top: 0; }
+	&__content > :last-child { margin-bottom: 0; }
+}
+
+/* Presets keep the same accessible markup while changing the visual language. */
+.stagekitwp-accordion.preset-minimal .stagekitwp-accordion__item { border-width: 0 0 1px; }
+.stagekitwp-accordion.preset-cards { display: grid; gap: 12px; }
+.stagekitwp-accordion.preset-cards .stagekitwp-accordion__item { border-radius: 8px; overflow: hidden; box-shadow: 0 3px 12px rgba(15, 23, 42, 0.08); }
+.stagekitwp-accordion.preset-underline .stagekitwp-accordion__trigger { border-bottom: 3px solid var(--stagekitwp-accordion-border); }
+.stagekitwp-accordion.preset-underline .stagekitwp-accordion__item.is-open .stagekitwp-accordion__trigger { border-bottom-color: var(--stagekitwp-accordion-accent); }
+.stagekitwp-accordion.preset-pill { display: grid; gap: 10px; }
+.stagekitwp-accordion.preset-pill .stagekitwp-accordion__item { border: 0; border-radius: 999px; overflow: hidden; }
+.stagekitwp-accordion.preset-pill .stagekitwp-accordion__panel { padding-top: 4px; border-radius: 0 0 18px 18px; }
+.stagekitwp-accordion.preset-stage .stagekitwp-accordion__item { border-width: 0 0 2px; }
+.stagekitwp-accordion.preset-stage .stagekitwp-accordion__trigger { background: linear-gradient(135deg, var(--stagekitwp-accordion-header-bg), color-mix(in srgb, var(--stagekitwp-accordion-accent) 12%, var(--stagekitwp-accordion-header-bg))); border-left: 6px solid var(--stagekitwp-accordion-accent); }
+.stagekitwp-accordion.preset-boxed { border: 1px solid var(--stagekitwp-accordion-border); border-radius: 8px; overflow: hidden; }
+.stagekitwp-accordion.preset-boxed .stagekitwp-accordion__item { border-width: 0 0 1px; }
+.stagekitwp-accordion.preset-boxed .stagekitwp-accordion__item:last-child { border-bottom: 0; }
+.stagekitwp-accordion .stagekitwp-accordion__item.is-open .stagekitwp-accordion__icon { color: var(--stagekitwp-accordion-accent); }
+
+body.stagekitwp-dark-mode .stagekitwp-accordion:not(.is-light-mode),
+html.stagekitwp-dark-mode .stagekitwp-accordion:not(.is-light-mode) {
+	--stagekitwp-accordion-header-text: var(--stagekitwp-accordion-header-text-dark, #f8fafc) !important;
+	--stagekitwp-accordion-header-bg: var(--stagekitwp-accordion-header-bg-dark, #1e293b) !important;
+	--stagekitwp-accordion-body-text: var(--stagekitwp-accordion-body-text-dark, #e2e8f0) !important;
+	--stagekitwp-accordion-body-bg: var(--stagekitwp-accordion-body-bg-dark, #0f172a) !important;
+	--stagekitwp-accordion-border: var(--stagekitwp-accordion-border-dark, #475569) !important;
+	--stagekitwp-accordion-accent: var(--stagekitwp-accordion-accent-dark, #f59e0b) !important;
+}
+
+.stagekitwp-accordion.is-dark-mode {
+	--stagekitwp-accordion-header-text: var(--stagekitwp-accordion-header-text-dark, #f8fafc) !important;
+	--stagekitwp-accordion-header-bg: var(--stagekitwp-accordion-header-bg-dark, #1e293b) !important;
+	--stagekitwp-accordion-body-text: var(--stagekitwp-accordion-body-text-dark, #e2e8f0) !important;
+	--stagekitwp-accordion-body-bg: var(--stagekitwp-accordion-body-bg-dark, #0f172a) !important;
+	--stagekitwp-accordion-border: var(--stagekitwp-accordion-border-dark, #475569) !important;
+	--stagekitwp-accordion-accent: var(--stagekitwp-accordion-accent-dark, #f59e0b) !important;
+}
+
+.stagekitwp-accordion.is-light-mode {
+	--stagekitwp-accordion-header-text: var(--stagekitwp-accordion-header-text-light, #1e293b) !important;
+	--stagekitwp-accordion-header-bg: var(--stagekitwp-accordion-header-bg-light, #f8fafc) !important;
+	--stagekitwp-accordion-body-text: var(--stagekitwp-accordion-body-text-light, #334155) !important;
+	--stagekitwp-accordion-body-bg: var(--stagekitwp-accordion-body-bg-light, #ffffff) !important;
+	--stagekitwp-accordion-border: var(--stagekitwp-accordion-border-light, #cbd5e1) !important;
+	--stagekitwp-accordion-accent: var(--stagekitwp-accordion-accent-light, #b42318) !important;
+}

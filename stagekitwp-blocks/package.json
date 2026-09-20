@@ -15,10 +15,14 @@
 		"start": "wp-scripts start --blocks-manifest --webpack-copy-php"
 	},
 	"dependencies": {
+		"@wordpress/api-fetch": "latest",
 		"@wordpress/block-editor": "latest",
 		"@wordpress/blocks": "latest",
+		"@wordpress/components": "latest",
+		"@wordpress/element": "latest",
 		"@wordpress/i18n": "latest",
 		"hyperellipse": "^1.0.5",
+		"lottie-web": "^5.13.0",
 		"swiper": "^14.1.0"
 	},
 	"devDependencies": {

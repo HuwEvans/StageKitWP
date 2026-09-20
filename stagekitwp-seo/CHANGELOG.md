@@ -1,5 +1,19 @@
 # StageKitWP Search Optimizer Changelog
 
+## Version 1.4.3 — 2026-09-19
+
+### Fixed
+
+- Show `TheaterEvent` schema `startDate` is now guaranteed: the season+time-slot fallback formula was corrected to season start date + 4/7/10 months (Fall/Winter/Spring) instead of fixed calendar dates, falls back to the season start date itself when no time slot is set, and falls back to the show's publish date as a last resort when no season is assigned.
+- `stagekitwp_event` `Event` schema now falls back to the event's publish date when no event date is set, so `startDate` is never empty.
+
+## Version 1.4.2 — 2026-09-18
+
+### Fixed
+
+- Show `Offer` schema now sets `validFrom` to the start date of the show's associated season instead of leaving it unset.
+- Venue `location.image` now outputs a proper `ImageObject` (`@type` + `contentUrl`) instead of a bare URL string.
+
 ## Version 1.4.1 — 2026-09-07
 
 ### Added

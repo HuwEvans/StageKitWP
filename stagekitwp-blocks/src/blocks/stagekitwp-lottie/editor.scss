@@ -1,0 +1,215 @@
+/*
+=========================================
+StageKitWP Lottie Block Editor Styles
+=========================================
+*/
+
+.stagekitwp-lottie-editor {
+
+	/*
+	=========================================
+	Active Theme Preview
+	=========================================
+	*/
+
+	.stagekitwp-lottie-editor__active-preview {
+		background: #ffffff;
+		border: 1px solid #dcdcde;
+		border-radius: 8px;
+		padding: 20px;
+		margin-bottom: 24px;
+		text-align: center;
+
+		h3 {
+			margin: 0 0 8px;
+		}
+
+		p {
+			margin: 0 0 16px;
+			color: #646970;
+			font-size: 13px;
+		}
+	}
+
+	/*
+	=========================================
+	Preview Grid
+	=========================================
+	*/
+
+	.stagekitwp-lottie-editor__preview {
+		display: grid;
+		grid-template-columns: repeat(
+			auto-fit,
+			minmax(280px, 1fr)
+		);
+		gap: 20px;
+	}
+
+	.stagekitwp-lottie-editor__column {
+		background: #ffffff;
+		border: 1px solid #dcdcde;
+		border-radius: 8px;
+		padding: 16px;
+
+		h4 {
+			margin-top: 0;
+			margin-bottom: 12px;
+		}
+	}
+
+	/*
+	=========================================
+	Player Areas
+	=========================================
+	*/
+
+	.stagekitwp-lottie-editor__player {
+		width: 100%;
+		min-height: 250px;
+		aspect-ratio: 1 / 1;
+
+		border: 1px solid #dcdcde;
+		border-radius: 6px;
+
+		background: #f6f7f7;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		overflow: hidden;
+		margin-top: 12px;
+
+		svg,
+		canvas {
+			width: 100% !important;
+			height: 100% !important;
+			display: block;
+		}
+	}
+
+	/*
+	=========================================
+	Placeholder
+	=========================================
+	*/
+
+	.stagekitwp-lottie-editor__placeholder {
+		min-height: 250px;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		text-align: center;
+
+		padding: 20px;
+
+		border: 2px dashed #dcdcde;
+		border-radius: 6px;
+
+		background: #f6f7f7;
+		color: #646970;
+	}
+
+	/*
+	=========================================
+	Settings Summary
+	=========================================
+	*/
+
+	.stagekitwp-lottie-editor__settings {
+		margin-top: 24px;
+
+		padding: 16px;
+
+		background: #ffffff;
+		border: 1px solid #dcdcde;
+		border-radius: 8px;
+
+		h4 {
+			margin-top: 0;
+		}
+
+		ul {
+			margin: 0;
+			padding-left: 20px;
+		}
+
+		li {
+			margin-bottom: 6px;
+		}
+	}
+
+	/*
+	=========================================
+	Animation Picker
+	=========================================
+	*/
+
+	.stagekitwp-lottie__picker {
+		margin-bottom: 20px;
+		padding-bottom: 20px;
+		border-bottom: 1px solid #f0f0f1;
+
+		strong {
+			display: block;
+			margin-bottom: 10px;
+		}
+	}
+
+	.stagekitwp-lottie__picker:last-child {
+		margin-bottom: 0;
+		padding-bottom: 0;
+		border-bottom: none;
+	}
+}
+
+/*
+=========================================
+Gutenberg Dark Theme Support
+=========================================
+*/
+
+.is-dark-theme .stagekitwp-lottie-editor {
+
+	.stagekitwp-lottie-editor__active-preview,
+	.stagekitwp-lottie-editor__column,
+	.stagekitwp-lottie-editor__settings {
+		background: #1e1e1e;
+		border-color: #3c434a;
+		color: #f0f0f0;
+	}
+
+	.stagekitwp-lottie-editor__active-preview p {
+		color: #dcdcde;
+	}
+
+	.stagekitwp-lottie-editor__placeholder {
+		background: #2c3338;
+		border-color: #3c434a;
+		color: #dcdcde;
+	}
+
+	.stagekitwp-lottie-editor__player {
+		background: #2c3338;
+		border-color: #3c434a;
+	}
+}
+
+/*
+=========================================
+Responsive Layout
+=========================================
+*/
+
+@media (max-width: 782px) {
+
+	.stagekitwp-lottie-editor {
+
+		.stagekitwp-lottie-editor__preview {
+			grid-template-columns: 1fr;
+		}
+	}
+}

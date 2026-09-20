@@ -1,7 +1,7 @@
 {
   "name": "StageKitWP Core",
   "slug": "stagekitwp-core",
-  "version": "5.2.7",
+  "version": "5.2.9",
   "author": "Huw Evans",
   "author_homepage": "https://github.com/HuwEvans",
   "requires": "6.8.2",
@@ -13,6 +13,6 @@
   "sections": {
     "description": "The StageKitWP Core plugin provides the content management foundation for the full StageKitWP ecosystem, including custom post types, block support, admin hub screens, and the shared display options system.",
     "installation": "Upload the stagekitwp-core plugin folder to wp-content/plugins/, activate it, and open the StageKitWP admin hub to begin managing content.",
-    "changelog": "5.2.7: fixed castwithbio cast photos being cropped at the single-column mobile breakpoint (object-fit was set to cover instead of contain)."
+    "changelog": "5.2.9: Landing Page (`[stagekitwp_landingpage]` + Show CPT front-end display) now supports an 'awards' field that lists the show's awards/nominations after the cast list (toggle via field_list attr or the Front-end Display meta box). Card and hero layouts also gain a second 'Get Tickets' button placed right after the performances list and before the venue."
   }
 }

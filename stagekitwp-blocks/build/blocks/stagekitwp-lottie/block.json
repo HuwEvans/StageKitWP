@@ -1,0 +1,70 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "stagekitwp/lottie",
+  "title": "Dark Mode Lottie",
+  "category": "stagekitwp-blocks",
+  "icon": "format-image",
+  "description": "Display light and dark Lottie animations with automatic theme switching.",
+  "supports": {
+    "html": false,
+    "align": [
+      "left",
+      "center",
+      "right",
+      "wide",
+      "full"
+    ]
+  },
+  "attributes": {
+    "lightAnimationId": {
+      "type": "number",
+      "default": 0
+    },
+    "lightAnimationUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "darkAnimationId": {
+      "type": "number",
+      "default": 0
+    },
+    "darkAnimationUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "colorMode": {
+      "type": "string",
+      "default": "auto"
+    },
+    "autoplay": {
+      "type": "boolean",
+      "default": true
+    },
+    "loop": {
+      "type": "boolean",
+      "default": true
+    },
+    "speed": {
+      "type": "number",
+      "default": 1
+    },
+    "width": {
+      "type": "number",
+      "default": 100
+    },
+    "maxWidth": {
+      "type": "number",
+      "default": 500
+    },
+    "aspectRatio": {
+      "type": "string",
+      "default": "1 / 1"
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js"
+}

@@ -55,6 +55,7 @@ function stagekitwp_lp_all_fields() {
         'program_pdf'         => 'Program PDF Link',
         'cast'               => 'Cast List (simple)',
         'castwithbio'        => 'Cast with Photos',
+        'awards'             => 'Awards',
         'venue'              => 'Venue',
     ];
 }
@@ -101,7 +102,7 @@ function stagekitwp_show_front_display_meta_box( $post ) {
     $active_fields = array_map( 'trim', explode( ',', $field_list ) );
 
     // Per-show heading overrides
-    $heading_keys = [ 'author','sub_authors','director','assoc_dir','producer','stage_manager','synopsis','show_dates','program_pdf','venue','cast' ];
+    $heading_keys = [ 'author','sub_authors','director','assoc_dir','producer','stage_manager','synopsis','show_dates','program_pdf','venue','cast','awards' ];
     $headings = [];
     foreach ( $heading_keys as $hk ) {
         $headings[ $hk ] = get_post_meta( $post->ID, '_stagekitwp_lp_heading_' . $hk, true ) ?: '';
@@ -378,6 +379,7 @@ function stagekitwp_show_front_display_meta_box( $post ) {
                 'program_pdf'   => 'Programme',
                 'venue'         => 'Venue',
                 'cast'          => 'Cast',
+                'awards'        => 'Awards',
             ];
             ?>
             <div class="stagekitwp-fd-headings-grid">
@@ -450,7 +452,7 @@ add_action( 'save_post_show', function( $post_id ) {
     $allowed_layouts = [ 'card', 'hero', 'programme', 'minimal' ];
     $allowed_fmts    = [ 'default','modern','minimal','outline','gradient','prominent','success','ghost','glass' ];
     $allowed_fields  = array_keys( stagekitwp_lp_all_fields() );
-    $allowed_hkeys   = [ 'author','sub_authors','director','assoc_dir','producer','stage_manager','synopsis','show_dates','program_pdf','venue','cast' ];
+    $allowed_hkeys   = [ 'author','sub_authors','director','assoc_dir','producer','stage_manager','synopsis','show_dates','program_pdf','venue','cast','awards' ];
 
     $view = sanitize_key( $post_data['stagekitwp_show_front_view'] ?? 'landing_page' );
     if ( ! in_array( $view, $allowed_views, true ) ) { $view = 'landing_page'; }

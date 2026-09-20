@@ -1,0 +1,33 @@
+.stagekitwp-thermometer {
+	--stagekitwp-thermometer-text: var(--stagekitwp-body-text, #1e293b);
+	--stagekitwp-thermometer-surface: var(--stagekitwp-surface-bg, transparent);
+	--stagekitwp-thermometer-accent: #c2410c;
+	color: var(--stagekitwp-thermometer-text);
+	max-width: 680px;
+	padding: 18px;
+	background: var(--stagekitwp-thermometer-surface);
+	&__title { margin: 0 0 14px; color: inherit; }
+	&__visual { position: relative; overflow: visible; }
+	&__svg { display: block; width: 100%; height: auto; overflow: visible; }
+	&__tube-track, &__track, &__ring-track { fill: color-mix(in srgb, currentColor 15%, transparent); stroke: color-mix(in srgb, currentColor 25%, transparent); stroke-width: 2; }
+	&__shine { fill: var(--stagekitwp-thermometer-accent); opacity: 0.88; }
+	&__highlight { fill: #fff; opacity: 0.48; }
+	&__bulb-face { fill: color-mix(in srgb, currentColor 15%, transparent); stroke: color-mix(in srgb, currentColor 25%, transparent); stroke-width: 2; }
+	&__ticks line { stroke: currentColor; stroke-width: 2; opacity: 0.55; }
+	&__ring-track, &__ring-progress { fill: none; stroke-width: 12; }
+	&__ring-progress { stroke: var(--stagekitwp-thermometer-accent); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 60px 60px; }
+	&__stage-frame { fill: color-mix(in srgb, currentColor 10%, transparent); stroke: color-mix(in srgb, currentColor 28%, transparent); stroke-width: 3; }
+	&__stage-segment { fill: color-mix(in srgb, currentColor 16%, transparent); stroke: color-mix(in srgb, currentColor 25%, transparent); stroke-width: 1; }
+	&__stage-segment.is-filled { fill: var(--stagekitwp-thermometer-accent); }
+	&__summary { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; font-variant-numeric: tabular-nums; }
+}
+
+.stagekitwp-thermometer.theme-classic { max-width: 260px; text-align: center; }
+.stagekitwp-thermometer.theme-classic .stagekitwp-thermometer__visual { max-width: 150px; height: auto; margin: 0 auto 12px; }
+.stagekitwp-thermometer.theme-ring { max-width: 320px; text-align: center; }
+.stagekitwp-thermometer.theme-ring .stagekitwp-thermometer__visual { max-width: 220px; margin: 0 auto 12px; }
+.stagekitwp-thermometer.theme-stage .stagekitwp-thermometer__visual { margin-bottom: 4px; }
+
+body.stagekitwp-dark-mode .stagekitwp-thermometer:not(.is-light-mode), html.stagekitwp-dark-mode .stagekitwp-thermometer:not(.is-light-mode) { --stagekitwp-thermometer-text: #f8fafc; --stagekitwp-thermometer-surface: rgba(255, 255, 255, 0.04); }
+.stagekitwp-thermometer.is-dark-mode { --stagekitwp-thermometer-text: #f8fafc !important; --stagekitwp-thermometer-surface: rgba(255, 255, 255, 0.04); }
+.stagekitwp-thermometer.is-light-mode { --stagekitwp-thermometer-text: #1e293b !important; --stagekitwp-thermometer-surface: transparent; }

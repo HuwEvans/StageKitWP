@@ -100,7 +100,7 @@ class Shortcode {
 			. '.skwpm-gallery-list--list .skwpm-gallery-entry img{width:120px;height:80px;flex:0 0 auto;}'
 			. '.skwpm-gallery-list--list .skwpm-gallery-entry-title{padding:0;}'
 			. '.skwpm-gallery-list--grid{display:grid;grid-template-columns:repeat(var(--skwpm-cols,3),1fr);gap:1rem;}'
-			. '.skwpm-gallery-list--grid .skwpm-gallery-entry img{aspect-ratio:4/3;}'
+			. '.skwpm-gallery-list--grid .skwpm-gallery-entry img{aspect-ratio:4/3;height:auto;}'
 			. '.skwpm-gallery-list--mosaic{display:grid;grid-auto-flow:dense;grid-template-columns:repeat(var(--skwpm-cols,4),1fr);grid-auto-rows:120px;gap:.75rem;}'
 			. '.skwpm-gallery-list--mosaic .skwpm-gallery-entry{position:relative;overflow:hidden;}'
 			. '.skwpm-gallery-list--mosaic .skwpm-gallery-entry:nth-child(5n+1){grid-column:span 2;grid-row:span 2;}'

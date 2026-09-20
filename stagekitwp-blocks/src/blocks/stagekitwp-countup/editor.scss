@@ -1,0 +1,33 @@
+.stagekitwp-countup-editor-preview {
+
+	padding: 20px;
+
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+
+	background: #fff;
+	text-align: inherit;
+
+	.stagekitwp-countup__number {
+
+		font-size:
+			var(
+				--stagekitwp-countup-number-size,
+				48px
+			);
+
+		font-weight: 800;
+		line-height: 1.1;
+	}
+
+	.stagekitwp-countup__pre,
+	.stagekitwp-countup__post {
+
+		font-size:
+			var(
+				--stagekitwp-countup-text-size,
+				24px
+			);
+
+	}
+}

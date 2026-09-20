@@ -260,12 +260,12 @@
 		$container.show();
 
 		if ( 'grid' === state.viewMode ) {
-			$container.removeClass( 'skwpm-items-list' ).addClass( 'skwpm-items-grid' );
+			$container.removeClass( 'skwpm-items-list-container' ).addClass( 'skwpm-items-grid' );
 			state.items.forEach( function ( item ) {
 				$container.append( buildGridCard( item ) );
 			} );
 		} else {
-			$container.removeClass( 'skwpm-items-grid' ).addClass( 'skwpm-items-list' );
+			$container.removeClass( 'skwpm-items-grid' ).addClass( 'skwpm-items-list-container' );
 			$container.append( buildListTable( state.items ) );
 		}
 	}

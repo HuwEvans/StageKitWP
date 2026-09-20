@@ -1,0 +1,32 @@
+.stagekitwp-divider {
+	--stagekitwp-divider-color: var(--stagekitwp-body-text, #64748b);
+	--stagekitwp-divider-thickness: 2px;
+	--stagekitwp-divider-width: 80%;
+	--stagekitwp-divider-spacing: 28px;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: calc(var(--stagekitwp-divider-spacing) * 2 + 20px);
+	margin: 0;
+	color: var(--stagekitwp-divider-color);
+	&__line { display: block; width: var(--stagekitwp-divider-width); border-top: var(--stagekitwp-divider-thickness) solid currentColor; }
+	&.style-dashed &__line { border-top-style: dashed; }
+	&.style-dotted &__line { border-top-style: dotted; }
+	&.style-double &__line { border-top-style: double; border-top-width: calc(var(--stagekitwp-divider-thickness) * 3); }
+	&__icon { position: absolute; z-index: 1; padding: 0 12px; background: var(--stagekitwp-base-bg, #fff); font-size: 24px; line-height: 1; }
+	&__image { position: absolute; z-index: 1; width: auto; max-width: 120px; max-height: 48px; padding: 0 12px; background: var(--stagekitwp-base-bg, #fff); object-fit: contain; }
+	&.type-shape &__line { height: 28px; border: 0; background: currentColor; }
+	&.type-shape.shape-wave &__line { clip-path: polygon(0 45%, 12% 20%, 25% 55%, 38% 25%, 50% 60%, 62% 25%, 75% 55%, 88% 20%, 100% 45%, 100% 70%, 88% 45%, 75% 80%, 62% 50%, 50% 85%, 38% 50%, 25% 80%, 12% 45%, 0 70%); }
+	&.type-shape.shape-arch &__line { clip-path: ellipse(50% 70% at 50% 100%); }
+	&.type-shape.shape-zigzag &__line { clip-path: polygon(0 50%, 10% 0, 20% 50%, 30% 0, 40% 50%, 50% 0, 60% 50%, 70% 0, 80% 50%, 90% 0, 100% 50%, 100% 100%, 0 100%); }
+	&.type-shape.shape-scallop &__line { height: 18px; background: radial-gradient(circle at 12px 0, transparent 11px, currentColor 12px) 0 0 / 24px 18px repeat-x; }
+	&__icon-picker { display: grid; grid-template-columns: repeat(5, 38px); gap: 4px; padding: 8px; }
+	&__icon-picker .components-button { justify-content: center; min-width: 38px; padding: 4px; font-size: 20px; }
+	&__icon-picker .is-selected { outline: 2px solid currentColor; }
+	&__selected-icon { display: inline-block; margin-left: 8px; font-size: 22px; vertical-align: middle; }
+}
+
+body.stagekitwp-dark-mode .stagekitwp-divider:not(.is-light-mode), html.stagekitwp-dark-mode .stagekitwp-divider:not(.is-light-mode) { --stagekitwp-divider-color: #cbd5e1; }
+.stagekitwp-divider.is-dark-mode { --stagekitwp-divider-color: #cbd5e1 !important; }
+.stagekitwp-divider.is-light-mode { --stagekitwp-divider-color: #64748b !important; }

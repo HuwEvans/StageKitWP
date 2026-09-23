@@ -1,9 +1,9 @@
 {
-  "slug": "stagekitwp-theme",
-  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-theme/stagekitwp-theme-3.1.4.zip",
-  "new_version": "3.1.4",
   "name": "StageKitWP Theme",
-  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-theme/stagekitwp-theme-3.1.4.zip",
+  "new_version": "3.1.5",
+  "version": "3.1.5",
+  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-theme/stagekitwp-theme-3.1.5.zip",
   "url": "https://github.com/HuwEvans/StageKitWP",
-  "version": "3.1.4"
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-theme/stagekitwp-theme-3.1.5.zip",
+  "slug": "stagekitwp-theme"
 }

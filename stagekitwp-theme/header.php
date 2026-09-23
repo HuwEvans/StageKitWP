@@ -21,6 +21,9 @@
 <div id="page" class="site">
     <a class="skip-link screen-reader-text" href="#primary"><?php esc_html_e( 'Skip to content', 'stagekitwp-theme' ); ?></a>
 
+    <?php $stagekitwp_hide_header = in_array( stagekitwp_get_page_chrome_mode(), array( 'no-header', 'no-header-footer' ), true ); ?>
+    <?php if ( ! $stagekitwp_hide_header ) : ?>
+
     <?php 
     // Check global toggle visibility setting first
     if ( get_theme_mod( 'stagekitwp_enable_countdown', true ) ) : 
@@ -426,5 +429,7 @@
             });
         });
     </script>
+
+    <?php endif; ?>
 
     <div id="content" class="site-content">

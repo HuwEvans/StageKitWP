@@ -1,10 +1,10 @@
 {
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-blocks/stagekitwp-blocks-1.5.0.zip",
+  "tested": "6.6",
+  "requires": "6.0",
   "slug": "stagekitwp-blocks",
   "name": "stagekitwp-blocks",
   "new_version": "1.5.0",
-  "requires": "6.0",
-  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-blocks/stagekitwp-blocks-1.5.0.zip",
-  "tested": "6.6",
-  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-blocks/stagekitwp-blocks-1.5.0.zip",
-  "version": "1.5.0"
+  "version": "1.5.0",
+  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-blocks/stagekitwp-blocks-1.5.0.zip"
 }

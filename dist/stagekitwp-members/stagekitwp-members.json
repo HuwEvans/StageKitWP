@@ -1,20 +1,20 @@
 {
-  "short_description": "A complete members experience with invitations, directory, messaging, announcements, events, availability, bulk email, and REST APIs.",
-  "requires_php": "7.4",
-  "author": "StageKitWP",
-  "requires": "6.0",
-  "tested": "6.6",
   "author_homepage": "https://github.com/stagekitwp",
   "version": "3.0.0",
-  "new_version": "3.0.0",
-  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-members/stagekitwp-members-3.0.0.zip",
-  "name": "stagekitwp-members",
-  "homepage": "https://github.com/stagekitwp/stagekitwp-members",
   "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-members/stagekitwp-members-3.0.0.zip",
+  "name": "stagekitwp-members",
+  "short_description": "A complete members experience with invitations, directory, messaging, announcements, events, availability, bulk email, and REST APIs.",
+  "slug": "stagekitwp-members",
   "sections": {
     "description": "The members plugin adds a private member area to the StageKitWP site, including role-based access, member profiles, announcements, events, and producer tools.",
     "installation": "Upload the stagekitwp-members plugin folder to wp-content/plugins/, activate it, and ensure StageKitWP Core is active as a dependency.",
     "changelog": "See CHANGELOG.md for the full release history."
   },
-  "slug": "stagekitwp-members"
+  "requires": "6.0",
+  "requires_php": "7.4",
+  "author": "StageKitWP",
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-members/stagekitwp-members-3.0.0.zip",
+  "tested": "6.6",
+  "new_version": "3.0.0",
+  "homepage": "https://github.com/stagekitwp/stagekitwp-members"
 }

@@ -1,20 +1,20 @@
 {
-  "short_description": "Dedicated media asset manager, hierarchical folder organization, isolated storage outside core WordPress media, and cloud sync galleries.",
-  "requires_php": "8.1",
-  "author": "Huw Evans",
-  "requires": "6.5",
-  "tested": "6.8",
   "author_homepage": "https://github.com/HuwEvans",
   "version": "1.0.1",
-  "new_version": "1.0.1",
-  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-media/stagekitwp-media-1.0.1.zip",
-  "name": "stagekitwp-media",
-  "homepage": "https://github.com/HuwEvans/StageKitWP/tree/StageKitWP/dist/stagekitwp-media",
   "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-media/stagekitwp-media-1.0.1.zip",
+  "name": "stagekitwp-media",
+  "short_description": "Dedicated media asset manager, hierarchical folder organization, isolated storage outside core WordPress media, and cloud sync galleries.",
+  "slug": "stagekitwp-media",
   "sections": {
     "description": "StageKit WP Media provides a high-performance, non-attachment media asset management system with virtual/nested folder hierarchy, drag-and-drop uploads, responsive thumbnail generation, storage diagnostics, and direct cloud sync with Google Drive, Google Photos, Dropbox, Pexels, Unsplash, Flickr, YouTube, and Vimeo.",
     "installation": "Upload the stagekitwp-media plugin folder to wp-content/plugins/, activate it, and open the StageKit Media Library in the WordPress admin menu.",
     "changelog": "1.0.1: added image lightbox navigation, responsive gallery columns, and a Back to Galleries link on single gallery views."
   },
-  "slug": "stagekitwp-media"
+  "requires": "6.5",
+  "requires_php": "8.1",
+  "author": "Huw Evans",
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-media/stagekitwp-media-1.0.1.zip",
+  "tested": "6.8",
+  "new_version": "1.0.1",
+  "homepage": "https://github.com/HuwEvans/StageKitWP/tree/StageKitWP/dist/stagekitwp-media"
 }

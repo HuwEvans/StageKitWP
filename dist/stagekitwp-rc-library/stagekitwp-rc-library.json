@@ -1,20 +1,20 @@
 {
-  "short_description": "RC Library management for rubrics, reading-circle content, evaluation forms, and reporting workflows.",
-  "requires_php": "8.0",
-  "author": "StageKitWP",
-  "requires": "6.8",
-  "tested": "6.8",
   "author_homepage": "https://github.com/stagekitwp",
   "version": "2.0.0",
-  "new_version": "2.0.0",
-  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-rc-library/stagekitwp-rc-library-2.0.0.zip",
-  "name": "stagekitwp-rc-library",
-  "homepage": "https://github.com/stagekitwp/stagekitwp-rc-library",
   "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-rc-library/stagekitwp-rc-library-2.0.0.zip",
+  "name": "stagekitwp-rc-library",
+  "short_description": "RC Library management for rubrics, reading-circle content, evaluation forms, and reporting workflows.",
+  "slug": "stagekitwp-rc-library",
   "sections": {
     "description": "The RC Library plugin manages rubric items, templates, circle groups, and evaluation form workflows for the StageKitWP ecosystem.",
     "installation": "Upload the stagekitwp-rc-library plugin folder to wp-content/plugins/ and activate it from the Plugins screen.",
     "changelog": "Release notes are maintained in the plugin repository."
   },
-  "slug": "stagekitwp-rc-library"
+  "requires": "6.8",
+  "requires_php": "8.0",
+  "author": "StageKitWP",
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-rc-library/stagekitwp-rc-library-2.0.0.zip",
+  "tested": "6.8",
+  "new_version": "2.0.0",
+  "homepage": "https://github.com/stagekitwp/stagekitwp-rc-library"
 }

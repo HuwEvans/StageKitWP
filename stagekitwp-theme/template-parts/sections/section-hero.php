@@ -71,7 +71,8 @@ $hero_style = sprintf(
                 muted
                 loop
                 playsinline
-                preload="metadata"
+                webkit-playsinline="true"
+                preload="auto"
                 class="stagekitwp-hero-video"
                 data-desktop-src="<?php echo esc_url( $uploaded_vid ); ?>"
                 data-mobile-src="<?php echo esc_url( $uploaded_mobile_vid ); ?>"
@@ -345,6 +346,11 @@ $hero_style = sprintf(
         return;
     }
 
+    // Safari (iOS) and Edge can silently ignore the HTML `muted` attribute for
+    // programmatic autoplay unless it is also set as a JS property.
+    heroVideo.muted = true;
+    heroVideo.defaultMuted = true;
+
     function syncHeroVideoSource() {
         var desktopSrc = heroVideo.getAttribute( 'data-desktop-src' ) || '';
         var mobileSrc = heroVideo.getAttribute( 'data-mobile-src' ) || '';
@@ -352,23 +358,36 @@ $hero_style = sprintf(
         var nextSrc = useMobile ? mobileSrc : desktopSrc;
 
         if ( ! nextSrc || source.getAttribute( 'src' ) === nextSrc ) {
-            return;
+            return false;
         }
 
         source.setAttribute( 'src', nextSrc );
+        heroVideo.muted = true; // .load() can reset muted state in some engines
         heroVideo.load();
+        return true;
     }
+
+    function tryPlay() {
+        heroVideo.muted = true;
+        var playPromise = heroVideo.play();
+        if ( playPromise !== undefined ) {
+            playPromise.catch( function () {} );
+        }
+    }
+
+    // Resolve the desktop/mobile source immediately (not only inside the
+    // IntersectionObserver callback) so the hero — which is always visible on
+    // load — plays via the same native-autoplay-eligible path in every
+    // browser, instead of a delayed script-initiated play() that Safari/Edge
+    // can treat as non-autoplay and block.
+    syncHeroVideoSource();
 
     if ( 'IntersectionObserver' in window ) {
         var videoObserver = new IntersectionObserver( function ( entries ) {
             entries.forEach( function ( entry ) {
                 if ( entry.isIntersecting ) {
-                    syncHeroVideoSource();
                     if ( heroVideo.paused ) {
-                        var playPromise = heroVideo.play();
-                        if ( playPromise !== undefined ) {
-                            playPromise.catch( function () {} );
-                        }
+                        tryPlay();
                     }
                 } else {
                     if ( ! heroVideo.paused ) {
@@ -380,11 +399,15 @@ $hero_style = sprintf(
 
         videoObserver.observe( heroVideo );
     } else {
-        syncHeroVideoSource();
+        tryPlay();
     }
 
-    window.stagekitwpSyncHeroVideoSource = syncHeroVideoSource;
-    window.addEventListener( 'resize', syncHeroVideoSource );
+    window.stagekitwpSyncHeroVideoSource = function () {
+        if ( syncHeroVideoSource() ) {
+            tryPlay();
+        }
+    };
+    window.addEventListener( 'resize', window.stagekitwpSyncHeroVideoSource );
 }() );
 </script>
 <?php endif; ?>

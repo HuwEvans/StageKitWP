@@ -1,6 +1,19 @@
 # Theatre Manager Theme — Changelog
 <!-- markdownlint-disable-file MD022 MD024 MD032 -->
 
+## Version 3.1.5 — 2026-09-21 — Fix hero video not playing on Safari (iOS) and Edge
+
+### Fixed
+
+- The homepage hero video failed to display/autoplay on Safari (iOS) and Microsoft Edge after the 3.1.3 lazy-load rework: the desktop/mobile source swap only ran inside the IntersectionObserver callback, turning the very first playback into a delayed, script-initiated `play()` that those browsers can silently block instead of treating as native autoplay.
+- The hero video now resolves its desktop/mobile source immediately on load (IntersectionObserver is only used afterward to pause/resume on scroll), `muted`/`defaultMuted` are set explicitly via JS in addition to the HTML attribute (some engines ignore the attribute for programmatic autoplay), and `preload` changed from `metadata` back to `auto` since the hero is always visible above the fold.
+
+### Files changed
+
+- `template-parts/sections/section-hero.php`
+- `style.css`
+- `stagekitwp-theme.json`
+
 ## Version 3.1.4 — 2026-09-19 — Data-driven Upcoming Season Grid toggle
 
 ### Updates

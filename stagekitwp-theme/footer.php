@@ -12,6 +12,7 @@ $layout_mode  = get_theme_mod( 'stagekitwp_footer_layout_mode', 'three-column' )
 $left_align   = get_theme_mod( 'stagekitwp_footer_align_left', 'left' );
 $middle_align = get_theme_mod( 'stagekitwp_footer_align_middle', 'center' );
 $right_align  = get_theme_mod( 'stagekitwp_footer_align_right', 'right' );
+$stagekitwp_hide_footer = in_array( stagekitwp_get_page_chrome_mode(), array( 'no-footer', 'no-header-footer' ), true );
 
 // Calculate Container Style Configuration Toggles
 $container_styles = 'max-width: var(--stagekitwp-site-max-width, 1200px); margin: 0 auto; padding: 0 20px;';
@@ -24,6 +25,7 @@ if ( $layout_mode === 'full-width' ) {
 }
 ?>
     </div>
+    <?php if ( ! $stagekitwp_hide_footer ) : ?>
 	<footer id="colophon" class="site-footer" style="background: var(--stagekitwp-bg); color: var(--stagekitwp-text-light); padding: 60px 0 20px 0; font-family: -apple-system, sans-serif; clear: both;">
         
         <div class="footer-columns-container" style="<?php echo esc_attr( $container_styles . $row_flex_styles ); ?> overflow: visible;">
@@ -63,7 +65,9 @@ if ( $layout_mode === 'full-width' ) {
             </div>
         <?php endif; ?>
 
-    </footer></div><?php wp_footer(); ?>
+    </footer>
+    <?php endif; ?>
+    </div><?php wp_footer(); ?>
 
     <style type="text/css">
         /* Dynamically force the Social Widget wrapper to align based on parent configurations */

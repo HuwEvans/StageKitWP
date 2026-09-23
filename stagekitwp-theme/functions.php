@@ -14,6 +14,93 @@ if ( ! defined( '_S_VERSION' ) ) {
 }
 
 /**
+ * Register the per-page chrome selector used by header.php and footer.php.
+ */
+function stagekitwp_register_page_chrome_meta_box() {
+    $screens = array( 'page', 'post', 'show', 'season' );
+    foreach ( $screens as $screen ) {
+        add_meta_box(
+            'stagekitwp_page_chrome',
+            __( 'StageKitWP Page Chrome', 'stagekitwp-theme' ),
+            'stagekitwp_render_page_chrome_meta_box',
+            $screen,
+            'side',
+            'default'
+        );
+    }
+}
+add_action( 'add_meta_boxes', 'stagekitwp_register_page_chrome_meta_box' );
+
+function stagekitwp_render_page_chrome_meta_box( $post ) {
+    wp_nonce_field( 'stagekitwp_save_page_chrome', 'stagekitwp_page_chrome_nonce' );
+    $mode = get_post_meta( $post->ID, '_stagekitwp_page_chrome', true );
+    if ( ! in_array( $mode, array( 'default', 'no-header', 'no-footer', 'no-header-footer' ), true ) ) {
+        $mode = 'default';
+    }
+    ?>
+    <p>
+        <label for="stagekitwp_page_chrome_mode">
+            <?php esc_html_e( 'Header and footer display', 'stagekitwp-theme' ); ?>
+        </label>
+        <select id="stagekitwp_page_chrome_mode" name="stagekitwp_page_chrome_mode" style="width:100%;">
+            <option value="default" <?php selected( $mode, 'default' ); ?>><?php esc_html_e( 'Use theme default', 'stagekitwp-theme' ); ?></option>
+            <option value="no-header" <?php selected( $mode, 'no-header' ); ?>><?php esc_html_e( 'No header', 'stagekitwp-theme' ); ?></option>
+            <option value="no-footer" <?php selected( $mode, 'no-footer' ); ?>><?php esc_html_e( 'No footer', 'stagekitwp-theme' ); ?></option>
+            <option value="no-header-footer" <?php selected( $mode, 'no-header-footer' ); ?>><?php esc_html_e( 'No header or footer', 'stagekitwp-theme' ); ?></option>
+        </select>
+    </p>
+    <p class="description">
+        <?php esc_html_e( 'This also marks the page body so optional side-menu chrome can follow the same setting.', 'stagekitwp-theme' ); ?>
+    </p>
+    <?php
+}
+
+function stagekitwp_save_page_chrome_meta( $post_id ) {
+    if ( ! isset( $_POST['stagekitwp_page_chrome_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['stagekitwp_page_chrome_nonce'] ) ), 'stagekitwp_save_page_chrome' ) ) {
+        return;
+    }
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+        return;
+    }
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        return;
+    }
+    $mode = isset( $_POST['stagekitwp_page_chrome_mode'] ) ? sanitize_key( wp_unslash( $_POST['stagekitwp_page_chrome_mode'] ) ) : 'default';
+    if ( ! in_array( $mode, array( 'default', 'no-header', 'no-footer', 'no-header-footer' ), true ) ) {
+        $mode = 'default';
+    }
+    if ( 'default' === $mode ) {
+        delete_post_meta( $post_id, '_stagekitwp_page_chrome' );
+    } else {
+        update_post_meta( $post_id, '_stagekitwp_page_chrome', $mode );
+    }
+}
+add_action( 'save_post', 'stagekitwp_save_page_chrome_meta' );
+
+function stagekitwp_get_page_chrome_mode() {
+    if ( ! is_singular() ) {
+        return 'default';
+    }
+    $mode = get_post_meta( get_queried_object_id(), '_stagekitwp_page_chrome', true );
+    return in_array( $mode, array( 'default', 'no-header', 'no-footer', 'no-header-footer' ), true ) ? $mode : 'default';
+}
+
+function stagekitwp_page_chrome_body_class( $classes ) {
+    $mode = stagekitwp_get_page_chrome_mode();
+    if ( 'default' !== $mode ) {
+        $classes[] = 'stagekitwp-chrome-' . $mode;
+        if ( in_array( $mode, array( 'no-header', 'no-header-footer' ), true ) ) {
+            $classes[] = 'stagekitwp-hide-header';
+        }
+        if ( in_array( $mode, array( 'no-footer', 'no-header-footer' ), true ) ) {
+            $classes[] = 'stagekitwp-hide-footer';
+        }
+    }
+    return $classes;
+}
+add_filter( 'body_class', 'stagekitwp_page_chrome_body_class' );
+
+/**
  * Set the global content width in pixels, based on the theme's design and stylesheet.
  * Priority 0 so it is available to lower priority callbacks.
  *

@@ -6,7 +6,7 @@ class STAGEKITWP_MEMBERS_Email_Helper {
 
     public static function init() {}
 
-    public static function parse_variables($message, $user = null) {
+    public static function parse_variables($message, $user = null, $context = [], $escape_values = true) {
 
         if (!$user) return $message;
 
@@ -22,9 +22,24 @@ class STAGEKITWP_MEMBERS_Email_Helper {
             '{interests}'   => $interests,
             '{site_name}'   => get_bloginfo('name'),
             '{site_url}'    => site_url(),
-            '{profile_link}'=> site_url('/profile/?user_id=' . $user->ID)
+            '{profile_link}'=> site_url('/profile/?user_id=' . $user->ID),
+            '{event}'       => isset($context['event']) ? $context['event'] : '',
+            '{position}'    => isset($context['position']) ? $context['position'] : '',
+            '{date}'        => isset($context['date']) ? $context['date'] : '',
+            '{unsubscribe_link}' => isset($context['unsubscribe_link']) ? $context['unsubscribe_link'] : '',
+            '{preferences_link}' => isset($context['preferences_link']) ? $context['preferences_link'] : '',
         ];
 
-        return str_replace(array_keys($replacements), array_values($replacements), $message);
+        $replacements = array_map($escape_values ? 'esc_html' : 'sanitize_text_field', $replacements);
+        $replacements['{profile_link}'] = $escape_values
+            ? esc_url(site_url('/profile/?user_id=' . $user->ID))
+            : site_url('/profile/?user_id=' . $user->ID);
+        $replacements['{unsubscribe_link}'] = $escape_values
+            ? esc_url(isset($context['unsubscribe_link']) ? $context['unsubscribe_link'] : '')
+            : (string) (isset($context['unsubscribe_link']) ? $context['unsubscribe_link'] : '');
+        $replacements['{preferences_link}'] = $escape_values
+            ? esc_url(isset($context['preferences_link']) ? $context['preferences_link'] : '')
+            : (string) (isset($context['preferences_link']) ? $context['preferences_link'] : '');
+        return str_replace(array_keys($replacements), array_values($replacements), (string) $message);
     }
 }

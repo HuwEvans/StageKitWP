@@ -95,6 +95,10 @@ function stagekitwp_render_season_fields($post) {
     echo '<p><label>End Date:<br><input type="date" name="stagekitwp_season_end_date" value="' . esc_attr($end_date) . '" class="widefat stagekitwp-datepicker" /></label></p>';
     echo '<p><label>Tickets URL:<br><input type="url" name="stagekitwp_season_tickets_url" value="' . esc_attr($tickets_url) . '" class="widefat" placeholder="https://example.com/tickets" /></label></p>';
 
+    echo '<p><label>Featured Sponsor:<br>';
+    stagekitwp_render_sponsor_select('stagekitwp_season_featured_sponsor', get_post_meta($post->ID, '_stagekitwp_season_featured_sponsor', true));
+    echo '</label></p>';
+
     echo '<p>';
     echo '<label><input type="checkbox" id="stagekitwp_season_is_current" name="stagekitwp_season_is_current" value="1" ' . checked($is_current, 1, false) . ' /> Is Current Season</label>';
     echo '</p>';
@@ -221,6 +225,7 @@ function stagekitwp_save_season_fields($post_id) {
     update_post_meta($post_id, '_stagekitwp_season_sm_portrait', isset($_POST['stagekitwp_season_sm_portrait']) ? esc_url_raw(wp_unslash($_POST['stagekitwp_season_sm_portrait'])) : '');
     update_post_meta($post_id, '_stagekitwp_season_is_current', $is_current);
     update_post_meta($post_id, '_stagekitwp_season_is_upcoming', $is_upcoming);
+    update_post_meta($post_id, '_stagekitwp_season_featured_sponsor', stagekitwp_sanitize_post_id_of_type(isset($_POST['stagekitwp_season_featured_sponsor']) ? wp_unslash($_POST['stagekitwp_season_featured_sponsor']) : '', 'sponsor'));
 
     remove_action('save_post', 'stagekitwp_save_season_fields');
     wp_update_post(array('ID' => $post_id, 'post_title' => $name));
@@ -245,6 +250,34 @@ function stagekitwp_season_columns($columns) {
     );
 }
 add_filter('manage_season_posts_columns', 'stagekitwp_season_columns');
+
+// Sortable Start Date / End Date columns (seasons without a date sort last).
+function stagekitwp_season_sortable_columns($columns) {
+    $columns['start_date'] = 'stagekitwp_start_date';
+    $columns['end_date']   = 'stagekitwp_end_date';
+    return $columns;
+}
+add_filter('manage_edit-season_sortable_columns', 'stagekitwp_season_sortable_columns');
+
+function stagekitwp_season_sort_clauses($clauses, $query) {
+    global $wpdb;
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'season') {
+        return $clauses;
+    }
+    $map = array(
+        'stagekitwp_start_date' => '_stagekitwp_season_start_date',
+        'stagekitwp_end_date'   => '_stagekitwp_season_end_date',
+    );
+    $orderby = $query->get('orderby');
+    if (!isset($map[$orderby])) {
+        return $clauses;
+    }
+    $dir = strtoupper($query->get('order')) === 'DESC' ? 'DESC' : 'ASC';
+    $clauses['join']   .= $wpdb->prepare(" LEFT JOIN {$wpdb->postmeta} AS skw_sort ON ({$wpdb->posts}.ID = skw_sort.post_id AND skw_sort.meta_key = %s)", $map[$orderby]);
+    $clauses['orderby'] = "(skw_sort.meta_value IS NULL OR skw_sort.meta_value = '') ASC, skw_sort.meta_value {$dir}, {$wpdb->posts}.post_title ASC";
+    return $clauses;
+}
+add_filter('posts_clauses', 'stagekitwp_season_sort_clauses', 10, 2);
 
 function stagekitwp_season_custom_column($column, $post_id) {
     switch ($column) {

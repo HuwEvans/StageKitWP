@@ -1,6 +1,6 @@
 <?php
 /**
- * TM Members Area – Authentication & Registration
+ * StageKitWP Members – Authentication & Registration
  *
  * Replaces the native WordPress login/register screens with custom pages
  * (configurable in Settings). Can be disabled to fall back to /wp-login.php.
@@ -28,6 +28,43 @@ class STAGEKITWP_MEMBERS_Auth {
         add_action('init',                   [__CLASS__, 'handle_login_post']);
         add_action('init',                   [__CLASS__, 'handle_register_post']);
         add_action('wp_enqueue_scripts',     [__CLASS__, 'maybe_enqueue_turnstile']);
+        add_filter('login_redirect',         [__CLASS__, 'filter_login_redirect'], 99, 3);
+        add_filter('show_admin_bar',         [__CLASS__, 'filter_admin_bar']);
+        add_action('admin_init',             [__CLASS__, 'block_admin_access']);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Front-end only access for non-administrators                        */
+    /* ------------------------------------------------------------------ */
+
+    private static function is_frontend_only_user($user = null): bool {
+        if (!get_option('stagekitwp_members_frontend_only', 1)) return false;
+        $user = $user ?: wp_get_current_user();
+        if (!$user || !$user->exists()) return false;
+        $restricted = !user_can($user, 'manage_options');
+        return (bool) apply_filters('stagekitwp_members_frontend_only_user', $restricted, $user);
+    }
+
+    public static function filter_login_redirect($redirect_to, $requested, $user) {
+        if ($user instanceof WP_User && self::is_frontend_only_user($user)) {
+            if (!$requested || false !== strpos($requested, 'wp-admin')) {
+                return self::after_login_url();
+            }
+        }
+        return $redirect_to;
+    }
+
+    public static function filter_admin_bar($show) {
+        return self::is_frontend_only_user() ? false : $show;
+    }
+
+    public static function block_admin_access() {
+        if (!self::is_frontend_only_user()) return;
+        if (wp_doing_ajax() || (defined('DOING_CRON') && DOING_CRON) || (defined('REST_REQUEST') && REST_REQUEST)) return;
+        $script = isset($_SERVER['SCRIPT_NAME']) ? basename($_SERVER['SCRIPT_NAME']) : '';
+        if (in_array($script, ['admin-post.php', 'async-upload.php', 'admin-ajax.php'], true)) return;
+        wp_safe_redirect(self::after_login_url());
+        exit;
     }
 
     /* ------------------------------------------------------------------ */
@@ -182,6 +219,9 @@ class STAGEKITWP_MEMBERS_Auth {
             self::set_auth_error(__('Incorrect username or password.', 'stagekitwp-members-area')); return;
         }
         $redirect = !empty($_POST['redirect_to']) ? wp_sanitize_redirect($_POST['redirect_to']) : self::after_login_url();
+        if (self::is_frontend_only_user($user) && false !== strpos($redirect, 'wp-admin')) {
+            $redirect = self::after_login_url();
+        }
         wp_safe_redirect($redirect);
         exit;
     }
@@ -269,6 +309,7 @@ class STAGEKITWP_MEMBERS_Auth {
         $turnstile   = self::turnstile_enabled();
         $site_key    = esc_attr((string) get_option('stagekitwp_members_turnstile_site_key', ''));
         $reg_url     = self::open_reg_enabled() ? self::register_url() : '';
+        $register_btn_url = $reg_url ?: STAGEKITWP_MEMBERS_Invitations::register_url();
 
         ob_start(); ?>
         <div class="stagekitwp-ma-auth-box stagekitwp-ma-login-box">
@@ -303,10 +344,10 @@ class STAGEKITWP_MEMBERS_Auth {
                 </div>
                 <div class="stagekitwp-ma-auth-links">
                     <a href="<?php echo esc_url(wp_lostpassword_url()); ?>"><?php esc_html_e('Forgot your password?', 'stagekitwp-members-area'); ?></a>
-                    <?php if ($reg_url): ?>
-                        <span class="stagekitwp-ma-auth-sep">·</span>
-                        <a href="<?php echo esc_url($reg_url); ?>"><?php esc_html_e('Create an account', 'stagekitwp-members-area'); ?></a>
-                    <?php endif; ?>
+                </div>
+                <div class="stagekitwp-ma-field stagekitwp-ma-register-cta">
+                    <p><?php esc_html_e('New here?', 'stagekitwp-members-area'); ?></p>
+                    <a href="<?php echo esc_url($register_btn_url); ?>" class="stagekitwp-ma-btn stagekitwp-ma-btn-secondary"><?php esc_html_e('Register Here', 'stagekitwp-members-area'); ?></a>
                 </div>
             </form>
         </div>

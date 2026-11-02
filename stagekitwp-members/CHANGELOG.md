@@ -1,7 +1,120 @@
 # Changelog
 
-All notable changes to **TM Members Area** are documented here.
+All notable changes to **StageKitWP Members** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
+
+## [3.2.7] — 2026-11-01
+
+### Changed — Events, Announcements and Email Templates use the native admin screens
+- The Members hub's Events, Announcements and Email Templates tabs now link to the standard WordPress list/edit screens (`edit.php?post_type=...`) instead of a custom in-hub form, giving them the native screen options, search, filters, quick edit and bulk actions.
+- Added a "Duplicate" row action on the list screens for all three post types (`class-stagekitwp-members-duplicate.php`); it copies the title, content, meta and taxonomy terms into a new draft.
+- Trash and Delete Permanently already come from WordPress core for any registered post type; no code was required beyond registering the types for admin UI.
+
+### Fixed — Producers/Executives could not edit Announcements or Email Templates
+- Announcements and Email Templates were registered with the generic `post` capability type, which only built-in roles like Administrator and Editor hold (`edit_posts`, `delete_posts`, etc.). Producers and Executives — who only have this plugin's custom capabilities — could see the native list screens but got "Sorry, you are not allowed" when trying to add, edit, trash or delete an item.
+- Both post types now use dedicated capability types (`stagekitwp_ann`/`stagekitwp_anns` and `stagekitwp_email`/`stagekitwp_emails`, mirroring the existing Events pattern) with `map_meta_cap`. `STAGEKITWP_MEMBERS_Roles` grants the new primitive capabilities to Producer/Executive (Announcements, alongside Events) and Executive (Email Templates), and mirrors them onto Administrator. Capability version bumped to `1.0.3` so existing sites re-sync automatically.
+
+### Fixed — Capability re-sync never actually ran, so Administrators (and everyone else) never received new capabilities
+- `STAGEKITWP_MEMBERS_Roles::init()` registered its re-sync on `plugins_loaded` at priority 6, but `init()` is only ever called from this plugin's own `plugins_loaded` bootstrap at priority 20 — by then `plugins_loaded` has already passed priority 6, so the newly-added callback could never fire on that pass, and `plugins_loaded` only fires once per request. In practice this meant the capability map was silently frozen at whatever it was when the site was last activated/reactivated; every subsequent `CAPS_VERSION` bump (including the Announcements/Email Templates fix above) was never applied, leaving Administrators without the new `edit_stagekitwp_ann`/`edit_stagekitwp_email`-family capabilities.
+- `init()` now calls `maybe_sync()` directly instead of hooking it, since it is already running inside `plugins_loaded`. Verified via WP-CLI that Administrators, Producers and Executives now hold the expected capabilities after a normal page load, with no reactivation required.
+
+## [3.2.6] — 2026-11-01
+
+### Fixed — New announcements did not send email
+- The Members hub announcement form published the post before saving the "Also email members" flag, so the publish hook saw the flag unset, skipped email, and locked the one-time delivery guard. The flags are now saved with the post (`meta_input`) so they exist when the publish transition fires.
+
+## [3.2.5] — 2026-11-01
+
+### Added — Register button on login page
+- The custom login form now shows a "Register Here" button. It links to the open-registration page when open registration is on, otherwise to the invitation Register page.
+
+## [3.2.4] — 2026-11-01
+
+### Added — Front-end-only login
+- New Settings option "Front-End Only" (on by default): everyone except Administrators (`manage_options`) is redirected to the front end after login, has the admin bar hidden, and is redirected away from `/wp-admin/` (AJAX, admin-post and uploads still work). Filter: `stagekitwp_members_frontend_only_user`.
+
+## [3.2.3] — 2026-11-01
+
+### Fixed — Invitation link
+- The invitation email is sent as HTML but the link was plain text with newlines, so it was not clickable. The email now has a proper HTML link.
+- The link pointed to `/register/`, which 404'd when no Register page existed. A published `register` page containing `[stagekitwp_members_register]` is now created automatically on first use (disable with the `stagekitwp_members_autocreate_register_page` filter).
+
+## [3.2.2] — 2026-11-01
+
+### Fixed — Invitation form did nothing
+- The Invitations form is rendered inside the Members hub (`page=stagekitwp-ma-admin`), but the submit handler only ran on `page=stagekitwp-ma-invitations`, so the POST was silently ignored. Send, resend and revoke now use `admin-post.php` handlers and redirect back to the hub's Invitations tab.
+
+## [3.2.1] — 2026-11-01
+
+### Fixed — Member invitation creation
+- Added the invitations table to the database migration runner and bumped the schema version to 1.6.0 so existing installs create the previously omitted table.
+- Check database insert and email delivery results. Failed writes now show an actionable error instead of reporting success; failed email sends clearly say the invitation was saved and can be resent after mail configuration is fixed.
+
+## [3.2.0] — 2026-11-01
+
+### Completed — Members development plan
+- Completed the approved Phase 0 → 1 → 4 → 2 → 3 → 5 plan and consolidated the finished work into the planned minor release.
+- Added a reusable read-only WP-CLI smoke test and a comprehensive cross-phase acceptance plan covering roles, access rules, payment hooks, volunteer workflows, email campaigns, accessibility/mobile, and uninstall.
+- Completed guarded uninstall cleanup for plugin settings, access/volunteer metadata, membership and volunteer tables, user metadata, custom roles and Administrator capabilities, and scheduled queue/reminder jobs.
+- Improved keyboard focus visibility and mobile tap targets for event RSVP and volunteer controls; made RSVP history horizontally navigable on narrow screens with accessible table headings.
+- Updated shortcode/testing documentation, on-site Member Instructions metadata, and release JSON changelog entries.
+
+## [3.1.6] — 2026-11-01
+
+### Added — Phase 5 polish and release validation
+- Added `tests/smoke.php` and `docs/test-plan.md` for repeatable smoke and manual acceptance testing across all completed phases.
+- Expanded explicit-purge uninstall handling to remove all plugin settings, access/volunteer post metadata, Administrator capabilities, and all scheduled queue/reminder events.
+- Added visible keyboard focus, mobile-sized event RSVP/volunteer controls, and an accessible horizontally scrollable RSVP history table.
+
+## [3.1.5] — 2026-11-01
+
+### Added — Phase 3 email and interest search
+- Extended the Producer dashboard filters to include role, availability on a date, event RSVP status and volunteer signup status, alongside name and interest.
+- Added reusable recipient groups from saved filter definitions, current-filter recipient previews, opt-out exclusions and per-group delivery counts/history.
+- Added event, volunteer position and date merge fields (`{event}`, `{position}`, `{date}`) to campaign messages and subjects.
+- Added signed, confirmation-based unsubscribe links and a member email-preferences link to bulk campaigns.
+- Campaigns now enter the bounded queue (500 recipients per campaign, 1,000 pending jobs total, 25 sends per minute); campaign logs retain the saved group identifier.
+- Bumped the email-log schema to DB version 1.5.0 and added cleanup for saved groups on explicit uninstall.
+
+## [3.1.4] — 2026-11-01
+
+### Added — Phase 2 volunteer signup
+- Added the `stagekitwp_members_positions` and `stagekitwp_members_volunteers` tables (DB version 1.4.0), including reusable position templates, capacity counts, signup notes and reminder tracking.
+- Added position editors to both event editing surfaces, with role/interest requirements, per-event public-visibility override and reusable templates.
+- Added signup/cancel and waitlist handling with capacity-safe slot reservation, waitlist promotion on cancellation, plus confirmation and promotion emails respecting event notification preferences.
+- Added `[stagekitwp_members_volunteer]` and `[stagekitwp_members_my_volunteering]`; event cards now include eligible volunteer opportunities and a “Volunteers needed” heading.
+- Added public read-only open-position counts (off by default), Producer/Executive roster screen and CSV export, plus capability-gated REST roster and signup endpoints.
+- Implemented the `stagekitwp_members_before_signup` and `stagekitwp_members_after_signup` actions. Added daily reminders for confirmed volunteers one day before the event.
+- Updated uninstall cleanup for the new tables, setting and reminder schedule; repaired the Settings class early-return that prevented its settings UI from loading.
+- Added `docs/shortcodes.md` and documented volunteer hooks in `docs/hooks.md`.
+
+## [3.1.3] — 2026-10-31
+
+### Added - Phase 4 payment contract
+- Membership tables (`stagekitwp_members_memberships` and a history log), DB version 1.3.0. Expiry reads as lapsed without cron.
+- Hooks for a payment plugin: `stagekitwp_members_payments_enabled`, `payment_required`, `membership_status`, `checkout_url` filters and `payment_complete`, `access_granted`, `access_revoked` actions. See `docs/hooks.md`.
+- New access rule "Paid / active membership"; passes for any member while no payment plugin is active.
+- Optional event "Member price" field.
+- Membership status and expiry editor on the user profile screen for Executives and administrators.
+- Uninstall drops the new tables.
+
+## [3.1.2] — 2026-10-31
+
+### Added - Phase 1 access control
+- "Who can see this?" meta box on pages, posts and other chosen public post types, plus a per-menu-item rule in Appearance > Menus.
+- Rules: everyone, logged in, logged out, any member, minimum level, or specific roles.
+- Server-side enforcement with blocked behaviour of login redirect, message or 404 (site default and per-item override).
+- Restricted content is excluded from archives, search, feeds, sitemaps and REST.
+- Shortcode `[stagekitwp_members_only]` (attributes roles, level, rule, message).
+- Settings > Access Control section and an Access column in post lists.
+- SEO plugin: restricted posts are left out of descriptions and llms files.
+
+## [3.1.1] — 2026-10-31
+
+### Changed - Phase 0 cleanup
+- Added public access API (`stagekitwp_members_get_user_level`, `stagekitwp_members_user_can_access`, filter `stagekitwp_members_can_access`).
+- Health tab warns about plain WordPress subscribers and offers a Convert to Member action.
+- Removed unused legacy stub files; replaced legacy TM naming.
 
 ## [3.0.0] — 2026-08-10
 
@@ -10,7 +123,12 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Announcements, Events, and Email Templates remain in the embedded workflow so member admin stays compact and consistent with the rest of the ecosystem.
 - Version metadata was advanced to match the ecosystem-wide admin restructuring.
 
-## [Unreleased]
+## [3.1.0] — 2026-10-31
+
+### Added — Event location, format, status and cost
+- `[stagekitwp_members_events]` (default and `layout="all-details"`) now shows the location, format, status (cancelled/postponed), price ("Free" when blank or 0) and a tickets link. The online link is shown to members only.
+- Events now have a Venue (Core venues CPT), free-text Location, Format (in person/online/hybrid), online link, Event status, Price and tickets link, in both the event editor and the admin Events panel. Events also support a featured image and excerpt.
+- iCal feeds include `LOCATION`; the REST event payload includes `location` and `status`.
 
 ### Added — `layout` attribute for `[tm_ma_events]`
 - New `layout="all-details"` attribute value for the `[tm_ma_events]` shortcode.

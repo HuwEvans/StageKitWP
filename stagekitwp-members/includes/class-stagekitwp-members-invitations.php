@@ -48,7 +48,7 @@ class STAGEKITWP_MEMBERS_Invitations {
         $token   = wp_generate_password(32, false);
         $expires = date('Y-m-d H:i:s', strtotime('+7 days'));
 
-        $wpdb->insert(
+        $inserted = $wpdb->insert(
             self::table(),
             [
                 'email'      => $email,
@@ -59,7 +59,20 @@ class STAGEKITWP_MEMBERS_Invitations {
             ]
         );
 
-        self::send_invite_email($email, $token);
+        if ($inserted === false) {
+            error_log('StageKitWP Members could not create invitation: ' . $wpdb->last_error);
+            return new WP_Error(
+                'invite_insert_failed',
+                'The invitation could not be saved. Check that the Members database tables are up to date, then try again.'
+            );
+        }
+
+        if (!self::send_invite_email($email, $token)) {
+            return new WP_Error(
+                'invite_email_failed',
+                'The invitation was saved, but its email could not be sent. Check the Members email setting and mail delivery configuration, then use Resend.'
+            );
+        }
 
         return $token;
     }
@@ -72,16 +85,17 @@ class STAGEKITWP_MEMBERS_Invitations {
         $link = add_query_arg('stagekitwp_token', rawurlencode($token), self::register_url());
 
         $subject = sprintf('You are invited to join %s', get_bloginfo('name'));
+        $url     = esc_url($link);
         $message =
-            "You have been invited to join " . get_bloginfo('name') . ".\n\n" .
-            "Complete your registration here:\n" . esc_url_raw($link) . "\n\n" .
-            "This link expires in 7 days.";
+            '<p>You have been invited to join ' . esc_html(get_bloginfo('name')) . '.</p>' .
+            '<p>Complete your registration here:<br><a href="' . $url . '">' . $url . '</a></p>' .
+            '<p>This link expires in 7 days.</p>';
 
         if (class_exists('STAGEKITWP_MEMBERS_Health')) {
             return STAGEKITWP_MEMBERS_Health::send_email($email, $subject, $message);
         }
 
-        return wp_mail($email, $subject, $message);
+        return wp_mail($email, $subject, $message, ['Content-Type: text/html; charset=UTF-8']);
     }
 
     /**
@@ -90,7 +104,17 @@ class STAGEKITWP_MEMBERS_Invitations {
      */
     public static function register_url() {
         $page = get_page_by_path('register');
-        $url  = $page ? get_permalink($page) : home_url('/register/');
+        if (!$page && apply_filters('stagekitwp_members_autocreate_register_page', true)) {
+            $id = wp_insert_post([
+                'post_type'    => 'page',
+                'post_status'  => 'publish',
+                'post_title'   => 'Register',
+                'post_name'    => 'register',
+                'post_content' => '[stagekitwp_members_register]',
+            ]);
+            $page = $id && !is_wp_error($id) ? get_post($id) : null;
+        }
+        $url = $page ? get_permalink($page) : home_url('/register/');
         return apply_filters('stagekitwp_members_register_url', $url);
     }
 

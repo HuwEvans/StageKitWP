@@ -92,6 +92,7 @@ function stagekitwp_render_sponsor_meta_box($post) {
             <option value="Bronze" <?php selected($level, 'Bronze'); ?>>Bronze</option>
         </select>
     </label></p>
+    <p><label>Season:<br><?php stagekitwp_render_season_select('stagekitwp_season', get_post_meta($post->ID, '_stagekitwp_season', true)); ?></label></p>
 
     <p>
         <label for="stagekitwp_logo">Logo:</label><br>
@@ -136,6 +137,7 @@ function stagekitwp_save_sponsor_meta($post_id) {
     update_post_meta($post_id, '_stagekitwp_name', $name);
     update_post_meta($post_id, '_stagekitwp_company', $company);
     update_post_meta($post_id, '_stagekitwp_level', $level);
+    update_post_meta($post_id, '_stagekitwp_season', stagekitwp_sanitize_post_id_of_type(isset($_POST['stagekitwp_season']) ? wp_unslash($_POST['stagekitwp_season']) : '', 'season'));
     
     // Save logo - can be attachment ID or URL
     $logo = isset($_POST['stagekitwp_logo']) ? sanitize_text_field(wp_unslash($_POST['stagekitwp_logo'])) : '';
@@ -168,6 +170,7 @@ function stagekitwp_sponsor_columns($columns) {
         'title' => 'Name',
         'company' => 'Company',
         'level' => 'Level',
+        'season' => 'Season',
         'logo' => 'Logo',
         'banner' => 'Banner',
         'website' => 'Website'
@@ -182,6 +185,10 @@ function stagekitwp_sponsor_custom_column($column, $post_id) {
             break;
         case 'level':
             echo esc_html(get_post_meta($post_id, '_stagekitwp_level', true));
+            break;
+        case 'season':
+            $sid = (int) get_post_meta($post_id, '_stagekitwp_season', true);
+            echo $sid ? esc_html(get_the_title($sid)) : '&mdash;';
             break;
         case 'logo':
             $logo = get_post_meta($post_id, '_stagekitwp_logo', true);

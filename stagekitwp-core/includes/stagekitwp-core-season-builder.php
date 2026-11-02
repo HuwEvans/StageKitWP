@@ -229,6 +229,12 @@ function stagekitwp_season_builder_handle_save() {
     update_post_meta($season_id, '_stagekitwp_season_start_date', $season_start);
     update_post_meta($season_id, '_stagekitwp_season_end_date', $season_end);
     update_post_meta($season_id, '_stagekitwp_season_tickets_url', $season_tickets_url);
+    $season_featured_sponsor = stagekitwp_sanitize_post_id_of_type($season['featured_sponsor'] ?? '', 'sponsor');
+    if ($season_featured_sponsor) {
+        update_post_meta($season_id, '_stagekitwp_season_featured_sponsor', $season_featured_sponsor);
+    } else {
+        delete_post_meta($season_id, '_stagekitwp_season_featured_sponsor');
+    }
     update_post_meta($season_id, '_stagekitwp_season_is_current', $season_is_current);
     update_post_meta($season_id, '_stagekitwp_season_is_upcoming', $season_is_upcoming);
     update_post_meta($season_id, '_stagekitwp_season_image_front', stagekitwp_season_builder_resolve_media_value($season['image_front'] ?? '', $season['image_front_id'] ?? 0));
@@ -354,6 +360,60 @@ function stagekitwp_season_builder_handle_save() {
             delete_post_meta($show_id, '_stagekitwp_show_venue');
         }
         update_post_meta($show_id, '_stagekitwp_show_tickets_url', $show_tickets_url);
+
+        $show_featured_sponsor = stagekitwp_sanitize_post_id_of_type($row['featured_sponsor'] ?? '', 'sponsor');
+        if ($show_featured_sponsor) {
+            update_post_meta($show_id, '_stagekitwp_show_featured_sponsor', $show_featured_sponsor);
+        } else {
+            delete_post_meta($show_id, '_stagekitwp_show_featured_sponsor');
+        }
+
+        // Structured performance dates and their optional per-performance sponsors.
+        $posted_dates = isset($row['actual_dates']) && is_array($row['actual_dates']) ? array_values($row['actual_dates']) : array();
+        $posted_perf_sponsors = isset($row['perf_sponsors']) && is_array($row['perf_sponsors']) ? array_values($row['perf_sponsors']) : array();
+        $valid_actual_dates = array();
+        $perf_map = array();
+        foreach ($posted_dates as $i => $perf_date) {
+            if (!is_string($perf_date)) {
+                continue;
+            }
+            $perf_date = sanitize_text_field($perf_date);
+            if (preg_match('/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/', $perf_date, $m)
+                && checkdate((int) $m[2], (int) $m[3], (int) $m[1])
+                && (int) $m[4] <= 23 && (int) $m[5] <= 59) {
+                $valid_actual_dates[] = $perf_date;
+                $perf_sponsor = isset($posted_perf_sponsors[$i]) && is_scalar($posted_perf_sponsors[$i])
+                    ? stagekitwp_sanitize_post_id_of_type($posted_perf_sponsors[$i], 'sponsor')
+                    : '';
+                if ($perf_sponsor && !isset($perf_map[$perf_date])) {
+                    $perf_map[$perf_date] = $perf_sponsor;
+                }
+            }
+        }
+        if ($valid_actual_dates) {
+            update_post_meta($show_id, '_stagekitwp_show_actual_dates', array_values(array_unique($valid_actual_dates)));
+        } else {
+            delete_post_meta($show_id, '_stagekitwp_show_actual_dates');
+        }
+        if ($perf_map) {
+            update_post_meta($show_id, '_stagekitwp_show_performance_sponsors', $perf_map);
+        } else {
+            delete_post_meta($show_id, '_stagekitwp_show_performance_sponsors');
+        }
+
+        stagekitwp_save_audition_slots($show_id, stagekitwp_sanitize_audition_slots(
+            $row['aud_start'] ?? array(),
+            $row['aud_duration'] ?? array(),
+            $row['aud_venue'] ?? array()
+        ));
+
+        $dur_hours = isset($row['duration_hours']) && is_scalar($row['duration_hours']) && preg_match('/^\d+$/', (string) $row['duration_hours']) ? (int) $row['duration_hours'] : 2;
+        $dur_mins = isset($row['duration_minutes']) && is_scalar($row['duration_minutes']) && preg_match('/^\d+$/', (string) $row['duration_minutes']) ? (int) $row['duration_minutes'] : 45;
+        $dur_total = ($dur_hours * 60) + $dur_mins;
+        if ($dur_hours > 24 || $dur_mins > 59 || $dur_total < 1 || $dur_total > 1440) {
+            $dur_total = 165;
+        }
+        update_post_meta($show_id, '_stagekitwp_show_duration_minutes', $dur_total);
         update_post_meta($show_id, '_stagekitwp_show_season', $season_id);
         update_post_meta($show_id, '_stagekitwp_show_sm_image', stagekitwp_season_builder_resolve_media_value($row['sm_image'] ?? '', $row['sm_image_id'] ?? 0));
         update_post_meta($show_id, '_stagekitwp_show_testimonial_media', stagekitwp_season_builder_resolve_media_value($row['testimonial_media'] ?? '', $row['testimonial_media_id'] ?? 0));
@@ -564,6 +624,7 @@ function stagekitwp_render_season_builder_page() {
     $season_start = '';
     $season_end = '';
     $season_tickets_url = '';
+    $season_featured_sponsor_id = '';
     $season_is_current = 0;
     $season_is_upcoming = 0;
     $season_status = 'past';
@@ -599,6 +660,7 @@ function stagekitwp_render_season_builder_page() {
             $season_status = 'past';
         }
         
+        $season_featured_sponsor_id = get_post_meta($season_id, '_stagekitwp_season_featured_sponsor', true);
         $season_images = array(
             'image_front' => get_post_meta($season_id, '_stagekitwp_season_image_front', true),
             'image_back' => get_post_meta($season_id, '_stagekitwp_season_image_back', true),
@@ -637,6 +699,11 @@ function stagekitwp_render_season_builder_page() {
                 'show_dates' => get_post_meta($show->ID, '_stagekitwp_show_show_dates', true),
                 'venue' => get_post_meta($show->ID, '_stagekitwp_show_venue', true),
                 'tickets_url' => get_post_meta($show->ID, '_stagekitwp_show_tickets_url', true),
+                'featured_sponsor' => get_post_meta($show->ID, '_stagekitwp_show_featured_sponsor', true),
+                'actual_dates' => (array) get_post_meta($show->ID, '_stagekitwp_show_actual_dates', true),
+                'audition_slots' => stagekitwp_get_audition_slots($show->ID),
+                'duration_minutes' => (function ($m) { $m = absint($m); return ($m < 1 || $m > 1440) ? 165 : $m; })(get_post_meta($show->ID, '_stagekitwp_show_duration_minutes', true)),
+                'perf_sponsors' => stagekitwp_get_performance_sponsors($show->ID),
                 'sm_image' => get_post_meta($show->ID, '_stagekitwp_show_sm_image', true),
                 'testimonial_media' => get_post_meta($show->ID, '_stagekitwp_show_testimonial_media', true),
                 'program_id' => get_post_meta($show->ID, '_stagekitwp_show_program', true),
@@ -729,7 +796,7 @@ function stagekitwp_render_season_builder_page() {
 
     if (empty($show_rows)) {
         $show_rows = array(
-            'show_new_1' => array('id' => '', 'name' => '', 'author' => '', 'sub_authors' => '', 'synopsis' => '', 'audition_date' => '', 'audition_details' => '', 'genre' => '', 'director' => '', 'associate_director' => '', 'producer' => '', 'stage_manager' => '', 'time_slot' => '', 'show_dates' => '', 'venue' => '', 'tickets_url' => '', 'sm_image' => '', 'testimonial_media' => '', 'program_id' => '', 'program_url' => ''),
+            'show_new_1' => array('id' => '', 'name' => '', 'author' => '', 'sub_authors' => '', 'synopsis' => '', 'audition_date' => '', 'audition_details' => '', 'genre' => '', 'director' => '', 'associate_director' => '', 'producer' => '', 'stage_manager' => '', 'time_slot' => '', 'show_dates' => '', 'venue' => '', 'tickets_url' => '', 'featured_sponsor' => '', 'actual_dates' => array(), 'audition_slots' => array(), 'duration_minutes' => 165, 'perf_sponsors' => array(), 'sm_image' => '', 'testimonial_media' => '', 'program_id' => '', 'program_url' => ''),
         );
     }
     $casts_by_show = array();
@@ -832,6 +899,10 @@ function stagekitwp_render_season_builder_page() {
                             <td><input id="stagekitwp-season-tickets" type="url" class="regular-text" name="season[tickets_url]" value="<?php echo esc_attr($season_tickets_url); ?>" placeholder="https://example.com/tickets" /></td>
                         </tr>
                         <tr>
+                            <th scope="row">Featured Sponsor</th>
+                            <td><?php stagekitwp_render_sponsor_select('season[featured_sponsor]', $season_featured_sponsor_id); ?></td>
+                        </tr>
+                        <tr>
                             <th scope="row">Season Status</th>
                             <td>
                                 <select id="stagekitwp-season-status" name="season[status]">
@@ -889,6 +960,24 @@ function stagekitwp_render_season_builder_page() {
                                         <td><input type="date" name="shows[<?php echo esc_attr($row_key); ?>][audition_date]" value="<?php echo esc_attr($row['audition_date']); ?>" /></td>
                                     </tr>
                                     <tr>
+                                        <th scope="row">Audition Slots</th>
+                                        <td>
+                                            <div class="stagekitwp-sb-audition-slots" data-row-key="<?php echo esc_attr($row_key); ?>">
+                                                <div class="stagekitwp-sb-audition-slots-list">
+                                                    <?php foreach ((array) ($row['audition_slots'] ?? array()) as $aud_slot) {
+                                                        echo stagekitwp_audition_slot_row_html(array(
+                                                            'start' => 'shows[' . $row_key . '][aud_start][]',
+                                                            'duration' => 'shows[' . $row_key . '][aud_duration][]',
+                                                            'venue' => 'shows[' . $row_key . '][aud_venue][]',
+                                                        ), $aud_slot, 'stagekitwp-sb-audition-slot-row', 'js-remove-audition-slot'); // phpcs:ignore WordPress.Security.EscapeOutput
+                                                    } ?>
+                                                </div>
+                                                <button type="button" class="button js-add-audition-slot">Add Audition Slot</button>
+                                                <p class="description">Start, duration and venue for each audition session. Blank venue uses the show venue. When slots exist, the Audition Date is set from them.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th scope="row">Venue</th>
                                         <td>
                                             <select name="shows[<?php echo esc_attr($row_key); ?>][venue]">
@@ -911,6 +1000,36 @@ function stagekitwp_render_season_builder_page() {
                                     <tr>
                                         <th scope="row">Tickets URL</th>
                                         <td><input type="url" class="regular-text" name="shows[<?php echo esc_attr($row_key); ?>][tickets_url]" value="<?php echo esc_attr($row['tickets_url']); ?>" placeholder="https://example.com/tickets" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Featured Sponsor</th>
+                                        <td><?php stagekitwp_render_sponsor_select('shows[' . $row_key . '][featured_sponsor]', $row['featured_sponsor']); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Actual Show Dates and Times</th>
+                                        <td>
+                                            <div class="stagekitwp-sb-actual-dates" data-row-key="<?php echo esc_attr($row_key); ?>">
+                                                <div class="stagekitwp-sb-actual-dates-list">
+                                                    <?php foreach (array_values((array) ($row['actual_dates'] ?? array())) as $perf_date) :
+                                                        if ($perf_date === '' || !is_string($perf_date)) { continue; } ?>
+                                                        <p class="stagekitwp-sb-actual-date-row">
+                                                            <input type="datetime-local" name="shows[<?php echo esc_attr($row_key); ?>][actual_dates][]" value="<?php echo esc_attr($perf_date); ?>" />
+                                                            <?php stagekitwp_render_sponsor_select('shows[' . $row_key . '][perf_sponsors][]', $row['perf_sponsors'][$perf_date] ?? '', '— Default sponsor —'); ?>
+                                                            <button type="button" class="button js-remove-actual-date">Remove</button>
+                                                        </p>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                                <button type="button" class="button js-add-actual-date">Add Performance Date</button>
+                                                <p class="description">Each performance date and start time, with an optional sponsor. Blank uses the show's featured sponsor, then the season's.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Show Duration</th>
+                                        <td>
+                                            <label>Hours <input type="number" min="0" max="24" step="1" style="width:70px;" name="shows[<?php echo esc_attr($row_key); ?>][duration_hours]" value="<?php echo esc_attr((string) floor(((int) $row['duration_minutes']) / 60)); ?>" /></label>
+                                            <label>Minutes <input type="number" min="0" max="59" step="1" style="width:70px;" name="shows[<?php echo esc_attr($row_key); ?>][duration_minutes]" value="<?php echo esc_attr((string) (((int) $row['duration_minutes']) % 60)); ?>" /></label>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th scope="row">Director</th>
@@ -1317,6 +1436,37 @@ function stagekitwp_render_season_builder_page() {
                 '</div>';
         }
 
+        var sponsorSelectTemplate = <?php ob_start(); stagekitwp_render_sponsor_select('__NAME__', ''); echo wp_json_encode(ob_get_clean()); ?>;
+        var perfSponsorSelectTemplate = <?php ob_start(); stagekitwp_render_sponsor_select('__NAME__', '', '— Default sponsor —'); echo wp_json_encode(ob_get_clean()); ?>;
+
+        $(document).on('click', '.js-add-actual-date', function () {
+            var wrap = $(this).closest('.stagekitwp-sb-actual-dates');
+            var key = wrap.data('row-key');
+            var row = $('<p class="stagekitwp-sb-actual-date-row"></p>');
+            row.html('<input type="datetime-local" name="shows[' + escHtml(key) + '][actual_dates][]" /> ' +
+                perfSponsorSelectTemplate.replace('__NAME__', 'shows[' + escHtml(key) + '][perf_sponsors][]') +
+                ' <button type="button" class="button js-remove-actual-date">Remove</button>');
+            wrap.find('.stagekitwp-sb-actual-dates-list').append(row);
+        });
+        $(document).on('click', '.js-remove-actual-date', function () {
+            $(this).closest('.stagekitwp-sb-actual-date-row').remove();
+        });
+
+        var auditionSlotTemplate = <?php echo wp_json_encode(stagekitwp_audition_slot_row_html(array('start' => '__S__', 'duration' => '__D__', 'venue' => '__V__'), array(), 'stagekitwp-sb-audition-slot-row', 'js-remove-audition-slot')); ?>;
+        function auditionSlotRow(key) {
+            return auditionSlotTemplate
+                .replace('__S__', 'shows[' + escHtml(key) + '][aud_start][]')
+                .replace('__D__', 'shows[' + escHtml(key) + '][aud_duration][]')
+                .replace('__V__', 'shows[' + escHtml(key) + '][aud_venue][]');
+        }
+        $(document).on('click', '.js-add-audition-slot', function () {
+            var wrap = $(this).closest('.stagekitwp-sb-audition-slots');
+            wrap.find('.stagekitwp-sb-audition-slots-list').append(auditionSlotRow(wrap.data('row-key')));
+        });
+        $(document).on('click', '.js-remove-audition-slot', function () {
+            $(this).closest('.stagekitwp-sb-audition-slot-row').remove();
+        });
+
         function addShowRow() {
             var rowKey = 'show_new_' + showCounter++;
             var html = '' +
@@ -1351,6 +1501,8 @@ function stagekitwp_render_season_builder_page() {
                 '          </td>' +
                 '        </tr>' +
                 '        <tr><th scope="row">Audition Date</th><td><input type="date" name="shows[' + escHtml(rowKey) + '][audition_date]" value="" /></td></tr>' +
+                                '        <tr><th scope="row">Audition Slots</th><td><div class="stagekitwp-sb-audition-slots" data-row-key="' + escHtml(rowKey) + '"><div class="stagekitwp-sb-audition-slots-list"></div><button type="button" class="button js-add-audition-slot">Add Audition Slot</button></div></td></tr>' +
+                                '        <tr><th scope="row">Featured Sponsor</th><td>' + sponsorSelectTemplate.replace('__NAME__', 'shows[' + escHtml(rowKey) + '][featured_sponsor]') + '</td></tr>' +
                 '        <tr><th scope="row">Director</th><td><input type="text" class="regular-text" name="shows[' + escHtml(rowKey) + '][director]" value="" /></td></tr>' +
                 '        <tr><th scope="row">Associate Director</th><td><input type="text" class="regular-text" name="shows[' + escHtml(rowKey) + '][associate_director]" value="" /></td></tr>' +
                 '        <tr><th scope="row">Producer</th><td><input type="text" class="regular-text" name="shows[' + escHtml(rowKey) + '][producer]" value="" /></td></tr>' +
@@ -1367,6 +1519,8 @@ function stagekitwp_render_season_builder_page() {
                 '          </td>' +
                 '        </tr>' +
                 '        <tr><th scope="row">Show Dates</th><td><textarea id="stagekitwp_sb_show_dates_' + escHtml(rowKey) + '" class="large-text" rows="3" name="shows[' + escHtml(rowKey) + '][show_dates]"></textarea></td></tr>' +
+                '        <tr><th scope="row">Actual Show Dates and Times</th><td><div class="stagekitwp-sb-actual-dates" data-row-key="' + escHtml(rowKey) + '"><div class="stagekitwp-sb-actual-dates-list"></div><button type="button" class="button js-add-actual-date">Add Performance Date</button><p class="description">Each performance date and start time, with an optional sponsor. Blank uses the show\'s featured sponsor, then the season\'s.</p></div></td></tr>' +
+                '        <tr><th scope="row">Show Duration</th><td><label>Hours <input type="number" min="0" max="24" step="1" style="width:70px;" name="shows[' + escHtml(rowKey) + '][duration_hours]" value="2" /></label> <label>Minutes <input type="number" min="0" max="59" step="1" style="width:70px;" name="shows[' + escHtml(rowKey) + '][duration_minutes]" value="45" /></label></td></tr>' +
                 '        <tr><th scope="row">Synopsis</th><td><textarea class="large-text" rows="4" name="shows[' + escHtml(rowKey) + '][synopsis]"></textarea></td></tr>' +
                 '        <tr><th scope="row">Audition Details</th><td><textarea id="stagekitwp_sb_audition_details_' + escHtml(rowKey) + '" name="shows[' + escHtml(rowKey) + '][audition_details]" rows="6"></textarea></td></tr>' +
                 '      </tbody>' +

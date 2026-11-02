@@ -7,6 +7,150 @@ if (!defined('ABSPATH')) {
 class STAGEKITWP_MEMBERS_Events {
 
     const META_VISIBILITY = '_stagekitwp_members_event_visibility';
+    const META_VENUE      = '_stagekitwp_members_event_venue';
+    const META_LOCATION   = '_stagekitwp_members_event_location';
+    const META_FORMAT     = '_stagekitwp_members_event_format';
+    const META_ONLINE_URL = '_stagekitwp_members_event_online_url';
+    const META_STATUS     = '_stagekitwp_members_event_status';
+    const META_PRICE      = '_stagekitwp_members_event_price';
+    const META_MEMBER_PRICE = '_stagekitwp_members_event_member_price';
+    const META_TICKET_URL = '_stagekitwp_members_event_ticket_url';
+
+    const FORMATS  = ['in_person' => 'In person', 'online' => 'Online', 'hybrid' => 'Hybrid'];
+    const STATUSES = ['scheduled' => 'Scheduled', 'cancelled' => 'Cancelled', 'postponed' => 'Postponed'];
+
+    /**
+     * Shared event detail values with defaults.
+     */
+    public static function get_details($event_id) {
+        $event_id = (int) $event_id;
+        $get = function ($key) use ($event_id) {
+            return $event_id ? get_post_meta($event_id, $key, true) : '';
+        };
+        $format = $get(self::META_FORMAT);
+        $status = $get(self::META_STATUS);
+        return [
+            'venue'      => absint($get(self::META_VENUE)),
+            'location'   => (string) $get(self::META_LOCATION),
+            'format'     => isset(self::FORMATS[$format]) ? $format : 'in_person',
+            'online_url' => (string) $get(self::META_ONLINE_URL),
+            'status'     => isset(self::STATUSES[$status]) ? $status : 'scheduled',
+            'price'      => (string) $get(self::META_PRICE),
+            'member_price' => (string) $get(self::META_MEMBER_PRICE),
+            'ticket_url' => (string) $get(self::META_TICKET_URL),
+        ];
+    }
+
+    /**
+     * Human-readable location: venue name, else free-text location.
+     */
+    public static function get_location_label($event_id) {
+        $d = self::get_details($event_id);
+        if ($d['venue']) {
+            $name = get_post_meta($d['venue'], '_stagekitwp_venue_name', true) ?: get_the_title($d['venue']);
+            if ($name) {
+                return $name;
+            }
+        }
+        return $d['location'];
+    }
+
+    /**
+     * Render the location/format/status/cost fields (shared by both editors).
+     */
+    public static function render_detail_fields($event_id) {
+        $d      = self::get_details($event_id);
+        $venues = post_type_exists('venue')
+            ? get_posts(['post_type' => 'venue', 'numberposts' => -1, 'post_status' => 'publish', 'orderby' => 'title', 'order' => 'ASC'])
+            : [];
+        ?>
+        <?php if ($venues) : ?>
+        <p><label><strong>Venue</strong><br>
+            <select name="stagekitwp_members_event_venue">
+                <option value="">— None —</option>
+                <?php foreach ($venues as $venue) :
+                    $label = get_post_meta($venue->ID, '_stagekitwp_venue_name', true) ?: $venue->post_title; ?>
+                    <option value="<?php echo esc_attr($venue->ID); ?>" <?php selected($d['venue'], $venue->ID); ?>><?php echo esc_html($label); ?></option>
+                <?php endforeach; ?>
+            </select></label></p>
+        <?php endif; ?>
+        <p><label><strong>Location (name and address)</strong><br>
+            <input type="text" class="regular-text" name="stagekitwp_members_event_location" value="<?php echo esc_attr($d['location']); ?>" placeholder="Used when no venue is chosen"></label>
+            <br><span class="description">Events with no venue and no location are left out of search-engine event markup.</span></p>
+        <p><label><strong>Format</strong><br>
+            <select name="stagekitwp_members_event_format">
+                <?php foreach (self::FORMATS as $key => $label) : ?>
+                    <option value="<?php echo esc_attr($key); ?>" <?php selected($d['format'], $key); ?>><?php echo esc_html($label); ?></option>
+                <?php endforeach; ?>
+            </select></label></p>
+        <p><label><strong>Online link</strong><br>
+            <input type="url" class="regular-text" name="stagekitwp_members_event_online_url" value="<?php echo esc_attr($d['online_url']); ?>" placeholder="https://"></label></p>
+        <p><label><strong>Event status</strong><br>
+            <select name="stagekitwp_members_event_status">
+                <?php foreach (self::STATUSES as $key => $label) : ?>
+                    <option value="<?php echo esc_attr($key); ?>" <?php selected($d['status'], $key); ?>><?php echo esc_html($label); ?></option>
+                <?php endforeach; ?>
+            </select></label></p>
+        <p><label><strong>Price</strong><br>
+            <input type="number" min="0" step="0.01" name="stagekitwp_members_event_price" value="<?php echo esc_attr($d['price']); ?>" placeholder="0">
+            </label> <span class="description">Leave blank for free.</span></p>
+        <p><label><strong>Member price</strong><br>
+            <input type="number" min="0" step="0.01" name="stagekitwp_members_event_member_price" value="<?php echo esc_attr($d['member_price']); ?>" placeholder="Same as price">
+            </label> <span class="description">Optional. Used by a payment plugin; blank means members pay the regular price.</span></p>
+        <p><label><strong>Tickets / registration link</strong><br>
+            <input type="url" class="regular-text" name="stagekitwp_members_event_ticket_url" value="<?php echo esc_attr($d['ticket_url']); ?>" placeholder="https://"></label></p>
+        <?php
+    }
+
+    /**
+     * Save the shared detail fields from $_POST. Caller must have verified nonce and caps.
+     */
+    public static function save_detail_fields($post_id) {
+        $post_id = (int) $post_id;
+        $text = function ($key) {
+            return isset($_POST[$key]) && is_scalar($_POST[$key]) ? sanitize_text_field(wp_unslash($_POST[$key])) : '';
+        };
+
+        $venue = isset($_POST['stagekitwp_members_event_venue']) && is_scalar($_POST['stagekitwp_members_event_venue'])
+            ? absint(wp_unslash($_POST['stagekitwp_members_event_venue']))
+            : 0;
+        if ($venue && get_post_type($venue) === 'venue') {
+            update_post_meta($post_id, self::META_VENUE, $venue);
+        } else {
+            delete_post_meta($post_id, self::META_VENUE);
+        }
+
+        update_post_meta($post_id, self::META_LOCATION, $text('stagekitwp_members_event_location'));
+
+        $format = sanitize_key($text('stagekitwp_members_event_format'));
+        update_post_meta($post_id, self::META_FORMAT, isset(self::FORMATS[$format]) ? $format : 'in_person');
+
+        $status = sanitize_key($text('stagekitwp_members_event_status'));
+        update_post_meta($post_id, self::META_STATUS, isset(self::STATUSES[$status]) ? $status : 'scheduled');
+
+        foreach ([self::META_ONLINE_URL => 'stagekitwp_members_event_online_url', self::META_TICKET_URL => 'stagekitwp_members_event_ticket_url'] as $meta => $field) {
+            $url = esc_url_raw($text($field));
+            if ($url) {
+                update_post_meta($post_id, $meta, $url);
+            } else {
+                delete_post_meta($post_id, $meta);
+            }
+        }
+
+        $price = $text('stagekitwp_members_event_price');
+        if ($price !== '' && is_numeric($price) && (float) $price > 0) {
+            update_post_meta($post_id, self::META_PRICE, (string) round((float) $price, 2));
+        } else {
+            delete_post_meta($post_id, self::META_PRICE);
+        }
+
+        $member_price = $text('stagekitwp_members_event_member_price');
+        if ($member_price !== '' && is_numeric($member_price) && (float) $member_price >= 0) {
+            update_post_meta($post_id, self::META_MEMBER_PRICE, (string) round((float) $member_price, 2));
+        } else {
+            delete_post_meta($post_id, self::META_MEMBER_PRICE);
+        }
+    }
 
     public static function init() {
         add_action('init', [__CLASS__, 'register']);
@@ -47,8 +191,8 @@ class STAGEKITWP_MEMBERS_Events {
             'label' => 'Events',
             'public' => true,
             'menu_icon' => 'dashicons-calendar',
-            'show_in_menu' => false,
-            'supports' => ['title', 'editor'],
+            'show_in_menu' => 'stagekitwp',
+            'supports' => ['title', 'editor', 'excerpt', 'thumbnail'],
             'has_archive' => true,
             'show_in_rest' => true,
             // Map to the plugin's own capability so Producers/Executives can
@@ -114,6 +258,7 @@ class STAGEKITWP_MEMBERS_Events {
         </p>
 
         <?php
+        self::render_detail_fields($post->ID);
     }
 
     /**
@@ -157,6 +302,8 @@ class STAGEKITWP_MEMBERS_Events {
             $visibility = 'private';
         }
         update_post_meta($post_id, self::META_VISIBILITY, $visibility);
+
+        self::save_detail_fields($post_id);
     }
 
     /**

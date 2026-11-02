@@ -149,7 +149,7 @@ class STAGEKITWP_MEMBERS_ICal {
         $lines   = [];
         $lines[] = 'BEGIN:VCALENDAR';
         $lines[] = 'VERSION:2.0';
-        $lines[] = 'PRODID:-//TM Members Area//Events//EN';
+        $lines[] = 'PRODID:-//StageKitWP Members//Events//EN';
         $lines[] = 'CALSCALE:GREGORIAN';
         $lines[] = 'METHOD:PUBLISH';
         $lines[] = 'X-WR-CALNAME:' . self::esc($name);
@@ -185,6 +185,10 @@ class STAGEKITWP_MEMBERS_ICal {
             }
 
             $lines[] = 'SUMMARY:' . self::esc($event->post_title);
+            $location = STAGEKITWP_MEMBERS_Events::get_location_label($event->ID);
+            if ($location) {
+                $lines[] = 'LOCATION:' . self::esc($location);
+            }
 
             $raw  = $event->post_excerpt ?: $event->post_content;
             $raw  = strip_shortcodes($raw);

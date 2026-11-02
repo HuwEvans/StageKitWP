@@ -62,6 +62,7 @@ function stagekitwp_render_contributor_meta_box($post) {
             <option value="Bronze" <?php selected($level, 'Bronze'); ?>>Bronze</option>
         </select>
     </label></p>
+    <p><label>Season:<br><?php stagekitwp_render_season_select('stagekitwp_season', get_post_meta($post->ID, '_stagekitwp_season', true)); ?></label></p>
     <?php
 }
 
@@ -80,6 +81,7 @@ function stagekitwp_save_contributor_meta($post_id) {
     update_post_meta($post_id, '_stagekitwp_name', $name);
     update_post_meta($post_id, '_stagekitwp_company', $company);
     update_post_meta($post_id, '_stagekitwp_level', $level);
+    update_post_meta($post_id, '_stagekitwp_season', stagekitwp_sanitize_post_id_of_type(isset($_POST['stagekitwp_season']) ? wp_unslash($_POST['stagekitwp_season']) : '', 'season'));
 
     remove_action('save_post', 'stagekitwp_save_contributor_meta');
     wp_update_post(array('ID' => $post_id, 'post_title' => $name));
@@ -92,7 +94,8 @@ function stagekitwp_contributor_columns($columns) {
         'cb' => '<input type="checkbox" />',
         'title' => 'Name',
         'company' => 'Company',
-        'level' => 'Contribution Level'
+        'level' => 'Contribution Level',
+        'season' => 'Season'
     );
 }
 add_filter('manage_contributor_posts_columns', 'stagekitwp_contributor_columns');
@@ -104,6 +107,10 @@ function stagekitwp_contributor_custom_column($column, $post_id) {
             break;
         case 'level':
             echo esc_html(get_post_meta($post_id, '_stagekitwp_level', true));
+            break;
+        case 'season':
+            $sid = (int) get_post_meta($post_id, '_stagekitwp_season', true);
+            echo $sid ? esc_html(get_the_title($sid)) : '&mdash;';
             break;
     }
 }

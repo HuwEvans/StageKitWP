@@ -20,6 +20,7 @@ class STAGEKITWP_MEMBERS_Email_Queue {
     const OPTION_KEY   = 'stagekitwp_members_email_queue';
     const BATCH_SIZE   = 25;   // max sends per cron run
     const MAX_ATTEMPTS = 3;    // retry ceiling before marking failed
+    const MAX_PENDING_JOBS = 1000;
 
     const STATUS_PENDING = 'pending';
     const STATUS_SENT    = 'sent';
@@ -38,7 +39,7 @@ class STAGEKITWP_MEMBERS_Email_Queue {
         if (!isset($schedules['stagekitwp_members_minute'])) {
             $schedules['stagekitwp_members_minute'] = [
                 'interval' => 60,
-                'display'  => __('Every Minute (TM Members)', 'stagekitwp-members-area'),
+                'display'  => __('Every Minute (StageKitWP Members)', 'stagekitwp-members-area'),
             ];
         }
         return $schedules;
@@ -70,13 +71,21 @@ class STAGEKITWP_MEMBERS_Email_Queue {
 
     /**
      * Add a job. $time may be a unix timestamp or a strtotime()-able string.
-     * Returns the job id.
+     * Returns the job id or WP_Error when the bounded queue is full.
      */
     public static function add_to_queue($email, $subject, $message, $time = null) {
 
-        $send_time = self::normalize_time($time);
-
         $queue = self::get_queue();
+        $pending = count(array_filter($queue, function ($job) {
+            return (isset($job['status']) ? $job['status'] : self::STATUS_PENDING) === self::STATUS_PENDING;
+        }));
+        if ($pending >= self::MAX_PENDING_JOBS) {
+            $error = new WP_Error('queue_full', 'The email queue is full. Try again after pending emails have been processed.');
+            error_log('StageKitWP Members could not queue email: ' . $error->get_error_message());
+            return $error;
+        }
+
+        $send_time = self::normalize_time($time);
 
         $job = [
             'id'         => self::next_id($queue),
@@ -88,12 +97,56 @@ class STAGEKITWP_MEMBERS_Email_Queue {
             'status'     => self::STATUS_PENDING,
             'last_error' => '',
             'created_at' => time(),
+            'campaign_id' => '',
+            'context' => [],
         ];
 
         $queue[] = $job;
         self::save_queue($queue);
 
         return $job['id'];
+    }
+
+    /**
+     * Add an all-or-nothing campaign batch with a bounded queue size.
+     *
+     * @return int[]|WP_Error
+     */
+    public static function add_batch($jobs) {
+        $queue = self::get_queue();
+        $pending = count(array_filter($queue, function ($job) {
+            return (isset($job['status']) ? $job['status'] : self::STATUS_PENDING) === self::STATUS_PENDING;
+        }));
+        if (count($jobs) > self::MAX_PENDING_JOBS || $pending + count($jobs) > self::MAX_PENDING_JOBS) {
+            return new WP_Error('queue_full', 'The email queue cannot accept this campaign yet. Pending queue capacity is ' . self::MAX_PENDING_JOBS . ' jobs.');
+        }
+
+        $ids = [];
+        $next_id = self::next_id($queue);
+        foreach ((array) $jobs as $job) {
+            $email = sanitize_email($job['email'] ?? '');
+            if (!$email || !is_email($email)) {
+                return new WP_Error('invalid_recipient', 'The campaign contains an invalid recipient address.');
+            }
+            $queue_job = [
+                'id' => $next_id++,
+                'email' => $email,
+                'subject' => sanitize_text_field($job['subject'] ?? ''),
+                'message' => wp_kses_post($job['message'] ?? ''),
+                'send_time' => self::normalize_time($job['send_time'] ?? null),
+                'attempts' => 0,
+                'status' => self::STATUS_PENDING,
+                'last_error' => '',
+                'created_at' => time(),
+                'campaign_id' => sanitize_text_field($job['campaign_id'] ?? ''),
+                'context' => is_array($job['context'] ?? null) ? $job['context'] : [],
+            ];
+            $queue[] = $queue_job;
+            $ids[] = $queue_job['id'];
+        }
+
+        self::save_queue($queue);
+        return $ids;
     }
 
     /**
@@ -155,7 +208,13 @@ class STAGEKITWP_MEMBERS_Email_Queue {
 
             $job['attempts']++;
 
-            $sent = STAGEKITWP_MEMBERS_Health::send_email($job['email'], $job['subject'], $job['message']);
+            $sent = STAGEKITWP_MEMBERS_Health::send_email(
+                $job['email'],
+                $job['subject'],
+                $job['message'],
+                (array) $job['context'],
+                $job['campaign_id']
+            );
 
             if ($sent) {
                 $job['status']     = self::STATUS_SENT;
@@ -193,6 +252,8 @@ class STAGEKITWP_MEMBERS_Email_Queue {
             'status'     => self::STATUS_PENDING,
             'last_error' => '',
             'created_at' => time(),
+            'campaign_id' => '',
+            'context' => [],
         ], (array) $job);
     }
 

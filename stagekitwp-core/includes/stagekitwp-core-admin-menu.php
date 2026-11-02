@@ -16,7 +16,7 @@ function stagekitwp_register_plugin_menu() {
         'stagekitwp-core',
         'stagekitwp_dashboard_page',
         $icon_url,
-        26
+        27
     );
 
     // Dashboard — same slug as parent so WP uses this as the top-level link target.
@@ -49,26 +49,203 @@ function stagekitwp_register_plugin_menu() {
 		add_action( "load-{$stagekitwp_docs_hook}", 'stagekitwp_documentation_redirect' );
 	}
 
-	add_submenu_page(
+	$stagekitwp_sc_hook = add_submenu_page(
 		'stagekitwp-core',
 		'Season Content',
 		'Season Content',
 		'edit_posts',
 		'stagekitwp-season-content',
-		'stagekitwp_season_content_page'
+		'__return_null'
 	);
+	if ( $stagekitwp_sc_hook ) {
+		add_action( "load-{$stagekitwp_sc_hook}", 'stagekitwp_season_content_redirect' );
+	}
 
-	add_submenu_page(
+	$stagekitwp_ppp_hook = add_submenu_page(
 		'stagekitwp-core',
 		'People, Places & Partners',
 		'People, Places & Partners',
 		'edit_posts',
 		'stagekitwp-people-places-partners',
-		'stagekitwp_people_places_partners_page'
+		'__return_null'
 	);
+	if ( $stagekitwp_ppp_hook ) {
+		add_action( "load-{$stagekitwp_ppp_hook}", 'stagekitwp_people_places_partners_redirect' );
+	}
 	
 }
 add_action('admin_menu', 'stagekitwp_register_plugin_menu', 9);
+
+/**
+ * People, Places & Partners post types, in tab order.
+ *
+ * @return array post_type => label
+ */
+function stagekitwp_people_places_partners_types() {
+	return array(
+		'venue'       => __( 'Venues', 'stagekitwp-core' ),
+		'board_member' => __( 'Board Members', 'stagekitwp-core' ),
+		'contributor' => __( 'Contributors', 'stagekitwp-core' ),
+		'sponsor'     => __( 'Sponsors', 'stagekitwp-core' ),
+		'testimonial' => __( 'Testimonials', 'stagekitwp-core' ),
+		'advertiser'  => __( 'Advertisers', 'stagekitwp-core' ),
+	);
+}
+
+/** Season Content post types, in tab order. */
+function stagekitwp_season_content_types() {
+	return array(
+		'season' => __( 'Seasons', 'stagekitwp-core' ),
+		'show'   => __( 'Shows', 'stagekitwp-core' ),
+		'cast'   => __( 'Cast', 'stagekitwp-core' ),
+		'award'  => __( 'Awards', 'stagekitwp-core' ),
+	);
+}
+
+/**
+ * Tab groups that use the standard CPT screens.
+ *
+ * @return array submenu slug => array( 'title' => string, 'types' => array post_type => label )
+ */
+function stagekitwp_cpt_tab_groups() {
+	return array(
+		'stagekitwp-season-content'         => array(
+			'title' => __( 'Season Content', 'stagekitwp-core' ),
+			'types' => stagekitwp_season_content_types(),
+		),
+		'stagekitwp-people-places-partners' => array(
+			'title' => __( 'People, Places & Partners', 'stagekitwp-core' ),
+			'types' => stagekitwp_people_places_partners_types(),
+		),
+	);
+}
+
+/** Group slug a post type belongs to, or ''. */
+function stagekitwp_cpt_group_for_type( $post_type ) {
+	foreach ( stagekitwp_cpt_tab_groups() as $slug => $group ) {
+		if ( array_key_exists( $post_type, $group['types'] ) ) {
+			return $slug;
+		}
+	}
+	return '';
+}
+
+/** The submenu item opens the first post type's standard list screen. */
+function stagekitwp_people_places_partners_redirect() {
+	$types = stagekitwp_people_places_partners_types();
+	wp_safe_redirect( admin_url( 'edit.php?post_type=' . array_key_first( $types ) ) );
+	exit;
+}
+
+function stagekitwp_season_content_redirect() {
+	$types = stagekitwp_season_content_types();
+	wp_safe_redirect( admin_url( 'edit.php?post_type=' . array_key_first( $types ) ) );
+	exit;
+}
+
+/** Current post type on a standard list / edit / add screen, or ''. */
+function stagekitwp_ppp_current_post_type() {
+	if ( ! function_exists( 'get_current_screen' ) ) {
+		return '';
+	}
+	$screen = get_current_screen();
+	if ( ! $screen || ! in_array( $screen->base, array( 'edit', 'post' ), true ) ) {
+		return '';
+	}
+	return stagekitwp_cpt_group_for_type( $screen->post_type ) ? $screen->post_type : '';
+}
+
+/** Tab strip linking the standard CPT screens together. */
+function stagekitwp_ppp_render_tabs() {
+	$current = stagekitwp_ppp_current_post_type();
+	if ( ! $current ) {
+		return;
+	}
+	$groups = stagekitwp_cpt_tab_groups();
+	$group  = $groups[ stagekitwp_cpt_group_for_type( $current ) ];
+	echo '<div class="wrap" style="margin-bottom:0;"><h2 class="nav-tab-wrapper" style="margin-top:10px;">';
+	echo '<span style="float:left;margin-right:16px;font-weight:600;line-height:30px;">' . esc_html( $group['title'] ) . '</span>';
+	foreach ( $group['types'] as $type => $label ) {
+		printf(
+			'<a href="%s" class="nav-tab%s">%s</a>',
+			esc_url( admin_url( 'edit.php?post_type=' . $type ) ),
+			$type === $current ? ' nav-tab-active' : '',
+			esc_html( $label )
+		);
+	}
+	echo '</h2></div>';
+}
+add_action( 'all_admin_notices', 'stagekitwp_ppp_render_tabs' );
+
+/** Keep the StageKitWP menu open and highlighted on those screens. */
+function stagekitwp_ppp_parent_file( $parent_file ) {
+	global $submenu_file;
+	$current = stagekitwp_ppp_current_post_type();
+	if ( $current ) {
+		$submenu_file = stagekitwp_cpt_group_for_type( $current );
+		return 'stagekitwp-core';
+	}
+	return $parent_file;
+}
+add_filter( 'parent_file', 'stagekitwp_ppp_parent_file' );
+
+/** Add a "Duplicate" row action to the StageKitWP CPT list screens. */
+function stagekitwp_ppp_row_actions( $actions, $post ) {
+	if ( ! stagekitwp_cpt_group_for_type( $post->post_type ) || ! current_user_can( 'edit_post', $post->ID ) ) {
+		return $actions;
+	}
+	$url = wp_nonce_url( admin_url( 'admin.php?action=stagekitwp_duplicate_post&post=' . $post->ID ), 'stagekitwp_duplicate_' . $post->ID );
+	$actions['stagekitwp_duplicate'] = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Duplicate', 'stagekitwp-core' ) . '</a>';
+	return $actions;
+}
+add_filter( 'post_row_actions', 'stagekitwp_ppp_row_actions', 10, 2 );
+
+/** Copy a post (fields, meta, taxonomies) as a draft, then open it for editing. */
+function stagekitwp_ppp_duplicate_post() {
+	$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+	check_admin_referer( 'stagekitwp_duplicate_' . $post_id );
+	$post = $post_id ? get_post( $post_id ) : null;
+	if ( ! $post || ! stagekitwp_cpt_group_for_type( $post->post_type ) ) {
+		wp_die( esc_html__( 'Invalid item.', 'stagekitwp-core' ) );
+	}
+	if ( ! current_user_can( 'edit_post', $post_id ) || ! current_user_can( get_post_type_object( $post->post_type )->cap->create_posts ) ) {
+		wp_die( esc_html__( 'You are not allowed to duplicate this item.', 'stagekitwp-core' ) );
+	}
+
+	$new_id = wp_insert_post( array(
+		'post_type'      => $post->post_type,
+		'post_status'    => 'draft',
+		'post_title'     => $post->post_title . ' ' . __( '(Copy)', 'stagekitwp-core' ),
+		'post_content'   => $post->post_content,
+		'post_excerpt'   => $post->post_excerpt,
+		'post_author'    => get_current_user_id(),
+		'menu_order'     => $post->menu_order,
+		'comment_status' => $post->comment_status,
+		'ping_status'    => $post->ping_status,
+	), true );
+	if ( is_wp_error( $new_id ) ) {
+		wp_die( esc_html( $new_id->get_error_message() ) );
+	}
+
+	foreach ( get_post_meta( $post_id ) as $key => $values ) {
+		if ( in_array( $key, array( '_edit_lock', '_edit_last', '_wp_old_slug' ), true ) ) {
+			continue;
+		}
+		foreach ( $values as $value ) {
+			add_post_meta( $new_id, wp_slash( $key ), wp_slash( maybe_unserialize( $value ) ) );
+		}
+	}
+	foreach ( get_object_taxonomies( $post->post_type ) as $taxonomy ) {
+		$terms = wp_get_object_terms( $post_id, $taxonomy, array( 'fields' => 'ids' ) );
+		if ( ! is_wp_error( $terms ) ) {
+			wp_set_object_terms( $new_id, $terms, $taxonomy );
+		}
+	}
+
+	wp_safe_redirect( admin_url( 'post.php?action=edit&post=' . $new_id ) );
+	exit;
+}
+add_action( 'admin_action_stagekitwp_duplicate_post', 'stagekitwp_ppp_duplicate_post' );
 add_action( 'admin_head', 'stagekitwp_admin_menu_palette_styles' );
 add_action( 'admin_footer', 'stagekitwp_documentation_menu_link_new_tab' );
 

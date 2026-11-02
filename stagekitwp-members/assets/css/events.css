@@ -200,6 +200,47 @@
     border-top: 1px solid var(--stagekitwp-ma-border);
 }
 
+.stagekitwp-volunteers {
+    flex: 1 0 100%;
+    padding-top: .75rem;
+    border-top: 1px solid var(--stagekitwp-ma-border);
+}
+.stagekitwp-volunteers > h4 {
+    margin: 0 0 .5rem;
+    color: var(--stagekitwp-ma-heading);
+}
+.stagekitwp-volunteer-badge {
+    display: inline-block;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    background: var(--stagekitwp-ma-ok-bg);
+    color: var(--stagekitwp-ma-ok-text);
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.stagekitwp-volunteer-position {
+    padding: .65rem .8rem;
+    margin: .5rem 0;
+    border: 1px solid var(--stagekitwp-ma-border);
+    border-radius: 8px;
+    background: var(--stagekitwp-ma-surface-alt);
+}
+.stagekitwp-volunteer-position h5,
+.stagekitwp-volunteer-position p {
+    margin: 0 0 .35rem;
+}
+.stagekitwp-volunteer-count {
+    color: var(--stagekitwp-ma-muted);
+    font-size: .85rem;
+}
+.stagekitwp-events-error {
+    padding: .75rem 1rem;
+    border: 1px solid #b32d2e;
+    border-radius: 8px;
+    color: #8a2424;
+}
+
 /* My RSVPs table */
 .stagekitwp-myrsvps-table {
     width: 100%;
@@ -210,6 +251,11 @@
     text-align: left;
     padding: .6rem .7rem;
     border-bottom: 1px solid var(--stagekitwp-ma-border);
+}
+.stagekitwp-myrsvps-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .stagekitwp-myrsvps-table th {
     font-size: .8rem;
@@ -228,6 +274,42 @@
 .stagekitwp-rsvp-pill--maybe    { background: color-mix(in srgb, #f59e0b 18%, var(--stagekitwp-ma-surface) 82%); color: #92400e; }
 .stagekitwp-rsvp-pill--declined { background: color-mix(in srgb, #dc2626 18%, var(--stagekitwp-ma-surface) 82%); color: #991b1b; }
 
+.stagekitwp-events a:focus-visible,
+.stagekitwp-events button:focus-visible,
+.stagekitwp-events input:focus-visible,
+.stagekitwp-events select:focus-visible,
+.stagekitwp-events textarea:focus-visible,
+.stagekitwp-volunteers a:focus-visible,
+.stagekitwp-volunteers button:focus-visible,
+.stagekitwp-volunteers input:focus-visible,
+.stagekitwp-volunteers select:focus-visible,
+.stagekitwp-volunteers textarea:focus-visible,
+.stagekitwp-myrsvps-table-wrap:focus-visible {
+    outline: 3px solid var(--stagekitwp-ma-accent);
+    outline-offset: 3px;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .stagekitwp-rsvp-btn { transition: none; }
+}
+
+@media (max-width: 600px) {
+    .stagekitwp-event {
+        align-items: stretch;
+    }
+
+    .stagekitwp-event-rsvp,
+    .stagekitwp-event-detail-rsvp {
+        flex-basis: 100%;
+    }
+
+    .stagekitwp-event-rsvp .stagekitwp-rsvp-form,
+    .stagekitwp-event-detail-rsvp .stagekitwp-rsvp-form {
+        flex: 1 1 8rem;
+    }
+
+    .stagekitwp-rsvp-btn,
+    .stagekitwp-volunteer-position button {
+        min-height: 44px;
+    }
 }

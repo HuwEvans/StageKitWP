@@ -100,33 +100,81 @@ if (!defined('ABSPATH')) {
  * Get the current show (today's date falls within show dates)
  */
 function stagekitwp_get_current_show() {
-    $today_ts = strtotime(date('Y-m-d'));
-    $shows = get_posts([
-        'post_type' => 'show',
-        'posts_per_page' => -1
+    $now_ts   = current_time('timestamp');
+    $today_ts = strtotime(wp_date('Y-m-d', $now_ts) . ' 00:00:00');
+
+    // Pick the season: flagged current, otherwise one whose dates span today.
+    $season_id = 0;
+    $flagged = get_posts([
+        'post_type'      => 'season',
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+        'meta_key'       => '_stagekitwp_season_is_current',
+        'meta_value'     => '1',
     ]);
-
-    foreach ($shows as $show) {
-        $season_id = get_post_meta($show->ID, '_stagekitwp_show_season', true);
-        if (!$season_id) continue;
-
-        $season = get_post($season_id);
-        if (!$season) continue;
-
-        $start_raw = get_post_meta($season_id, '_stagekitwp_season_start_date', true);
-        $end_raw = get_post_meta($season_id, '_stagekitwp_season_end_date', true);
-
-        $start_ts = $start_raw ? strtotime($start_raw) : 0;
-        $end_ts = $end_raw ? strtotime($end_raw) : 0;
-
-        if (!empty($start_ts) && !empty($end_ts)) {
-            if ($today_ts > $start_ts && $today_ts < $end_ts) {
-                return $show->ID;
+    if ($flagged) {
+        $season_id = (int) $flagged[0];
+    } else {
+        foreach (get_posts(['post_type' => 'season', 'posts_per_page' => -1, 'fields' => 'ids']) as $sid) {
+            $start = strtotime((string) get_post_meta($sid, '_stagekitwp_season_start_date', true));
+            $end   = strtotime((string) get_post_meta($sid, '_stagekitwp_season_end_date', true));
+            if ($start && $end && $today_ts >= $start && $today_ts <= $end + DAY_IN_SECONDS - 1) {
+                $season_id = (int) $sid;
+                break;
             }
         }
     }
+    if (!$season_id) {
+        return null;
+    }
 
-    return null;
+    $shows = get_posts([
+        'post_type'      => 'show',
+        'posts_per_page' => -1,
+        'meta_key'       => '_stagekitwp_show_season',
+        'meta_value'     => $season_id,
+    ]);
+    if (!$shows) {
+        return null;
+    }
+
+    $slot_order = ['fall' => 1, 'winter' => 2, 'spring' => 3];
+    $rows = [];
+    foreach ($shows as $show) {
+        $dates = get_post_meta($show->ID, '_stagekitwp_show_actual_dates', true);
+        $dates = is_array($dates) ? array_filter(array_map('strtotime', $dates)) : [];
+        sort($dates);
+        $upcoming = null;
+        foreach ($dates as $ts) {
+            if ($ts >= $today_ts) {
+                $upcoming = $ts;
+                break;
+            }
+        }
+        $slot = strtolower((string) get_post_meta($show->ID, '_stagekitwp_show_time_slot', true));
+        $rows[] = [
+            'id'       => $show->ID,
+            'upcoming' => $upcoming,
+            'last'     => $dates ? end($dates) : 0,
+            'slot'     => $slot_order[$slot] ?? 99,
+        ];
+    }
+
+    // Shows with an upcoming performance first (soonest), then undated shows by slot.
+    $candidates = array_filter($rows, function ($r) { return $r['upcoming'] !== null; });
+    if ($candidates) {
+        usort($candidates, function ($a, $b) { return [$a['upcoming'], $a['slot']] <=> [$b['upcoming'], $b['slot']]; });
+        return (int) $candidates[0]['id'];
+    }
+    $undated = array_filter($rows, function ($r) { return !$r['last']; });
+    if ($undated) {
+        usort($undated, function ($a, $b) { return $a['slot'] <=> $b['slot']; });
+        return (int) $undated[0]['id'];
+    }
+
+    // Every show has finished: fall back to the most recent one.
+    usort($rows, function ($a, $b) { return $b['last'] <=> $a['last']; });
+    return (int) $rows[0]['id'];
 }
 
 /**
@@ -217,6 +265,9 @@ function stagekitwp_render_landingpage_field($show_id, $field_name, $hard_breaks
                     // Strip tags for plain text when hard_breaks is false
                     $output .= esc_html(wp_strip_all_tags($value));
                 }
+            }
+            if ($hard_breaks) {
+                $output .= stagekitwp_performance_sponsors_html($show_id);
             }
             break;
 
@@ -480,6 +531,15 @@ function stagekitwp_render_landingpage_field($show_id, $field_name, $hard_breaks
                     $output .= implode(', ', $award_texts);
                 }
             }
+            break;
+
+        case 'sponsor_credit':
+            $output .= stagekitwp_sponsor_credit_html(stagekitwp_get_show_sponsor_id($show_id));
+            break;
+
+        case 'sponsors':
+            $sp_season = (int) get_post_meta($show_id, '_stagekitwp_show_season', true);
+            $output .= stagekitwp_sponsors_by_level_html($sp_season);
             break;
     }
 
@@ -1144,6 +1204,7 @@ function stagekitwp_lp_heading( $key, $show_id ) {
         'venue'         => 'Venue',
         'cast'          => 'Cast',
         'awards'        => 'Awards',
+        'sponsors'      => 'Our Sponsors',
     ];
     // 1. Per-show meta (set in Front-end Display meta box)
     $meta = get_post_meta( $show_id, '_stagekitwp_lp_heading_' . $key, true );
@@ -1312,6 +1373,24 @@ function stagekitwp_lp_info_sections( $fields_data, $show_id, $use_button, $butt
               . '<div class="stagekitwp-lp-field stagekitwp-lp-field-awards">'
               . '<span class="stagekitwp-lp-label">' . stagekitwp_lp_heading( 'awards', $show_id ) . '</span>'
               . '<span class="stagekitwp-lp-value">' . $fields_data['awards'] . '</span>'
+              . '</div></div>';
+    }
+
+    // Sponsor credit
+    if ( isset( $fields_data['sponsor_credit'] ) ) {
+        $out .= '<div class="stagekitwp-lp-section stagekitwp-lp-section-sponsor-credit">'
+              . '<div class="stagekitwp-lp-field stagekitwp-lp-field-sponsor_credit">'
+              . '<span class="stagekitwp-lp-value">' . $fields_data['sponsor_credit'] . '</span>'
+              . '</div></div>';
+    }
+
+    // Sponsors (by level)
+    if ( isset( $fields_data['sponsors'] ) ) {
+        $out .= '<hr class="stagekitwp-lp-divider">'
+              . '<div class="stagekitwp-lp-section stagekitwp-lp-section-sponsors">'
+              . '<div class="stagekitwp-lp-field stagekitwp-lp-field-sponsors">'
+              . '<span class="stagekitwp-lp-label">' . stagekitwp_lp_heading( 'sponsors', $show_id ) . '</span>'
+              . '<span class="stagekitwp-lp-value">' . $fields_data['sponsors'] . '</span>'
               . '</div></div>';
     }
 
@@ -1723,6 +1802,17 @@ function stagekitwp_shortcode_landingpage($atts) {
                     echo '<div class="stagekitwp-lp-prog-awards">'
                        . '<h2 class="stagekitwp-lp-section-heading">' . stagekitwp_lp_heading( 'awards', $show_id ) . '</h2>'
                        . '<div class="stagekitwp-lp-value">' . $fields_data['awards'] . '</div>'
+                       . '</div>';
+                }
+                // Sponsor credit
+                if ( isset( $fields_data['sponsor_credit'] ) ) {
+                    echo '<div class="stagekitwp-lp-prog-sponsor-credit">' . $fields_data['sponsor_credit'] . '</div>';
+                }
+                // Sponsors by level
+                if ( isset( $fields_data['sponsors'] ) ) {
+                    echo '<div class="stagekitwp-lp-prog-sponsors">'
+                       . '<h2 class="stagekitwp-lp-section-heading">' . stagekitwp_lp_heading( 'sponsors', $show_id ) . '</h2>'
+                       . '<div class="stagekitwp-lp-value">' . $fields_data['sponsors'] . '</div>'
                        . '</div>';
                 }
                 // Ticket

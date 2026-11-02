@@ -1,20 +1,22 @@
 {
-  "author_homepage": "https://github.com/stagekitwp",
-  "version": "3.0.0",
-  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-members/stagekitwp-members-3.0.0.zip",
-  "name": "stagekitwp-members",
-  "short_description": "A complete members experience with invitations, directory, messaging, announcements, events, availability, bulk email, and REST APIs.",
-  "slug": "stagekitwp-members",
-  "sections": {
-    "description": "The members plugin adds a private member area to the StageKitWP site, including role-based access, member profiles, announcements, events, and producer tools.",
-    "installation": "Upload the stagekitwp-members plugin folder to wp-content/plugins/, activate it, and ensure StageKitWP Core is active as a dependency.",
-    "changelog": "See CHANGELOG.md for the full release history."
-  },
-  "requires": "6.0",
-  "requires_php": "7.4",
   "author": "StageKitWP",
-  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-members/stagekitwp-members-3.0.0.zip",
+  "name": "stagekitwp-members",
+  "sections": {
+    "description": "The members plugin adds a private member area to the StageKitWP site, including role-based access, member profiles, announcements, events with volunteer signup and waitlists, and producer tools for advanced member search and saved email campaigns.",
+    "installation": "Upload the stagekitwp-members plugin folder to wp-content/plugins/, activate it, and ensure StageKitWP Core is active as a dependency.",
+    "changelog": "Events, Announcements and Email Templates now use the native WordPress list/edit screens, with Trash, Delete and a new Duplicate row action. Fixed Producers/Executives being unable to edit or delete Announcements and Email Templates by giving both post types their own capabilities (instead of the generic post capabilities) and granting them to the right roles. See CHANGELOG.md for the full release history.",
+    "instructions": "See docs/shortcodes.md for member-facing shortcodes, docs/hooks.md for the payment and integration contract, and docs/test-plan.md for the comprehensive cross-phase regression and acceptance plan. Volunteer signups, role-based access, saved email recipient groups, queued campaigns, unsubscribe behavior, and mobile/accessibility checks are covered. Invitation delivery and database-upgrade checks are included in docs/test-plan.md."
+  },
+  "last_updated": "2026-11-01",
+  "requires": "6.0",
+  "version": "3.2.7",
   "tested": "6.6",
-  "new_version": "3.0.0",
-  "homepage": "https://github.com/stagekitwp/stagekitwp-members"
+  "slug": "stagekitwp-members",
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-members/stagekitwp-members-3.2.7.zip",
+  "requires_php": "7.4",
+  "new_version": "3.2.7",
+  "homepage": "https://github.com/stagekitwp/stagekitwp-members",
+  "short_description": "A complete members experience with invitations, directory, messaging, events with volunteer signup, availability, advanced email campaigns, saved recipient groups, and REST APIs.",
+  "author_homepage": "https://github.com/stagekitwp",
+  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-members/stagekitwp-members-3.2.7.zip"
 }

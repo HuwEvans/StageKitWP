@@ -162,13 +162,9 @@ function stagekitwp_enqueue_slick_slider_assets() {
 }
 // NOT hooked to wp_enqueue_scripts globally — called on demand by shortcode.
 
-
-function stagekitwp_enqueue_cast_styles() {
-    // Use STAGEKITWP_CORE_URL constant — plugin_dir_url(__FILE__) from inside includes/
-    // produced a fragile relative path traversal (../assets/...).
-    wp_enqueue_style('stagekitwp-season-cast-table', STAGEKITWP_CORE_URL . 'assets/css/stagekitwp_season_cast_table.css');
-}
-add_action('wp_enqueue_scripts', 'stagekitwp_enqueue_cast_styles');
+// stagekitwp_enqueue_cast_styles() removed: styled classes (.stagekitwp-cast-list/-table/-thumbnail)
+// aren't output by any shortcode — [stagekitwp_show_cast] and the landing page cast list both
+// ship their own inline <style> blocks — and the enqueued filename didn't match the file on disk.
 
 
 /**

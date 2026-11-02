@@ -1,5 +1,38 @@
 # Changelog
 
+## Version 5.3.0 — 2026-10-31 — Season sponsors, per-performance sponsors, audition slots
+
+### Added
+
+- **Season for sponsors, advertisers and contributors:** a Season dropdown on each editor (stored in `_stagekitwp_season`) with an admin column, and a `season` attribute on their shortcodes (accepts an ID, slug, title, `current`, `next` or `upcoming`).
+- **Featured sponsor:** new field on Seasons and Shows. Per-performance sponsors can also be set on each show date.
+- **`[stagekitwp_sponsor_credit]`:** shortcode that outputs the sponsor credit for a season or show.
+- **Auditions:** multiple audition slots per show with date, start time, duration and venue, also available in the Season Builder.
+- **Admin:** tab strips for the Season Content and People / Places / Partners groups, a Duplicate action, and sortable Start/End date columns on Seasons.
+
+### Fixed
+
+- `current` season resolution and the deprecated `get_page_by_title()` call.
+
+### Files changed
+
+- `cpt/stagekitwp-core-cpt/` (`advertisers.php`, `sponsors.php`, `contributors.php`, `seasons.php`, `shows.php`)
+- `includes/stagekitwp-core-helpers.php`, `includes/stagekitwp-core-admin-menu.php`, `includes/stagekitwp-core-season-builder.php`, `includes/stagekitwp-core-show-front-display.php`
+- `includes/stagekitwp-core-shortcodes/` (sponsors, advertisers, contributors, landing page, auditions)
+- `shortcode_usage.txt`, `stagekitwp-core.php`, `stagekitwp-core.json`
+
+## Version 5.2.10 — 2026-10-07 — Show duration
+
+### Added
+
+- **Show duration:** The Show editor now stores a performance duration in minutes, defaulting to 2 hours 45 minutes.
+
+### Files changed
+
+- `cpt/stagekitwp-core-cpt/shows.php`
+- `stagekitwp-core.php`
+- `stagekitwp-core.json`
+
 ## Version 5.2.9 — 2026-09-19 — Landing Page awards section + second Get Tickets button
 
 ### Added

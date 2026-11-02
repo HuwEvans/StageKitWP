@@ -1,9 +1,5 @@
 <?php
 
-defined( 'ABSPATH' ) || exit;
-require_once __DIR__ . '/class-stagekitwp-members-settings.php';
-return;
-
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -33,6 +29,7 @@ class STAGEKITWP_MEMBERS_Settings {
         // Login & Registration
         register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_custom_login_enabled');
         register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_login_page_id',          ['sanitize_callback' => 'absint']);
+        register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_frontend_only');
         register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_open_reg_enabled');
         register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_reg_page_id',            ['sanitize_callback' => 'absint']);
         register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_login_redirect_page_id', ['sanitize_callback' => 'absint']);
@@ -50,6 +47,64 @@ class STAGEKITWP_MEMBERS_Settings {
         register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_page_messages',       ['sanitize_callback' => 'absint']);
         register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_page_directory',      ['sanitize_callback' => 'absint']);
         register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_page_dashboard',      ['sanitize_callback' => 'absint']);
+
+        register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_access_post_types', [
+            'sanitize_callback' => static function ($v) {
+                return is_array($v) ? array_values(array_filter(array_map('sanitize_key', $v))) : [];
+            },
+        ]);
+        register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_access_default_behavior', [
+            'sanitize_callback' => static function ($v) {
+                return in_array($v, ['login', 'message', '404'], true) ? $v : 'login';
+            },
+        ]);
+        register_setting('stagekitwp_members_settings_group', 'stagekitwp_members_access_message', ['sanitize_callback' => 'sanitize_textarea_field']);
+        register_setting('stagekitwp_members_settings_group', STAGEKITWP_MEMBERS_Volunteers::VISIBILITY_OPTION, [
+            'sanitize_callback' => static function ($value) {
+                return empty($value) ? 0 : 1;
+            },
+        ]);
+    }
+
+    private static function section_access(): void {
+        $selected = class_exists('STAGEKITWP_MEMBERS_Access') ? STAGEKITWP_MEMBERS_Access::protected_types() : ['page', 'post'];
+        $behavior = class_exists('STAGEKITWP_MEMBERS_Access') ? STAGEKITWP_MEMBERS_Access::default_behavior() : 'login';
+        $message  = (string) get_option('stagekitwp_members_access_message', '');
+        $types    = get_post_types(['public' => true], 'objects');
+        unset($types['attachment']);
+        ?>
+        <h2 class="title">Access Control</h2>
+        <p class="description">Adds a "Who can see this?" box to the selected content types and to menu items.</p>
+        <input type="hidden" name="stagekitwp_members_access_post_types[]" value="">
+        <table class="form-table">
+            <tr>
+                <th>Protected content types</th>
+                <td>
+                    <?php foreach ($types as $slug => $obj) : ?>
+                        <label style="display:block">
+                            <input type="checkbox" name="stagekitwp_members_access_post_types[]" value="<?php echo esc_attr($slug); ?>" <?php checked(in_array($slug, $selected, true)); ?>>
+                            <?php echo esc_html($obj->labels->name); ?>
+                        </label>
+                    <?php endforeach; ?>
+                </td>
+            </tr>
+            <tr>
+                <th>When access is blocked</th>
+                <td>
+                    <select name="stagekitwp_members_access_default_behavior">
+                        <option value="login" <?php selected($behavior, 'login'); ?>>Redirect logged-out visitors to login</option>
+                        <option value="message" <?php selected($behavior, 'message'); ?>>Show a message</option>
+                        <option value="404" <?php selected($behavior, '404'); ?>>Show a 404 page</option>
+                    </select>
+                    <p class="description">Logged-in users without access always see the message. Each item can override this.</p>
+                </td>
+            </tr>
+            <tr>
+                <th>Blocked message</th>
+                <td><textarea name="stagekitwp_members_access_message" rows="3" class="large-text"><?php echo esc_textarea($message); ?></textarea></td>
+            </tr>
+        </table>
+        <?php
     }
 
     /* --- page-select helper (echo) --- */
@@ -79,10 +134,30 @@ class STAGEKITWP_MEMBERS_Settings {
 				self::section_login($published_pages);
                 self::section_turnstile();
 				self::section_nav($published_pages);
+                self::section_access();
+                self::section_volunteers();
                 submit_button();
                 ?>
             </form>
         </div>
+        <?php
+    }
+
+    private static function section_volunteers(): void {
+        $public = (bool) get_option(STAGEKITWP_MEMBERS_Volunteers::VISIBILITY_OPTION, 0);
+        ?>
+        <h2 class="title">Volunteer Signups</h2>
+        <table class="form-table">
+            <tr>
+                <th>Open positions</th>
+                <td>
+                    <input type="hidden" name="<?php echo esc_attr(STAGEKITWP_MEMBERS_Volunteers::VISIBILITY_OPTION); ?>" value="0">
+                    <label><input type="checkbox" name="<?php echo esc_attr(STAGEKITWP_MEMBERS_Volunteers::VISIBILITY_OPTION); ?>" value="1" <?php checked($public); ?>>
+                        Show open positions and counts publicly (read-only)</label>
+                    <p class="description">Signups always require a logged-in member. Events can override this setting individually.</p>
+                </td>
+            </tr>
+        </table>
         <?php
     }
 
@@ -146,6 +221,16 @@ class STAGEKITWP_MEMBERS_Settings {
                 <td>
                     <?php self::page_select('stagekitwp_members_login_redirect_page_id', $redirect_page, $pages); ?>
                     <p class="description">Where to send users after a successful login. Defaults to the home page.</p>
+                </td>
+            </tr>
+            <tr>
+                <th>Front-End Only</th>
+                <td>
+                    <label>
+                        <input type="checkbox" name="stagekitwp_members_frontend_only" value="1" <?php checked(get_option('stagekitwp_members_frontend_only', 1), 1); ?>>
+                        Keep everyone except Administrators out of the WordPress dashboard
+                    </label>
+                    <p class="description">Non-administrators are sent to the front end after login, the admin bar is hidden, and <code>/wp-admin/</code> redirects to the front end.</p>
                 </td>
             </tr>
             <tr>

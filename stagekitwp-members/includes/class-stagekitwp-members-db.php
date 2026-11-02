@@ -17,7 +17,7 @@ class StageKitWP_MEMBERS_DB {
     /**
      * Bump this whenever a table schema changes.
      */
-    const DB_VERSION = '1.2.0';
+    const DB_VERSION = '1.6.0';
 
     const OPTION_KEY = 'stagekitwp_members_db_version';
 
@@ -51,9 +51,13 @@ class StageKitWP_MEMBERS_DB {
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
         self::create_invitations_table();
+
+        self::create_invitations_table();
         self::create_email_log_table();
         self::create_rsvps_table();
         self::create_availability_table();
+        self::create_memberships_tables();
+        self::create_volunteer_tables();
     }
 
     /**
@@ -109,6 +113,7 @@ class StageKitWP_MEMBERS_DB {
             subject text NOT NULL,
             message text NOT NULL,
             status varchar(20) NOT NULL,
+            group_id varchar(64) NOT NULL DEFAULT '',
             created_at datetime NOT NULL,
             PRIMARY KEY  (id)
         ) {$charset_collate};";
@@ -173,5 +178,96 @@ class StageKitWP_MEMBERS_DB {
         ) {$charset_collate};";
 
         dbDelta($sql);
+    }
+
+    /**
+     * Membership records and their history (Phase 4 payment contract).
+     * One current row per user plus an append-only history log.
+     */
+    private static function create_memberships_tables() {
+
+        global $wpdb;
+
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $table = $wpdb->prefix . 'stagekitwp_members_memberships';
+        dbDelta("CREATE TABLE {$table} (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) unsigned NOT NULL,
+            level varchar(40) NOT NULL DEFAULT '',
+            status varchar(20) NOT NULL DEFAULT 'none',
+            start_date datetime DEFAULT NULL,
+            expiry_date datetime DEFAULT NULL,
+            source varchar(40) NOT NULL DEFAULT 'manual',
+            external_ref varchar(190) NOT NULL DEFAULT '',
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY user_id (user_id),
+            KEY status (status),
+            KEY expiry_date (expiry_date)
+        ) {$charset_collate};");
+
+        $history = $wpdb->prefix . 'stagekitwp_members_membership_history';
+        dbDelta("CREATE TABLE {$history} (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) unsigned NOT NULL,
+            old_status varchar(20) NOT NULL DEFAULT '',
+            new_status varchar(20) NOT NULL DEFAULT '',
+            source varchar(40) NOT NULL DEFAULT '',
+            external_ref varchar(190) NOT NULL DEFAULT '',
+            actor_id bigint(20) unsigned NOT NULL DEFAULT 0,
+            note varchar(255) NOT NULL DEFAULT '',
+            created_at datetime NOT NULL,
+            PRIMARY KEY  (id),
+            KEY user_id (user_id)
+        ) {$charset_collate};");
+    }
+
+    /**
+     * Volunteer positions (including reusable templates) and member signups.
+     */
+    private static function create_volunteer_tables() {
+
+        global $wpdb;
+
+        $charset_collate = $wpdb->get_charset_collate();
+        $positions = $wpdb->prefix . 'stagekitwp_members_positions';
+        dbDelta("CREATE TABLE {$positions} (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            event_id bigint(20) unsigned NOT NULL DEFAULT 0,
+            title varchar(190) NOT NULL,
+            description text NOT NULL,
+            slots int(10) unsigned NOT NULL DEFAULT 1,
+            confirmed_count int(10) unsigned NOT NULL DEFAULT 0,
+            required_role varchar(40) NOT NULL DEFAULT '',
+            required_interest varchar(100) NOT NULL DEFAULT '',
+            sort_order int(10) unsigned NOT NULL DEFAULT 0,
+            active tinyint(1) NOT NULL DEFAULT 1,
+            is_template tinyint(1) NOT NULL DEFAULT 0,
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
+            PRIMARY KEY  (id),
+            KEY event_active (event_id, active),
+            KEY template_active (is_template, active)
+        ) {$charset_collate};");
+
+        $volunteers = $wpdb->prefix . 'stagekitwp_members_volunteers';
+        dbDelta("CREATE TABLE {$volunteers} (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            event_id bigint(20) unsigned NOT NULL,
+            position_id bigint(20) unsigned NOT NULL,
+            user_id bigint(20) unsigned NOT NULL,
+            status varchar(20) NOT NULL DEFAULT 'confirmed',
+            note varchar(255) NOT NULL DEFAULT '',
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
+            reminder_sent_at datetime DEFAULT NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY position_user (position_id, user_id),
+            KEY event_status (event_id, status),
+            KEY user_status (user_id, status),
+            KEY reminders (status, reminder_sent_at)
+        ) {$charset_collate};");
     }
 }

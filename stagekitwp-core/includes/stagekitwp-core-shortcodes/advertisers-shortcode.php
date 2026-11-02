@@ -17,6 +17,7 @@ function stagekitwp_advertiser_shortcode($atts) {
         'columns'    => get_option( 'stagekitwp_advertiser_grid_columns', '3' ),
         'lock_columns' => 'false',
         'mini_logos'   => 'false',
+        'season'       => '',
     ], $atts, 'stagekitwp_advertisers' );
     $atts['category'] = sanitize_key( $atts['category'] );
 
@@ -39,6 +40,13 @@ function stagekitwp_advertiser_shortcode($atts) {
                 'compare' => '='
             ]
         ];
+    }
+
+    $season_clause = stagekitwp_season_meta_query( $atts['season'] );
+    if ( $season_clause ) {
+        $args['meta_query'] = isset( $args['meta_query'] )
+            ? array_merge( [ 'relation' => 'AND' ], $args['meta_query'], [ $season_clause ] )
+            : [ $season_clause ];
     }
 
     $query = new WP_Query( $args );

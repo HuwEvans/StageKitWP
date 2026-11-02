@@ -90,6 +90,10 @@ function stagekitwp_advertiser_meta_box_callback($post) {
     echo '<option value="yes"' . selected($restaurant, 'yes', false) . '>Yes</option>';
     echo '<option value="no"' . selected($restaurant, 'no', false) . '>No</option>';
     echo '</select><br><br>';
+
+    echo '<label>Season:</label><br>';
+    stagekitwp_render_season_select('stagekitwp_season', get_post_meta($post->ID, '_stagekitwp_season', true));
+    echo '<br><br>';
 }
 
 // Save Meta Data
@@ -112,6 +116,7 @@ function stagekitwp_save_advertiser_meta($post_id) {
     update_post_meta($post_id, '_stagekitwp_website', $website);
     update_post_meta($post_id, '_stagekitwp_banner', $banner);
     update_post_meta($post_id, '_stagekitwp_restaurant', $restaurant);
+    update_post_meta($post_id, '_stagekitwp_season', stagekitwp_sanitize_post_id_of_type(isset($_POST['stagekitwp_season']) ? wp_unslash($_POST['stagekitwp_season']) : '', 'season'));
 
     // Auto-set post title from Name
     remove_action('save_post', 'stagekitwp_save_advertiser_meta');
@@ -127,6 +132,7 @@ function stagekitwp_advertiser_columns($columns) {
     $columns['stagekitwp_website'] = 'Website';
     $columns['stagekitwp_banner'] = 'Banner';
     $columns['stagekitwp_restaurant'] = 'Restaurant';
+    $columns['stagekitwp_season'] = 'Season';
     return $columns;
 }
 add_filter('manage_advertiser_posts_columns', 'stagekitwp_advertiser_columns');
@@ -169,6 +175,10 @@ function stagekitwp_advertiser_column_content($column, $post_id) {
                     echo '<img src="' . esc_url($banner) . '" style="max-width:50px; height:auto;" alt="Banner" />';
                 }
             }
+            break;
+        case 'stagekitwp_season':
+            $sid = (int) get_post_meta($post_id, '_stagekitwp_season', true);
+            echo $sid ? esc_html(get_the_title($sid)) : '&mdash;';
             break;
         case 'stagekitwp_restaurant':
             $restaurant = get_post_meta($post_id, '_stagekitwp_restaurant', true);

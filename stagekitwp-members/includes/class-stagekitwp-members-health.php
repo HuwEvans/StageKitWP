@@ -10,6 +10,47 @@ class STAGEKITWP_MEMBERS_Health {
         add_action('admin_menu', [__CLASS__, 'add_menu']);
         add_action('admin_notices', [__CLASS__, 'email_admin_notice']);
         add_action('admin_init', [__CLASS__, 'handle_test_email']);
+        add_action('admin_init', [__CLASS__, 'handle_convert_subscribers']);
+    }
+
+    /**
+     * Subscriber users have no member capabilities by design.
+     */
+    private static function check_subscribers() {
+        $ids = get_users(['role' => 'subscriber', 'fields' => 'ID', 'number' => 200]);
+        echo '<tr><td>Subscriber users</td>';
+        if (!$ids) {
+            echo '<td style="color:green;">✅ OK</td><td>No plain WordPress subscribers.</td></tr>';
+            return;
+        }
+        echo '<td style="color:orange;">⚠ ' . (int) count($ids) . ' found</td><td>';
+        echo 'Subscribers have no member access (they only see Log In/Log Out). ';
+        echo '<form method="post" style="display:inline;">';
+        wp_nonce_field('stagekitwp_members_convert_subscribers', 'stagekitwp_members_convert_nonce');
+        echo '<button class="button" name="stagekitwp_members_convert_subscribers" onclick="return confirm(\'Convert all subscribers to Member?\');">Convert to Member</button>';
+        echo '</form></td></tr>';
+    }
+
+    /**
+     * Convert subscribers to the Member role (admin action).
+     */
+    public static function handle_convert_subscribers() {
+        if (
+            !isset($_POST['stagekitwp_members_convert_subscribers'], $_POST['stagekitwp_members_convert_nonce']) ||
+            !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['stagekitwp_members_convert_nonce'])), 'stagekitwp_members_convert_subscribers') ||
+            !current_user_can('manage_options')
+        ) {
+            return;
+        }
+        $count = 0;
+        foreach (get_users(['role' => 'subscriber', 'fields' => 'ID']) as $uid) {
+            $user = get_userdata((int) $uid);
+            if ($user) {
+                $user->set_role('stagekitwp_member');
+                $count++;
+            }
+        }
+        set_transient('stagekitwp_members_convert_result', $count, 30);
     }
 
     /**
@@ -57,6 +98,7 @@ class STAGEKITWP_MEMBERS_Health {
 
                     <?php self::check_stagekitwp_core(); ?>
                     <?php self::check_email(); ?>
+                    <?php self::check_subscribers(); ?>
 
                 </tbody>
             </table>
@@ -126,7 +168,7 @@ class STAGEKITWP_MEMBERS_Health {
     /**
      * Central email sender
      */
-public static function send_email($to, $subject, $message) {
+public static function send_email($to, $subject, $message, $context = [], $campaign_id = '') {
 
     if (!get_option('stagekitwp_members_email_enabled', 1)) {
         return false;
@@ -139,13 +181,21 @@ public static function send_email($to, $subject, $message) {
 
     // ✅ Apply variables
     $user = get_user_by('email', $to);
-    $message = STAGEKITWP_MEMBERS_Email_Helper::parse_variables($message, $user);
+    $context = is_array($context) ? $context : [];
+    if (!empty($context['bulk_campaign']) && $user) {
+        $context['unsubscribe_link'] = STAGEKITWP_MEMBERS_Campaigns::unsubscribe_url($user->ID);
+        $context['preferences_link'] = home_url('/profile/');
+        $message .= '<hr><p><a href="' . esc_url($context['unsubscribe_link']) . '">Unsubscribe from announcement emails</a> · ';
+        $message .= '<a href="' . esc_url($context['preferences_link']) . '">Manage email preferences</a></p>';
+    }
+    $subject = STAGEKITWP_MEMBERS_Email_Helper::parse_variables($subject, $user, $context, false);
+    $message = STAGEKITWP_MEMBERS_Email_Helper::parse_variables($message, $user, $context);
 
     $sent = wp_mail($to, $subject, $message, $headers);
 
     update_option('stagekitwp_members_email_status', $sent ? 'ok' : 'failed');
 
-    STAGEKITWP_MEMBERS_Email_Log::log($to, $subject, $message, $sent ? 'success' : 'failed');
+    STAGEKITWP_MEMBERS_Email_Log::log($to, $subject, $message, $sent ? 'success' : 'failed', $campaign_id);
 
     return $sent;
 }
@@ -193,6 +243,11 @@ public static function send_email($to, $subject, $message) {
         }
 
         // ✅ Test email result
+        $converted = get_transient('stagekitwp_members_convert_result');
+        if ($converted !== false) {
+            echo '<div class="notice notice-success"><p>Converted ' . (int) $converted . ' subscriber(s) to Member.</p></div>';
+            delete_transient('stagekitwp_members_convert_result');
+        }
         $result = get_transient('stagekitwp_members_test_email_result');
 
         if ($result) {

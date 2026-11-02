@@ -1,25 +1,25 @@
 {
-  "name": "TM Members Area",
+  "name": "StageKitWP Members",
   "slug": "stagekitwp-members-area",
-  "version": "3.0.0",
+  "version": "3.2.7",
   "author": "Huw Evans",
   "author_homepage": "https://miltonplayers.example",
   "requires": "6.0",
   "tested": "6.6",
   "requires_php": "7.4",
-  "last_updated": "2026-08-10",
+  "last_updated": "2026-11-01",
   "homepage": "https://miltonplayers.example/stagekitwp-members-area",
-  "download_url": "https://miltonplayers.example/stagekitwp-members-area/stagekitwp-members-area-3.0.0.zip",
+  "download_url": "https://miltonplayers.example/stagekitwp-members-area/stagekitwp-members-area-3.2.7.zip",
   "requires_plugins": [
     "stagekitwp"
   ],
-  "short_description": "A full membership system for theatre groups: roles, invitations, directory, messaging, announcements, events with RSVP and attendance, cast availability, an iCal calendar feed, a REST API, bulk email, and notification preferences.",
-  "description": "TM Members Area turns a StageKitWP site into a private members area. Producers invite members, who register and manage a profile with interests, a photo, and a bio. Members find each other in an opt-in directory, message privately, read the announcements notice board, RSVP to events (Going / Maybe / Can't make it), subscribe to the event calendar in Google/Apple/Outlook, and publish their availability so producers can plan rehearsals and casting. Producers and executives get real member search, CSV exports, an attendance check-in roster, a cast-availability grid, an announcements notice board with optional email delivery, and a queued bulk-email tool with scheduling and per-member notification preferences. A capability-gated stagekitwp-ma/v1 REST API exposes read access to directory-listed members, events, and RSVPs without ever leaking private data. Every feature works on both MySQL and SQLite and is capability-gated for Member, Producer, and Executive roles.",
+  "short_description": "A full membership system for theatre groups: roles, invitations, directory, messaging, events with volunteer signup, cast availability, saved email recipient groups, advanced member filters, and REST APIs.",
+  "description": "StageKitWP Members turns a StageKitWP site into a private members area. Members RSVP to events and sign up for capacity-limited volunteer positions with waitlists; Producers manage position templates and rosters. The plugin also provides member access controls, profiles, messaging, availability, email tools and a capability-gated REST API. Every feature works on MySQL and SQLite.",
   "sections": {
-    "description": "A full membership system for theatre groups, integrated with StageKitWP. Includes roles and invitations, an opt-in member directory, private messaging, events with three-state RSVP and attendance check-in, cast availability ranges, a bulk email queue with scheduling, and per-member notification preferences.",
-    "installation": "1. Ensure the StageKitWP plugin is installed and active (required). 2. Upload the stagekitwp-members-area folder to wp-content/plugins/. 3. Activate the plugin from Plugins. 4. Roles, capabilities, and database tables are created automatically. 5. Add the member-facing pages using the shortcodes listed below. 6. (Optional) Enable Custom Login, Open Registration, Cloudflare Turnstile, and Nav Menu injection from TM Members > Settings.",
-    "instructions": "See the on-site 'Member Instructions' page (slug: /instructions) for a full member and producer guide. Member shortcodes: [stagekitwp_members_login], [stagekitwp_members_open_register], [stagekitwp_members_register], [stagekitwp_members_profile], [stagekitwp_members_member_profile], [stagekitwp_members_producer_dashboard], [stagekitwp_members_directory], [stagekitwp_members_conversations], [stagekitwp_members_conversation], [stagekitwp_members_announcements], [stagekitwp_members_events], [stagekitwp_members_my_rsvps], [stagekitwp_members_rsvp], [stagekitwp_members_availability]. Members can subscribe to the event calendar (/events.ics or a personal token feed) and browse a read-only REST API under stagekitwp-ma/v1. Nav menu: open Appearance > Menus, find the TM Members panel, tick the items you want, and click Add to Menu. Items show/hide based on login status and TM role. IMPORTANT: users must have the stagekitwp_member (or higher) TM role — WordPress subscriber role has no TM capabilities and will only see Log In/Log Out.",
-    "changelog": "See CHANGELOG.md for the full history. 2.1.4 aligned all member shortcode styles with StageKitWP light/dark theme tokens so UIs switch consistently with mode (including [stagekitwp_members_events]). 2.1.3 refined [stagekitwp_members_events] display behavior so title replaces the default Upcoming heading and public (logged-out) cards hide going/maybe counts. 2.1.2 added event Public/Private visibility, public-view filtering, and a title attribute for [stagekitwp_members_events]; instructions metadata now lists all shortcodes. 2.1.1 fixed nav menu visibility for users with subscriber role and documented the stagekitwp_member role requirement. 2.1.0 added custom login/registration pages, Cloudflare Turnstile bot protection, and the TM Members nav menu panel (Appearance > Menus). 2.0.0 is the hardening release: validated avatar uploads, a graceful avatar fallback, a safe uninstall.php with a keep-data-by-default guard, i18n loading, and a full nonce/capability audit. 1.8.0 added the stagekitwp-ma/v1 REST API and fixed member directory capabilities. 1.7.0 added a subscribe-able iCal event feed. 1.6.0 added Announcements. 1.5.0 added Casting and Availability. 1.4.x added Events and Attendance, the Member Directory, Producer search and CSV export, and notification preferences. Earlier releases delivered the email queue, messaging, invitations and registration, roles and capabilities, and the migration foundation."
+    "description": "A full membership system for theatre groups, integrated with StageKitWP. Includes roles and invitations, an opt-in member directory, private messaging, events with RSVP and volunteer signup, cast availability, advanced recipient filters, saved email groups, queued campaigns and per-member notification preferences.",
+    "installation": "1. Ensure the StageKitWP plugin is installed and active (required). 2. Upload the stagekitwp-members-area folder to wp-content/plugins/. 3. Activate the plugin from Plugins. 4. Roles, capabilities, and database tables are created automatically. 5. Add the member-facing pages using the shortcodes listed below. 6. (Optional) Enable Custom Login, Open Registration, Cloudflare Turnstile, and Nav Menu injection from StageKitWP Members > Settings.",
+    "instructions": "See the on-site 'Member Instructions' page (slug: /instructions) and docs/shortcodes.md for the complete shortcode list. For volunteer opportunities use [stagekitwp_members_volunteer event_id=\"123\"] or add positions to [stagekitwp_members_events]; members can review status with [stagekitwp_members_my_volunteering]. Signups require member login; public position counts are optional and show no names. Producers manage positions in the event editor or Members Events panel and review/export rosters under Volunteer Roster. Members can subscribe to the event calendar (/events.ics or a personal token feed) and access capability-gated REST endpoints under stagekitwp-ma/v1.",
+    "changelog": "Events, Announcements and Email Templates now use the native WordPress list/edit screens, with Trash, Delete and a new Duplicate row action. Fixed Producers/Executives being unable to edit or delete Announcements and Email Templates by giving both post types their own capabilities (instead of the generic post capabilities) and granting them to the right roles. See CHANGELOG.md for the full release history."
   },
   "capabilities": [
     "stagekitwp_members_manage_profile",
@@ -76,6 +76,14 @@
     {
       "tag": "[stagekitwp_members_events]",
       "description": "Events list with three-state RSVP; supports title, show, and layout attributes"
+    },
+    {
+      "tag": "[stagekitwp_members_volunteer]",
+      "description": "Volunteer positions and signup controls for an event; accepts event_id on non-event pages"
+    },
+    {
+      "tag": "[stagekitwp_members_my_volunteering]",
+      "description": "Current member's volunteer signup and waitlist statuses"
     },
     {
       "tag": "[stagekitwp_members_my_rsvps]",

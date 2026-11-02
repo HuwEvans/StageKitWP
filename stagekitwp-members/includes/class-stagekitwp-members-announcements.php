@@ -43,14 +43,18 @@ class STAGEKITWP_MEMBERS_Announcements {
             ],
             'public'              => false,
             'show_ui'             => true,
-            'show_in_menu'        => false,
+            'show_in_menu'        => 'stagekitwp',
             'menu_icon'           => 'dashicons-megaphone',
             'menu_position'       => 26,
             'exclude_from_search' => true,
             'publicly_queryable'  => false,
             'has_archive'         => false,
             'supports'            => ['title', 'editor', 'author'],
-            'capability_type'     => 'post',
+            // Dedicated capability type so Producers/Executives (granted via
+            // STAGEKITWP_MEMBERS_Roles::announcement_caps()) can manage
+            // announcements in wp-admin without needing the generic
+            // edit_posts/delete_posts caps (which only admins/editors have).
+            'capability_type'     => ['stagekitwp_ann', 'stagekitwp_anns'],
             'map_meta_cap'        => true,
         ]);
     }

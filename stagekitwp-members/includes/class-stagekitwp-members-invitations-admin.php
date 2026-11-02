@@ -14,7 +14,41 @@ class STAGEKITWP_MEMBERS_Invitations_Admin {
 
     public static function init() {
         add_action('admin_menu', [__CLASS__, 'add_menu']);
-        add_action('admin_init', [__CLASS__, 'handle_actions']);
+        add_action('admin_post_stagekitwp_members_invite_create', [__CLASS__, 'handle_create']);
+        add_action('admin_post_stagekitwp_members_invite_row', [__CLASS__, 'handle_row']);
+    }
+
+    private static function redirect($notice) {
+        wp_safe_redirect(add_query_arg('stagekitwp_members_notice', rawurlencode($notice), self::page_url()));
+        exit;
+    }
+
+    public static function handle_create() {
+        if (!current_user_can(self::CAP)) {
+            wp_die('Access denied');
+        }
+        check_admin_referer('stagekitwp_members_create_invite');
+        $email  = isset($_POST['stagekitwp_members_invite_email']) ? sanitize_email(wp_unslash($_POST['stagekitwp_members_invite_email'])) : '';
+        $result = STAGEKITWP_MEMBERS_Invitations::create_invite($email);
+        self::redirect(is_wp_error($result)
+            ? (($result->get_error_code() === 'invite_email_failed' ? 'warning:' : 'error:') . $result->get_error_message())
+            : 'created');
+    }
+
+    public static function handle_row() {
+        if (!current_user_can(self::CAP)) {
+            wp_die('Access denied');
+        }
+        check_admin_referer('stagekitwp_members_invite_row');
+        if (isset($_GET['resend'])) {
+            $ok = STAGEKITWP_MEMBERS_Invitations::resend((int) $_GET['resend']);
+            self::redirect($ok ? 'resent' : 'error:Could not resend.');
+        }
+        if (isset($_GET['revoke'])) {
+            STAGEKITWP_MEMBERS_Invitations::revoke((int) $_GET['revoke']);
+            self::redirect('revoked');
+        }
+        self::redirect('error:Unknown action.');
     }
 
     public static function add_menu() {
@@ -29,46 +63,7 @@ class STAGEKITWP_MEMBERS_Invitations_Admin {
     }
 
     private static function page_url() {
-        return admin_url('admin.php?page=stagekitwp-ma-invitations');
-    }
-
-    /**
-     * Process create / resend / revoke actions.
-     */
-    public static function handle_actions() {
-
-        if (!isset($_GET['page']) || $_GET['page'] !== 'stagekitwp-ma-invitations') {
-            return;
-        }
-        if (!current_user_can(self::CAP)) {
-            return;
-        }
-
-        // Create.
-        if (
-            isset($_POST['stagekitwp_members_create_invite']) &&
-            check_admin_referer('stagekitwp_members_create_invite')
-        ) {
-            $email  = isset($_POST['stagekitwp_members_invite_email']) ? sanitize_email(wp_unslash($_POST['stagekitwp_members_invite_email'])) : '';
-            $result = STAGEKITWP_MEMBERS_Invitations::create_invite($email);
-            $notice = is_wp_error($result) ? 'error:' . $result->get_error_message() : 'created';
-            wp_safe_redirect(add_query_arg('stagekitwp_members_notice', rawurlencode($notice), self::page_url()));
-            exit;
-        }
-
-        // Resend.
-        if (isset($_GET['resend']) && check_admin_referer('stagekitwp_members_invite_row')) {
-            $ok = STAGEKITWP_MEMBERS_Invitations::resend((int) $_GET['resend']);
-            wp_safe_redirect(add_query_arg('stagekitwp_members_notice', $ok ? 'resent' : 'error:Could not resend.', self::page_url()));
-            exit;
-        }
-
-        // Revoke.
-        if (isset($_GET['revoke']) && check_admin_referer('stagekitwp_members_invite_row')) {
-            STAGEKITWP_MEMBERS_Invitations::revoke((int) $_GET['revoke']);
-            wp_safe_redirect(add_query_arg('stagekitwp_members_notice', 'revoked', self::page_url()));
-            exit;
-        }
+        return admin_url('admin.php?page=stagekitwp-ma-admin&stagekitwp_members_tab=invitations');
     }
 
     public static function render() {
@@ -84,7 +79,8 @@ class STAGEKITWP_MEMBERS_Invitations_Admin {
             <h1>Member Invitations</h1>
 
             <h2>Send an Invitation</h2>
-            <form method="post">
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="stagekitwp_members_invite_create">
                 <?php wp_nonce_field('stagekitwp_members_create_invite'); ?>
                 <input type="email" name="stagekitwp_members_invite_email" placeholder="member@example.com" required style="min-width:280px;">
                 <button class="button button-primary" name="stagekitwp_members_create_invite">Send Invitation</button>
@@ -126,12 +122,13 @@ class STAGEKITWP_MEMBERS_Invitations_Admin {
             return;
         }
 
+        $base   = admin_url('admin-post.php?action=stagekitwp_members_invite_row');
         $resend = wp_nonce_url(
-            add_query_arg('resend', (int) $inv->id, self::page_url()),
+            add_query_arg('resend', (int) $inv->id, $base),
             'stagekitwp_members_invite_row'
         );
         $revoke = wp_nonce_url(
-            add_query_arg('revoke', (int) $inv->id, self::page_url()),
+            add_query_arg('revoke', (int) $inv->id, $base),
             'stagekitwp_members_invite_row'
         );
 
@@ -147,9 +144,12 @@ class STAGEKITWP_MEMBERS_Invitations_Admin {
 
         $raw = sanitize_text_field(wp_unslash($_GET['stagekitwp_members_notice']));
 
-        if (strpos($raw, 'error:') === 0) {
-            $msg = substr($raw, 6);
-            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($msg) . '</p></div>';
+        if (strpos($raw, 'error:') === 0 || strpos($raw, 'warning:') === 0) {
+            $warning = strpos($raw, 'warning:') === 0;
+            $prefix = $warning ? 'warning:' : 'error:';
+            $class = $warning ? 'notice-warning' : 'notice-error';
+            $msg = substr($raw, strlen($prefix));
+            echo '<div class="notice ' . esc_attr($class) . ' is-dismissible"><p>' . esc_html($msg) . '</p></div>';
             return;
         }
 

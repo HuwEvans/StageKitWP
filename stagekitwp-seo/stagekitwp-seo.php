@@ -2,7 +2,7 @@
 /**
  * Plugin Name: StageKitWP Search Optimizer
  * Description: Generates SEO tags, OpenGraph, Twitter Cards, JSON-LD Schema, and Microformats2.
- * Version:     1.4.3
+ * Version:     1.5.1
  * Author:      Huw Evans
  */
 
@@ -236,7 +236,19 @@ function seo_schema_save_postdata( $post_id ) {
     }
 }
 
+/**
+ * Whether the Members plugin restricts this post to some visitors.
+ * Restricted content must not leak into descriptions, schema or llms files.
+ */
+function stagekitwp_seo_is_restricted( $post ) {
+    $rule = get_post_meta( $post->ID, '_stagekitwp_members_access', true );
+    return is_array( $rule ) && ! empty( $rule['type'] ) && 'everyone' !== $rule['type'];
+}
+
 function stagekitwp_seo_description( $post ) {
+    if ( stagekitwp_seo_is_restricted( $post ) ) {
+        return '';
+    }
     $description = get_post_meta( $post->ID, '_seo_schema_desc', true );
     if ( ! empty( $description ) ) {
         return $description;
@@ -374,51 +386,12 @@ function stagekitwp_seo_add_sitemap_post_types( $post_types ) {
 }
 add_filter( 'wp_sitemaps_post_types', 'stagekitwp_seo_add_sitemap_post_types' );
 
-function stagekitwp_seo_add_llms_rewrite_rule() {
-    add_rewrite_rule( '^llms\.txt$', 'index.php?stagekitwp_seo_llms=1', 'top' );
-}
-add_action( 'init', 'stagekitwp_seo_add_llms_rewrite_rule' );
-
-function stagekitwp_seo_add_llms_query_var( $query_vars ) {
-    $query_vars[] = 'stagekitwp_seo_llms';
-    return $query_vars;
-}
-add_filter( 'query_vars', 'stagekitwp_seo_add_llms_query_var' );
-
-function stagekitwp_seo_render_llms_file() {
-    if ( ! get_query_var( 'stagekitwp_seo_llms' ) ) {
-        return;
-    }
-
-    $post_types = array_values( array_filter( array( 'page', 'show', 'season', 'venue', 'stagekitwp_event' ), 'post_type_exists' ) );
-    $posts = get_posts( array(
-        'post_type'      => $post_types,
-        'post_status'    => 'publish',
-        'posts_per_page' => 100,
-        'orderby'        => 'menu_order title',
-        'order'          => 'ASC',
-    ) );
-
-    status_header( 200 );
-    nocache_headers();
-    header( 'Content-Type: text/plain; charset=utf-8' );
-    echo '# ' . wp_strip_all_tags( stagekitwp_seo_get_organization_name() ) . "\n\n";
-    echo '> ' . wp_strip_all_tags( get_bloginfo( 'description' ) ) . "\n\n";
-    echo '## Public Content' . "\n\n";
-    foreach ( $posts as $post ) {
-        if ( get_post_meta( $post->ID, '_seo_schema_robots_noindex', true ) === '1' || ( 'stagekitwp_event' === $post->post_type && 'public' !== get_post_meta( $post->ID, '_stagekitwp_members_event_visibility', true ) ) ) {
-            continue;
-        }
-        echo '- [' . wp_strip_all_tags( get_the_title( $post ) ) . '](' . esc_url_raw( get_permalink( $post ) ) . ')';
-        $description = stagekitwp_seo_description( $post );
-        if ( $description ) {
-            echo ': ' . $description;
-        }
-        echo "\n";
-    }
-    exit;
-}
-add_action( 'template_redirect', 'stagekitwp_seo_render_llms_file' );
+// llms.txt / llms-full.txt generation and settings.
+require_once __DIR__ . '/includes/llms.php';
+// Performance carousel (ItemList) schema; reuses helpers from llms.php.
+require_once __DIR__ . '/includes/carousel.php';
+require_once __DIR__ . '/includes/auditions.php';
+require_once __DIR__ . '/includes/events.php';
 
 function stagekitwp_seo_activate() {
     stagekitwp_seo_add_llms_rewrite_rule();
@@ -780,18 +753,21 @@ function seo_schema_render_head_tags() {
             $schema['endDate'] = $end_date;
         }
     } elseif ( 'stagekitwp_event' === $schema_source_post_type ) {
-        $schema['@type'] = 'Event';
-        $event_date = get_post_meta( $schema_source_post->ID, '_stagekitwp_members_event_date', true );
-        $start_time = get_post_meta( $schema_source_post->ID, '_stagekitwp_members_start_time', true );
-        $end_time = get_post_meta( $schema_source_post->ID, '_stagekitwp_members_end_time', true );
-        if ( $event_date ) {
-            $schema['startDate'] = $event_date . ( $start_time ? 'T' . $start_time : '' );
-            if ( $end_time ) {
-                $schema['endDate'] = $event_date . 'T' . $end_time;
+        $schema = stagekitwp_seo_apply_member_event_schema( $schema, $schema_source_post );
+        if ( empty( $image_url ) && 'Event' === ( $schema['@type'] ?? '' ) ) {
+            // Fall back to the theme logo, then the core custom logo, then the site icon.
+            $image_url = (string) get_theme_mod( 'stagekitwp_custom_logo' );
+            $logo_id   = 0;
+            if ( $image_url ) {
+                $logo_id = (int) attachment_url_to_postid( $image_url );
+            } else {
+                $logo_id   = (int) get_theme_mod( 'custom_logo' );
+                $image_url = $logo_id ? (string) wp_get_attachment_image_url( $logo_id, 'full' ) : '';
             }
-        } else {
-            // No date set on the event: fall back to its publish date so the schema always has a startDate.
-            $schema['startDate'] = get_the_date( 'Y-m-d', $schema_source_post );
+            $image_alt = $logo_id ? (string) get_post_meta( $logo_id, '_wp_attachment_image_alt', true ) : '';
+            if ( ! $image_url ) {
+                $image_url = get_site_icon_url( 512 );
+            }
         }
     }
 
@@ -820,6 +796,58 @@ function seo_schema_render_head_tags() {
 
     if ( stagekitwp_seo_has_competing_plugin() && ! in_array( $schema_source_post_type, array( 'show', 'season', 'venue', 'stagekitwp_event' ), true ) ) {
         return;
+    }
+
+    if ( 'show' === $schema_source_post_type ) {
+        $actual_dates = get_post_meta( $schema_source_post->ID, '_stagekitwp_show_actual_dates', true );
+        $duration_minutes = absint( get_post_meta( $schema_source_post->ID, '_stagekitwp_show_duration_minutes', true ) );
+        if ( $duration_minutes < 1 || $duration_minutes > 1440 ) {
+            $duration_minutes = 165;
+        }
+
+        $performance_events = array();
+        if ( is_array( $actual_dates ) ) {
+            foreach ( $actual_dates as $actual_date ) {
+                if ( ! is_string( $actual_date ) || ! preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $actual_date ) ) {
+                    continue;
+                }
+
+                $event_start = DateTimeImmutable::createFromFormat( '!Y-m-d\TH:i', $actual_date, wp_timezone() );
+                $date_errors = DateTimeImmutable::getLastErrors();
+                if ( ! $event_start || ( is_array( $date_errors ) && ( $date_errors['warning_count'] || $date_errors['error_count'] ) ) ) {
+                    continue;
+                }
+
+                $event_end = $event_start->setTimestamp( $event_start->getTimestamp() + ( $duration_minutes * 60 ) );
+                $event = array(
+                    '@type'       => 'Event',
+                    '@id'         => get_permalink( $schema_source_post ) . '#performance-' . $event_start->format( 'Ymd\THis' ),
+                    'name'        => get_the_title( $schema_source_post ) . ' performance',
+                    'url'         => get_permalink( $schema_source_post ),
+                    'startDate'   => $event_start->format( DateTimeInterface::ATOM ),
+                    'endDate'     => $event_end->format( DateTimeInterface::ATOM ),
+                    'eventStatus' => 'https://schema.org/EventScheduled',
+                );
+
+                foreach ( array( 'description', 'organizer', 'location', 'offers', 'performer', 'image' ) as $shared_property ) {
+                    if ( isset( $schema[ $shared_property ] ) ) {
+                        $event[ $shared_property ] = $schema[ $shared_property ];
+                    }
+                }
+
+                $performance_events[] = $event;
+            }
+        }
+
+        $audition_events = stagekitwp_seo_audition_events( $schema_source_post, $schema );
+
+        if ( ! empty( $performance_events ) || ! empty( $audition_events ) ) {
+            unset( $schema['@context'] );
+            $schema = array(
+                '@context' => 'https://schema.org',
+                '@graph'   => array_merge( array( $schema ), $performance_events, $audition_events ),
+            );
+        }
     }
 
     echo '<script type="application/ld+json">' . wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) . '</script>' . "\n";

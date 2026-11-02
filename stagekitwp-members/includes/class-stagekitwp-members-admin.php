@@ -100,9 +100,9 @@ class STAGEKITWP_MEMBERS_Admin {
 			'email_logs'      => array( 'label' => 'Email Logs', 'cap' => 'manage_options', 'callback' => [ 'STAGEKITWP_MEMBERS_Email_Log', 'render' ] ),
 			'settings'        => array( 'label' => 'Settings', 'cap' => STAGEKITWP_MEMBERS_Roles::CAP_MANAGE_SETTINGS, 'callback' => [ 'STAGEKITWP_MEMBERS_Settings', 'render' ] ),
 			'health'          => array( 'label' => 'Health', 'cap' => 'manage_options', 'callback' => [ 'STAGEKITWP_MEMBERS_Health', 'render' ] ),
-			'announcements'   => array( 'label' => 'Announcements', 'cap' => STAGEKITWP_MEMBERS_Roles::CAP_RSVP_EVENTS, 'callback' => [ __CLASS__, 'render_announcements_panel' ] ),
-			'events'          => array( 'label' => 'Events', 'cap' => STAGEKITWP_MEMBERS_Roles::CAP_RSVP_EVENTS, 'callback' => [ __CLASS__, 'render_events_panel' ] ),
-			'email_templates' => array( 'label' => 'Email Templates', 'cap' => STAGEKITWP_MEMBERS_Roles::CAP_MANAGE_MEMBERS, 'callback' => [ __CLASS__, 'render_email_templates_panel' ] ),
+			'announcements'   => array( 'label' => 'Announcements', 'cap' => STAGEKITWP_MEMBERS_Roles::CAP_RSVP_EVENTS, 'callback' => function () { self::render_native_links( 'stagekitwp_ann', 'Announcements' ); } ),
+			'events'          => array( 'label' => 'Events', 'cap' => STAGEKITWP_MEMBERS_Roles::CAP_RSVP_EVENTS, 'callback' => function () { self::render_native_links( 'stagekitwp_event', 'Events' ); } ),
+			'email_templates' => array( 'label' => 'Email Templates', 'cap' => STAGEKITWP_MEMBERS_Roles::CAP_MANAGE_MEMBERS, 'callback' => function () { self::render_native_links( 'stagekitwp_email', 'Email Templates' ); } ),
 		);
 
 		$visible = array();
@@ -239,6 +239,14 @@ class STAGEKITWP_MEMBERS_Admin {
 		<?php
     }
 
+    private static function render_native_links( $post_type, $label ) {
+		$list = admin_url( 'edit.php?post_type=' . $post_type );
+		$add  = admin_url( 'post-new.php?post_type=' . $post_type );
+		echo '<h2>' . esc_html( $label ) . '</h2>';
+		echo '<p>' . esc_html( $label ) . ' are managed on the standard WordPress screens, with Trash, Delete and Duplicate.</p>';
+		echo '<p><a class="button button-primary" href="' . esc_url( $list ) . '">All ' . esc_html( $label ) . '</a> <a class="button" href="' . esc_url( $add ) . '">Add New</a></p>';
+    }
+
     private static function render_announcements_panel() {
 		$items = get_posts( array(
 			'post_type'      => 'stagekitwp_ann',
@@ -359,6 +367,7 @@ class STAGEKITWP_MEMBERS_Admin {
 					<h3><?php echo $selected ? esc_html( $selected->post_title ) : 'New Event'; ?></h3>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 						<?php wp_nonce_field( 'stagekitwp_members_save_event', 'stagekitwp_members_nonce' ); ?>
+						<?php wp_nonce_field( 'stagekitwp_members_volunteer_positions', 'stagekitwp_members_volunteer_nonce' ); ?>
 						<input type="hidden" name="action" value="stagekitwp_members_save_event">
 						<input type="hidden" name="stagekitwp_members_item_id" value="<?php echo (int) $selected_id; ?>">
 						<input type="hidden" name="stagekitwp_members_redirect_tab" value="events">
@@ -368,6 +377,8 @@ class STAGEKITWP_MEMBERS_Admin {
 						<p><label><strong>Start Time</strong><br><input type="time" name="stagekitwp_members_start_time" value="<?php echo esc_attr( $start_time ); ?>"></label></p>
 						<p><label><strong>End Time</strong><br><input type="time" name="stagekitwp_members_end_time" value="<?php echo esc_attr( $end_time ); ?>"></label></p>
 						<p><label><strong>Visibility</strong><br><select name="stagekitwp_members_event_visibility"><option value="private" <?php selected( $visibility, 'private' ); ?>>Private</option><option value="public" <?php selected( $visibility, 'public' ); ?>>Public</option></select></label></p>
+						<?php STAGEKITWP_MEMBERS_Events::render_detail_fields( $selected_id ); ?>
+						<?php STAGEKITWP_MEMBERS_Volunteers::render_fields( $selected_id ); ?>
 						<p><label><strong>Details</strong><br><textarea name="stagekitwp_members_content" rows="8" class="large-text"><?php echo esc_textarea( $content ); ?></textarea></label></p>
 						<p class="submit"><button type="submit" class="button button-primary">Save Event</button></p>
 					</form>
@@ -468,13 +479,21 @@ class STAGEKITWP_MEMBERS_Admin {
 		if ( ! in_array( $status, array( 'draft', 'publish', 'private' ), true ) ) {
 			$status = 'draft';
 		}
-		$save_id = $post_id ? wp_update_post( array( 'ID' => $post_id, 'post_title' => $title, 'post_content' => $content, 'post_status' => $status ), true ) : wp_insert_post( array( 'post_type' => 'stagekitwp_ann', 'post_title' => $title, 'post_content' => $content, 'post_status' => $status ), true );
+		$meta = array( '_stagekitwp_members_send_email' => ! empty( $_POST['stagekitwp_members_send_email'] ) ? '1' : '0' );
+		if ( current_user_can( STAGEKITWP_MEMBERS_Roles::CAP_MANAGE_MEMBERS ) ) {
+			$meta['_stagekitwp_members_important'] = ! empty( $_POST['stagekitwp_members_important'] ) ? '1' : '0';
+		}
+		// Meta is written before the publish transition so the email hook can read it.
+		$args = array( 'post_title' => $title, 'post_content' => $content, 'post_status' => $status, 'meta_input' => $meta );
+		if ( $post_id ) {
+			$args['ID'] = $post_id;
+			$save_id    = wp_update_post( $args, true );
+		} else {
+			$args['post_type'] = 'stagekitwp_ann';
+			$save_id           = wp_insert_post( $args, true );
+		}
 		if ( is_wp_error( $save_id ) ) {
 			wp_die( esc_html( $save_id->get_error_message() ) );
-		}
-		update_post_meta( (int) $save_id, '_stagekitwp_members_send_email', ! empty( $_POST['stagekitwp_members_send_email'] ) ? '1' : '0' );
-		if ( current_user_can( STAGEKITWP_MEMBERS_Roles::CAP_MANAGE_MEMBERS ) ) {
-			update_post_meta( (int) $save_id, '_stagekitwp_members_important', ! empty( $_POST['stagekitwp_members_important'] ) ? '1' : '0' );
 		}
 		self::redirect_to_tab( 'announcements', (int) $save_id );
 	}
@@ -486,7 +505,13 @@ class STAGEKITWP_MEMBERS_Admin {
 		if ( ! isset( $_POST['stagekitwp_members_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['stagekitwp_members_nonce'] ) ), 'stagekitwp_members_save_event' ) ) {
 			wp_die( 'Nonce verification failed' );
 		}
+		if ( ! isset( $_POST['stagekitwp_members_volunteer_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['stagekitwp_members_volunteer_nonce'] ) ), 'stagekitwp_members_volunteer_positions' ) ) {
+			wp_die( 'Volunteer position nonce verification failed.' );
+		}
 		$post_id = isset( $_POST['stagekitwp_members_item_id'] ) ? absint( $_POST['stagekitwp_members_item_id'] ) : 0;
+		if ( $post_id && ( get_post_type( $post_id ) !== 'stagekitwp_event' || ! current_user_can( 'edit_post', $post_id ) ) ) {
+			wp_die( 'Access denied.' );
+		}
 		$title   = isset( $_POST['stagekitwp_members_title'] ) ? sanitize_text_field( wp_unslash( $_POST['stagekitwp_members_title'] ) ) : '';
 		$content = isset( $_POST['stagekitwp_members_content'] ) ? wp_kses_post( wp_unslash( $_POST['stagekitwp_members_content'] ) ) : '';
 		$status  = isset( $_POST['stagekitwp_members_status'] ) ? sanitize_key( wp_unslash( $_POST['stagekitwp_members_status'] ) ) : 'draft';
@@ -505,6 +530,12 @@ class STAGEKITWP_MEMBERS_Admin {
 			$visibility = 'private';
 		}
 		update_post_meta( (int) $save_id, STAGEKITWP_MEMBERS_Events::META_VISIBILITY, $visibility );
+		STAGEKITWP_MEMBERS_Events::save_detail_fields( (int) $save_id );
+		STAGEKITWP_MEMBERS_Volunteers::save_positions( (int) $save_id );
+		$volunteer_visibility = isset( $_POST['stagekitwp_members_volunteer_visibility'] ) ? sanitize_key( wp_unslash( $_POST['stagekitwp_members_volunteer_visibility'] ) ) : 'inherit';
+		if ( in_array( $volunteer_visibility, array( 'inherit', 'public', 'private' ), true ) ) {
+			update_post_meta( (int) $save_id, STAGEKITWP_MEMBERS_Volunteers::VISIBILITY_META, $volunteer_visibility );
+		}
 		self::redirect_to_tab( 'events', (int) $save_id );
 	}
 

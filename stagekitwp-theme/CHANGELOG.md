@@ -1,6 +1,25 @@
 # Theatre Manager Theme — Changelog
 <!-- markdownlint-disable-file MD022 MD024 MD032 -->
 
+## Version 3.1.6 — 2026-09-23 — Per-page header/footer visibility control
+
+### Added
+
+- New "StageKitWP Page Chrome" meta box on pages, posts, shows, and seasons with four modes: Use theme default, No header, No footer, and No header or footer.
+- `stagekitwp-hide-header` / `stagekitwp-hide-footer` / `stagekitwp-chrome-*` body classes so optional side-menu or other chrome can follow the same per-page setting.
+
+### Changed
+
+- `header.php` and `footer.php` now gate the countdown bar, primary navigation, and footer widget areas on the saved page chrome mode while still running required `wp_head()`/`wp_footer()` hooks.
+
+### Files changed
+
+- `functions.php`
+- `header.php`
+- `footer.php`
+- `style.css`
+- `stagekitwp-theme.json`
+
 ## Version 3.1.5 — 2026-09-21 — Fix hero video not playing on Safari (iOS) and Edge
 
 ### Fixed

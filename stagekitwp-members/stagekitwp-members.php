@@ -2,8 +2,8 @@
 /**
  * Plugin Name: StageKitWP - Members
  * Plugin URI:  https://github.com/stagekitwp/stagekitwp-members
- * Description: Full membership system for theatre groups — roles &amp; invitations, member directory, private messaging, events with RSVP &amp; attendance, cast availability, bulk email with a queue, and per-member notification preferences. Integrates with StageKitWP.
- * Version:     3.0.0
+ * Description: Full membership system for theatre groups — roles &amp; invitations, member directory, private messaging, events with RSVP &amp; volunteer signup, cast availability, bulk email with a queue, and per-member notification preferences. Integrates with StageKitWP.
+ * Version:     3.2.7
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author:      Huw Evans
@@ -48,7 +48,7 @@ final class STAGEKITWP_Member_Area {
     private function define_constants() {
         define('STAGEKITWPMA_PATH', plugin_dir_path(__FILE__));
         define('STAGEKITWPMA_URL', plugin_dir_url(__FILE__));
-        define('STAGEKITWPMA_VERSION', '2.1.4');
+        define('STAGEKITWPMA_VERSION', '3.2.7');
 
     }
 
@@ -58,6 +58,7 @@ final class STAGEKITWP_Member_Area {
     private function includes() {
 
         $files = [
+            'stagekitwp-members-api.php',
             'class-stagekitwp-members-db.php',
             'class-stagekitwp-members-roles.php',
             'class-stagekitwp-members-notifications.php',
@@ -88,6 +89,11 @@ final class STAGEKITWP_Member_Area {
 			'class-stagekitwp-members-email-queue-admin.php',
 			'class-stagekitwp-members-auth.php',
 			'class-stagekitwp-members-nav-menu.php',
+			'class-stagekitwp-members-access.php',
+			'class-stagekitwp-members-membership.php',
+			'class-stagekitwp-members-volunteers.php',
+			'class-stagekitwp-members-campaigns.php',
+			'class-stagekitwp-members-duplicate.php',
         ];
 
         foreach ($files as $file) {
@@ -96,7 +102,7 @@ final class STAGEKITWP_Member_Area {
             if (file_exists($path)) {
                 require_once $path;
             } else {
-                error_log('TM Members Area missing file: ' . $path);
+                error_log('StageKitWP Members missing file: ' . $path);
             }
         }
     }
@@ -108,7 +114,7 @@ final class STAGEKITWP_Member_Area {
             load_plugin_textdomain(
                 'stagekitwp-members-area',
                 false,
-                dirname(plugin_basename(STAGEKITWPMA_PATH . 'stagekitwp-members-area.php')) . '/languages'
+                dirname(plugin_basename(STAGEKITWPMA_PATH . 'stagekitwp-members.php')) . '/languages'
             );
         });
 
@@ -142,6 +148,11 @@ final class STAGEKITWP_Member_Area {
 		if (class_exists('STAGEKITWP_MEMBERS_Email_Queue_Admin')) STAGEKITWP_MEMBERS_Email_Queue_Admin::init();
 		if (class_exists('STAGEKITWP_MEMBERS_Auth')) STAGEKITWP_MEMBERS_Auth::init();
 		if (class_exists('STAGEKITWP_MEMBERS_Nav_Menu')) STAGEKITWP_MEMBERS_Nav_Menu::init();
+		if (class_exists('STAGEKITWP_MEMBERS_Access')) STAGEKITWP_MEMBERS_Access::init();
+		if (class_exists('STAGEKITWP_MEMBERS_Duplicate')) STAGEKITWP_MEMBERS_Duplicate::init();
+		if (class_exists('STAGEKITWP_MEMBERS_Membership')) STAGEKITWP_MEMBERS_Membership::init();
+		if (class_exists('STAGEKITWP_MEMBERS_Volunteers')) STAGEKITWP_MEMBERS_Volunteers::init();
+		if (class_exists('STAGEKITWP_MEMBERS_Campaigns')) STAGEKITWP_MEMBERS_Campaigns::init();
 
 		// Enqueue auth CSS on the frontend.
 		add_action('wp_enqueue_scripts', function() {
@@ -211,6 +222,10 @@ register_deactivation_hook(__FILE__, function() {
     require_once plugin_dir_path(__FILE__) . 'includes/class-stagekitwp-members-email-queue.php';
     STAGEKITWP_MEMBERS_Email_Queue::clear_cron();
 
+    $volunteer_reminder = wp_next_scheduled('stagekitwp_members_volunteer_reminders');
+    if ($volunteer_reminder) {
+        wp_unschedule_event($volunteer_reminder, 'stagekitwp_members_volunteer_reminders');
+    }
+
     flush_rewrite_rules();
 });
-

@@ -1,8 +1,8 @@
 <?php
 /**
- * TM Members Area – Navigation Menu Integration
+ * StageKitWP Members – Navigation Menu Integration
  *
- * Adds a "TM Members" panel to Appearance → Menus so editors can drag
+ * Adds a "StageKitWP Members" panel to Appearance → Menus so editors can drag
  * permission-aware links into any menu — exactly like Pages or Custom Links.
  * Each item type stores a visibility rule in post meta (_stagekitwp_members_type).
  * At render time wp_nav_menu_objects removes items the visitor cannot see

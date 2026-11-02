@@ -189,6 +189,37 @@ public static function render_events($atts = []) {
 }
 
 /**
+ * Location, format, status, cost and tickets line for an event card.
+ * The online link is only shown to members who can RSVP.
+ */
+private static function event_details_html($event_id, $is_member) {
+    $d     = STAGEKITWP_MEMBERS_Events::get_details($event_id);
+    $items = [];
+
+    if ($d['status'] !== 'scheduled') {
+        $items[] = '<span class="stagekitwp-event-status stagekitwp-event-status--' . esc_attr($d['status']) . '">'
+            . esc_html(STAGEKITWP_MEMBERS_Events::STATUSES[$d['status']]) . '</span>';
+    }
+    $location = STAGEKITWP_MEMBERS_Events::get_location_label($event_id);
+    if ($location !== '') {
+        $items[] = '<span class="stagekitwp-event-location">' . esc_html($location) . '</span>';
+    }
+    if ($d['format'] !== 'in_person') {
+        $items[] = '<span class="stagekitwp-event-format">' . esc_html(STAGEKITWP_MEMBERS_Events::FORMATS[$d['format']]) . '</span>';
+        if ($is_member && $d['online_url'] !== '') {
+            $items[] = '<a class="stagekitwp-event-online" href="' . esc_url($d['online_url']) . '">Join online</a>';
+        }
+    }
+    $free = ($d['price'] === '' || (float) $d['price'] <= 0);
+    $items[] = '<span class="stagekitwp-event-price">' . ($free ? 'Free' : esc_html('$' . number_format((float) $d['price'], 2))) . '</span>';
+    if ($d['ticket_url'] !== '') {
+        $items[] = '<a class="stagekitwp-event-tickets" href="' . esc_url($d['ticket_url']) . '">Tickets</a>';
+    }
+
+    return '<p class="stagekitwp-event-info">' . implode(' · ', $items) . '</p>';
+}
+
+/**
  * Render one event row with RSVP controls (upcoming) or a summary (past).
  */
 private static function event_card($event, $can_rsvp) {
@@ -206,6 +237,8 @@ private static function event_card($event, $can_rsvp) {
             <?php if ($date): ?>
                 <p class="stagekitwp-event-date"><?php echo esc_html($date); ?></p>
             <?php endif; ?>
+            <?php echo self::event_details_html($event->ID, self::viewer_allowed()); ?>
+            <?php echo STAGEKITWP_MEMBERS_Volunteers::render_event_positions(['event_id' => $event->ID]); ?>
             <?php if ($event->post_excerpt): ?>
                 <p class="stagekitwp-event-blurb"><?php echo esc_html($event->post_excerpt); ?></p>
             <?php endif; ?>
@@ -278,6 +311,8 @@ private static function event_card_all_details($event, $can_rsvp) {
                 </span>
             <?php endif; ?>
         </div>
+        <?php echo self::event_details_html($event->ID, self::viewer_allowed()); ?>
+        <?php echo STAGEKITWP_MEMBERS_Volunteers::render_event_positions(['event_id' => $event->ID]); ?>
         <?php if ($event->post_excerpt): ?>
             <div class="stagekitwp-event-detail-excerpt">
                 <?php echo esc_html($event->post_excerpt); ?>
@@ -334,8 +369,9 @@ private static function event_card_all_details($event, $can_rsvp) {
 
         ob_start();
         echo '<div class="stagekitwp-events stagekitwp-myrsvps">';
+        echo '<div class="stagekitwp-myrsvps-table-wrap" role="region" tabindex="0" aria-label="' . esc_attr__('Your event RSVP history', 'stagekitwp-members-area') . '">';
         echo '<table class="stagekitwp-myrsvps-table"><thead><tr>';
-        echo '<th>Event</th><th>Date</th><th>Your RSVP</th><th>Attended</th>';
+        echo '<th scope="col">Event</th><th scope="col">Date</th><th scope="col">Your RSVP</th><th scope="col">Attended</th>';
         echo '</tr></thead><tbody>';
 
         foreach ($rows as $r) {
@@ -354,7 +390,7 @@ private static function event_card_all_details($event, $can_rsvp) {
             );
         }
 
-        echo '</tbody></table></div>';
+        echo '</tbody></table></div></div>';
         return ob_get_clean();
     }
 

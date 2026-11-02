@@ -2,8 +2,8 @@
 /**
  * Plugin Name: StageKitWP OneLink
  * Plugin URI:  https://miltonplayers.com
- * Description: Multi-style link tree aggregator for Milton Players Theatre Group with unlimited custom links, image icon support, and comprehensive social media controls.
- * Version:     1.6.0
+ * Description: Multi-style link tree aggregator for Milton Players Theatre Group with StageKitWP CPT/ecosystem wiring, dashicon/image icons, full light/dark theming, drag-and-drop ordering, and comprehensive social media controls.
+ * Version:     2.0.0
  * Author:      Milton Players Theatre Group
  * Text Domain: stagekitwp-onelink
  */
@@ -65,7 +65,7 @@ class StageKitWP_OneLink {
             'stagekit-onelink-standalone',
             array($this, 'render_admin_page'),
             'dashicons-share',
-            30
+            28
         );
     }
 

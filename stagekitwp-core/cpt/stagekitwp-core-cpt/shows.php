@@ -107,6 +107,18 @@ function stagekitwp_render_show_meta_box($post) {
             $fields[$key] = get_post_meta($post->ID, '_stagekitwp_show_' . $key, true);
     }
 
+    $actual_dates = get_post_meta($post->ID, '_stagekitwp_show_actual_dates', true);
+    if (!is_array($actual_dates)) {
+        $actual_dates = [];
+    }
+    if (empty($actual_dates)) {
+        $actual_dates = [''];
+    }
+    $duration_minutes = absint(get_post_meta($post->ID, '_stagekitwp_show_duration_minutes', true));
+    if ($duration_minutes < 1 || $duration_minutes > 1440) {
+        $duration_minutes = 165;
+    }
+
         // Program meta (separate fields: attachment ID and URL)
         $program_id = get_post_meta($post->ID, '_stagekitwp_show_program', true);
         $program_url = get_post_meta($post->ID, '_stagekitwp_show_program_url', true);
@@ -121,6 +133,33 @@ function stagekitwp_render_show_meta_box($post) {
     echo '<p><label>Sub-authors:<br><input type="text" name="stagekitwp_show_sub_authors" value="' . esc_attr($fields['sub_authors']) . '" class="widefat" /></label></p>';
     echo '<p><label>Synopsis:<br><textarea name="stagekitwp_show_synopsis" class="widefat">' . esc_textarea($fields['synopsis']) . '</textarea></label></p>';
     echo '<p><label>Audition Date:<br><input type="date" name="stagekitwp_show_audition_date" value="' . esc_attr($fields['audition_date']) . '" class="widefat stagekitwp-datepicker" /></label></p>';
+
+    $slot_names = array('start' => 'stagekitwp_audition_slot_start[]', 'duration' => 'stagekitwp_audition_slot_duration[]', 'venue' => 'stagekitwp_audition_slot_venue[]');
+    echo '<fieldset class="stagekitwp-audition-slots"><legend>Audition Dates, Times and Venues</legend>';
+    echo '<p>Each audition session: start, duration and venue (blank uses the show venue). When slots exist, the Audition Date above is set automatically from them.</p>';
+    echo '<div class="stagekitwp-audition-slots-list">';
+    foreach (stagekitwp_get_audition_slots($post->ID) as $audition_slot) {
+        echo stagekitwp_audition_slot_row_html($slot_names, $audition_slot); // phpcs:ignore WordPress.Security.EscapeOutput
+    }
+    echo '</div><button type="button" class="button stagekitwp-add-audition-slot">Add Audition Slot</button></fieldset>';
+    echo '<script>
+        (function () {
+            var rowHtml = ' . wp_json_encode(stagekitwp_audition_slot_row_html($slot_names)) . ';
+            var fs = document.querySelector(".stagekitwp-audition-slots");
+            if (!fs) return;
+            var list = fs.querySelector(".stagekitwp-audition-slots-list");
+            fs.addEventListener("click", function (e) {
+                if (e.target.classList.contains("stagekitwp-add-audition-slot")) {
+                    var tmp = document.createElement("div");
+                    tmp.innerHTML = rowHtml;
+                    list.appendChild(tmp.firstChild);
+                }
+                if (e.target.classList.contains("stagekitwp-remove-audition-slot")) {
+                    e.target.closest(".stagekitwp-audition-slot-row").remove();
+                }
+            });
+        })();
+    </script>';
 
     echo '<p><label>Audition Details:</label></p>';
     wp_editor(
@@ -153,11 +192,55 @@ function stagekitwp_render_show_meta_box($post) {
 
     echo '<p><label>Show Dates:<br><textarea name="stagekitwp_show_show_dates" class="widefat">' . esc_textarea($fields['show_dates']) . '</textarea></label></p>';
 
+    echo '<fieldset class="stagekitwp-show-actual-dates"><legend>Actual Show Dates and Times</legend>';
+    echo '<p>Enter each scheduled performance date and start time. Optionally choose a sponsor for that performance; blank uses the show\'s featured sponsor, then the season\'s.</p>';
+    echo '<div class="stagekitwp-show-actual-dates-list">';
+    $performance_sponsors = stagekitwp_get_performance_sponsors($post->ID);
+    foreach ($actual_dates as $actual_date) {
+        echo '<p class="stagekitwp-show-actual-date-row"><input type="datetime-local" name="stagekitwp_show_actual_dates[]" value="' . esc_attr($actual_date) . '" /> ';
+        stagekitwp_render_sponsor_select('stagekitwp_show_performance_sponsors[]', isset($performance_sponsors[$actual_date]) ? $performance_sponsors[$actual_date] : '', '— Default sponsor —');
+        echo ' <button type="button" class="button stagekitwp-remove-actual-date">Remove</button></p>';
+    }
+    echo '</div>';
+    echo '<button type="button" class="button stagekitwp-add-actual-date">Add Performance Date</button>';
+    echo '</fieldset>';
+    ob_start();
+    stagekitwp_render_sponsor_select('stagekitwp_show_performance_sponsors[]', '', '— Default sponsor —');
+    $sponsor_select_html = ob_get_clean();
+    echo '<script>
+        (function () {
+            var sponsorSelectHtml = ' . wp_json_encode($sponsor_select_html) . ';
+            var fieldset = document.querySelector(".stagekitwp-show-actual-dates");
+            if (!fieldset) return;
+            var list = fieldset.querySelector(".stagekitwp-show-actual-dates-list");
+            fieldset.addEventListener("click", function (event) {
+                if (event.target.classList.contains("stagekitwp-add-actual-date")) {
+                    var row = document.createElement("p");
+                    row.className = "stagekitwp-show-actual-date-row";
+                    row.innerHTML = \'<input type="datetime-local" name="stagekitwp_show_actual_dates[]" /> \' + sponsorSelectHtml + \' <button type="button" class="button stagekitwp-remove-actual-date">Remove</button>\';
+                    list.appendChild(row);
+                }
+                if (event.target.classList.contains("stagekitwp-remove-actual-date")) {
+                    event.target.closest(".stagekitwp-show-actual-date-row").remove();
+                }
+            });
+        })();
+    </script>';
+
+    echo '<fieldset class="stagekitwp-show-duration"><legend>Show Duration</legend>';
+    echo '<label>Hours: <input type="number" name="stagekitwp_show_duration_hours" min="0" max="24" step="1" value="' . esc_attr((string) floor($duration_minutes / 60)) . '" /></label> ';
+    echo '<label>Minutes: <input type="number" name="stagekitwp_show_duration_remainder" min="0" max="59" step="1" value="' . esc_attr((string) ($duration_minutes % 60)) . '" /></label>';
+    echo '</fieldset>';
+
     echo '<p><label>Season:<br><select name="stagekitwp_show_season">';
     foreach ($seasons as $season) {
         echo '<option value="' . esc_attr($season->ID) . '" ' . selected($fields['season'], $season->ID, false) . '>' . esc_html($season->post_title) . '</option>';
     }
     echo '</select></label></p>';
+
+    echo '<p><label>Featured Sponsor:<br>';
+    stagekitwp_render_sponsor_select('stagekitwp_show_featured_sponsor', get_post_meta($post->ID, '_stagekitwp_show_featured_sponsor', true));
+    echo '</label></p>';
 
     echo '<p><label>Venue:<br><select name="stagekitwp_show_venue">';
     echo '<option value="">-- Select Venue --</option>';
@@ -250,6 +333,65 @@ function stagekitwp_save_show_meta($post_id) {
         }
     }
 
+    update_post_meta($post_id, '_stagekitwp_show_featured_sponsor', stagekitwp_sanitize_post_id_of_type(isset($_POST['stagekitwp_show_featured_sponsor']) ? wp_unslash($_POST['stagekitwp_show_featured_sponsor']) : '', 'sponsor'));
+
+    $actual_dates = isset($_POST['stagekitwp_show_actual_dates']) && is_array($_POST['stagekitwp_show_actual_dates'])
+        ? wp_unslash($_POST['stagekitwp_show_actual_dates'])
+        : [];
+    $posted_sponsors = isset($_POST['stagekitwp_show_performance_sponsors']) && is_array($_POST['stagekitwp_show_performance_sponsors'])
+        ? array_values(wp_unslash($_POST['stagekitwp_show_performance_sponsors']))
+        : [];
+    $valid_actual_dates = [];
+    $performance_sponsor_map = [];
+    foreach (array_values($actual_dates) as $row_index => $actual_date) {
+        if (!is_string($actual_date)) {
+            continue;
+        }
+        $actual_date = sanitize_text_field($actual_date);
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/', $actual_date, $matches)
+            && checkdate((int) $matches[2], (int) $matches[3], (int) $matches[1])
+            && (int) $matches[4] <= 23
+            && (int) $matches[5] <= 59) {
+            $valid_actual_dates[] = $actual_date;
+            $row_sponsor = isset($posted_sponsors[$row_index]) && is_scalar($posted_sponsors[$row_index])
+                ? stagekitwp_sanitize_post_id_of_type($posted_sponsors[$row_index], 'sponsor')
+                : '';
+            if ($row_sponsor && !isset($performance_sponsor_map[$actual_date])) {
+                $performance_sponsor_map[$actual_date] = $row_sponsor;
+            }
+        }
+    }
+    if ($performance_sponsor_map) {
+        update_post_meta($post_id, '_stagekitwp_show_performance_sponsors', $performance_sponsor_map);
+    } else {
+        delete_post_meta($post_id, '_stagekitwp_show_performance_sponsors');
+    }
+    if (!empty($valid_actual_dates)) {
+        update_post_meta($post_id, '_stagekitwp_show_actual_dates', array_values(array_unique($valid_actual_dates)));
+    } else {
+        delete_post_meta($post_id, '_stagekitwp_show_actual_dates');
+    }
+
+    stagekitwp_save_audition_slots($post_id, stagekitwp_sanitize_audition_slots(
+        isset($_POST['stagekitwp_audition_slot_start']) ? wp_unslash($_POST['stagekitwp_audition_slot_start']) : [],
+        isset($_POST['stagekitwp_audition_slot_duration']) ? wp_unslash($_POST['stagekitwp_audition_slot_duration']) : [],
+        isset($_POST['stagekitwp_audition_slot_venue']) ? wp_unslash($_POST['stagekitwp_audition_slot_venue']) : []
+    ));
+
+        $duration_hours = isset($_POST['stagekitwp_show_duration_hours']) && is_scalar($_POST['stagekitwp_show_duration_hours'])
+            ? wp_unslash($_POST['stagekitwp_show_duration_hours'])
+            : '2';
+        $duration_remainder = isset($_POST['stagekitwp_show_duration_remainder']) && is_scalar($_POST['stagekitwp_show_duration_remainder'])
+            ? wp_unslash($_POST['stagekitwp_show_duration_remainder'])
+            : '45';
+        $duration_hours = is_string($duration_hours) && preg_match('/^\d+$/', $duration_hours) ? (int) $duration_hours : 2;
+        $duration_remainder = is_string($duration_remainder) && preg_match('/^\d+$/', $duration_remainder) ? (int) $duration_remainder : 45;
+        $duration_total_minutes = ($duration_hours * 60) + $duration_remainder;
+        if ($duration_hours > 24 || $duration_remainder > 59 || $duration_total_minutes < 1 || $duration_total_minutes > 1440) {
+            $duration_total_minutes = 165;
+        }
+        update_post_meta($post_id, '_stagekitwp_show_duration_minutes', $duration_total_minutes);
+
     $audition_details = isset($_POST['stagekitwp_show_audition_details']) ? wp_kses_post(wp_unslash($_POST['stagekitwp_show_audition_details'])) : '';
     update_post_meta($post_id, '_stagekitwp_show_audition_details', $audition_details);
 
@@ -299,6 +441,26 @@ function stagekitwp_show_columns($columns) {
     );
 }
 add_filter('manage_show_posts_columns', 'stagekitwp_show_columns');
+
+// Sortable Season column: orders shows by their season's start date (shows with no season sort last).
+function stagekitwp_show_sortable_columns($columns) {
+    $columns['season'] = 'stagekitwp_season';
+    return $columns;
+}
+add_filter('manage_edit-show_sortable_columns', 'stagekitwp_show_sortable_columns');
+
+function stagekitwp_show_sort_clauses($clauses, $query) {
+    global $wpdb;
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'show' || $query->get('orderby') !== 'stagekitwp_season') {
+        return $clauses;
+    }
+    $dir = strtoupper($query->get('order')) === 'DESC' ? 'DESC' : 'ASC';
+    $clauses['join']   .= " LEFT JOIN {$wpdb->postmeta} AS skw_show_season ON ({$wpdb->posts}.ID = skw_show_season.post_id AND skw_show_season.meta_key = '_stagekitwp_show_season')"
+        . " LEFT JOIN {$wpdb->postmeta} AS skw_season_start ON (skw_season_start.post_id = CAST(skw_show_season.meta_value AS UNSIGNED) AND skw_season_start.meta_key = '_stagekitwp_season_start_date')";
+    $clauses['orderby'] = "(skw_season_start.meta_value IS NULL OR skw_season_start.meta_value = '') ASC, skw_season_start.meta_value {$dir}, {$wpdb->posts}.post_title ASC";
+    return $clauses;
+}
+add_filter('posts_clauses', 'stagekitwp_show_sort_clauses', 10, 2);
 
 /**
  * Render Custom Columns

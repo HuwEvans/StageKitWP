@@ -68,7 +68,7 @@ class CPT {
  ],
  'public' => true,
  'show_in_rest' => true,
- 'menu_position' => 11,
+ 'menu_position' => 28,
  'menu_icon' => $icon_url,
  'supports' => [ 'title', 'thumbnail' ],
  ] );

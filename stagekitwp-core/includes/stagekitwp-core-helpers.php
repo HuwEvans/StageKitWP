@@ -353,3 +353,400 @@ function stagekitwp_next_season_has_shows() {
     $season = stagekitwp_get_next_season();
     return $season ? stagekitwp_season_has_shows( $season->ID ) : false;
 }
+
+/**
+ * Render a <select> of seasons for a CPT meta box.
+ *
+ * @param string $name     Form field name.
+ * @param mixed  $selected Selected season ID.
+ * @param string $blank    Label for the empty option.
+ */
+function stagekitwp_render_season_select( $name, $selected = '', $blank = '— All / No Season —' ) {
+    $seasons = get_posts( array( 'post_type' => 'season', 'numberposts' => -1, 'post_status' => 'publish', 'orderby' => 'title', 'order' => 'DESC' ) );
+    echo '<select name="' . esc_attr( $name ) . '">';
+    echo '<option value="">' . esc_html( $blank ) . '</option>';
+    foreach ( $seasons as $season ) {
+        echo '<option value="' . esc_attr( $season->ID ) . '" ' . selected( (int) $selected, $season->ID, false ) . '>' . esc_html( $season->post_title ) . '</option>';
+    }
+    echo '</select>';
+}
+
+/**
+ * Render a <select> of published sponsors (for featured sponsor fields).
+ */
+function stagekitwp_render_sponsor_select( $name, $selected = '', $blank = '— None —' ) {
+    $sponsors = get_posts( array( 'post_type' => 'sponsor', 'numberposts' => -1, 'post_status' => 'publish', 'orderby' => 'title', 'order' => 'ASC' ) );
+    echo '<select name="' . esc_attr( $name ) . '">';
+    echo '<option value="">' . esc_html( $blank ) . '</option>';
+    foreach ( $sponsors as $sponsor ) {
+        echo '<option value="' . esc_attr( $sponsor->ID ) . '" ' . selected( (int) $selected, $sponsor->ID, false ) . '>' . esc_html( $sponsor->post_title ) . '</option>';
+    }
+    echo '</select>';
+}
+
+/**
+ * Sanitize a posted ID of a given post type (returns '' if invalid).
+ */
+function stagekitwp_sanitize_post_id_of_type( $value, $post_type ) {
+    $id = absint( $value );
+    return ( $id && get_post_type( $id ) === $post_type ) ? $id : '';
+}
+
+/**
+ * Resolve a shortcode "season" attribute to a season post ID.
+ * Accepts an ID, a slug/title, "current" or "upcoming". Returns 0 when the
+ * attribute is empty, or -1 when a value was given but no season matches.
+ */
+function stagekitwp_resolve_season_attr( $value ) {
+    $value = trim( (string) $value );
+    if ( $value === '' ) {
+        return 0;
+    }
+    if ( ctype_digit( $value ) ) {
+        return get_post_type( (int) $value ) === 'season' ? (int) $value : -1;
+    }
+    $key = strtolower( $value );
+    if ( $key === 'next' ) {
+        $next = stagekitwp_get_next_season();
+        return $next ? (int) $next->ID : -1;
+    }
+    if ( $key === 'current' ) {
+        // Same date-range logic as [stagekitwp_season_shows which="current"].
+        $now = current_time( 'timestamp' );
+        foreach ( get_posts( array( 'post_type' => 'season', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' ) ) as $sid ) {
+            $start = get_post_meta( $sid, '_stagekitwp_season_start_date', true );
+            $end   = get_post_meta( $sid, '_stagekitwp_season_end_date', true );
+            if ( $start && $end && $now >= strtotime( $start ) && $now <= strtotime( $end ) + 86399 ) {
+                return (int) $sid;
+            }
+        }
+    }
+    if ( $key === 'current' || $key === 'upcoming' ) {
+        $found = get_posts( array(
+            'post_type' => 'season', 'numberposts' => 1, 'fields' => 'ids',
+            'meta_key' => '_stagekitwp_season_is_' . $key, 'meta_value' => '1',
+        ) );
+        return $found ? (int) $found[0] : -1;
+    }
+    $post = get_page_by_path( sanitize_title( $value ), OBJECT, 'season' );
+    if ( ! $post ) {
+        $by_title = get_posts( array(
+            'post_type' => 'season', 'title' => $value, 'numberposts' => 1,
+            'post_status' => 'publish', 'orderby' => 'ID', 'order' => 'ASC',
+        ) );
+        $post = $by_title ? $by_title[0] : null;
+    }
+    return $post ? (int) $post->ID : -1;
+}
+
+/**
+ * Build a meta_query clause filtering by the shared `_stagekitwp_season` meta.
+ * Returns an empty array when no filtering is requested. If the season cannot
+ * be resolved, the clause matches nothing.
+ */
+function stagekitwp_season_meta_query( $season_attr ) {
+    $season_id = stagekitwp_resolve_season_attr( $season_attr );
+    if ( $season_id === 0 ) {
+        return array();
+    }
+    return array(
+        'key'     => '_stagekitwp_season',
+        'value'   => $season_id > 0 ? (string) $season_id : '0',
+        'compare' => '=',
+    );
+}
+
+/**
+ * Per-performance sponsor map for a show: [ 'Y-m-d\TH:i' => sponsor_id ].
+ */
+function stagekitwp_get_performance_sponsors( $show_id ) {
+    $map = get_post_meta( $show_id, '_stagekitwp_show_performance_sponsors', true );
+    return is_array( $map ) ? $map : array();
+}
+
+/**
+ * Resolve the sponsor for a show, optionally for one performance.
+ * Fallback order: performance -> show featured sponsor -> season featured sponsor.
+ * Returns a published sponsor post ID, or 0.
+ */
+function stagekitwp_get_show_sponsor_id( $show_id, $datetime = '' ) {
+    $candidates = array();
+    if ( $datetime !== '' ) {
+        $map          = stagekitwp_get_performance_sponsors( $show_id );
+        $candidates[] = isset( $map[ $datetime ] ) ? $map[ $datetime ] : 0;
+    }
+    $candidates[] = get_post_meta( $show_id, '_stagekitwp_show_featured_sponsor', true );
+    $season_id    = (int) get_post_meta( $show_id, '_stagekitwp_show_season', true );
+    if ( $season_id ) {
+        $candidates[] = get_post_meta( $season_id, '_stagekitwp_season_featured_sponsor', true );
+    }
+    foreach ( $candidates as $candidate ) {
+        $id = absint( $candidate );
+        if ( $id && get_post_type( $id ) === 'sponsor' && get_post_status( $id ) === 'publish' ) {
+            return $id;
+        }
+    }
+    return 0;
+}
+
+/**
+ * HTML credit line for a sponsor (name linked to website when set).
+ */
+function stagekitwp_sponsor_credit_html( $sponsor_id, $label = 'Sponsored by', $show_banner = true ) {
+    if ( ! $sponsor_id ) {
+        return '';
+    }
+    $banner_html = '';
+    if ( $show_banner ) {
+        $banner_url = stagekitwp_get_image_url( get_post_meta( $sponsor_id, '_stagekitwp_banner', true ) );
+        if ( $banner_url ) {
+            $b_site = get_post_meta( $sponsor_id, '_stagekitwp_website', true );
+            $b_alt  = get_post_meta( $sponsor_id, '_stagekitwp_company', true ) ?: get_the_title( $sponsor_id );
+            $b_img  = '<img src="' . esc_url( $banner_url ) . '" alt="' . esc_attr( $b_alt ) . '" style="max-width:100%;height:auto;" loading="lazy">';
+            $banner_html = '<span class="stagekitwp-sponsor-credit-banner" style="display:block;margin-bottom:8px;">'
+                . ( $b_site ? '<a href="' . esc_url( $b_site ) . '" target="_blank" rel="noopener">' . $b_img . '</a>' : $b_img )
+                . '</span>';
+        }
+    }
+    $name = get_post_meta( $sponsor_id, '_stagekitwp_company', true );
+    if ( $name === '' ) {
+        $name = get_the_title( $sponsor_id );
+    }
+    $website = get_post_meta( $sponsor_id, '_stagekitwp_website', true );
+    $name_html = $website
+        ? '<a href="' . esc_url( $website ) . '" target="_blank" rel="noopener">' . esc_html( $name ) . '</a>'
+        : esc_html( $name );
+    return $banner_html . '<span class="stagekitwp-sponsor-credit">' . ( $label !== '' ? esc_html( $label ) . ' ' : '' ) . $name_html . '</span>';
+}
+
+/**
+ * Sponsors grouped by level (Diamond..Bronze) with all available elements:
+ * logo, banner, name, company, website. Filtered to a season when $season_id > 0.
+ */
+function stagekitwp_sponsors_by_level_html( $season_id = 0 ) {
+    $args = array(
+        'post_type'      => 'sponsor',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    );
+    if ( $season_id > 0 ) {
+        $args['meta_query'] = array( array( 'key' => '_stagekitwp_season', 'value' => (int) $season_id, 'compare' => '=' ) );
+    }
+    $sponsors = get_posts( $args );
+    if ( ! $sponsors ) {
+        return '';
+    }
+    $labels = stagekitwp_get_level_display_labels( 'sponsor' );
+    $groups = array();
+    foreach ( $sponsors as $s ) {
+        $lvl = get_post_meta( $s->ID, '_stagekitwp_level', true );
+        $groups[ isset( $labels[ $lvl ] ) ? $lvl : '' ][] = $s;
+    }
+    $order = array_keys( $labels );
+    $order[] = '';
+    $out = '';
+    foreach ( $order as $lvl ) {
+        if ( empty( $groups[ $lvl ] ) ) {
+            continue;
+        }
+        $out .= '<div class="stagekitwp-lp-sponsor-level stagekitwp-lp-sponsor-level-' . esc_attr( strtolower( $lvl ?: 'other' ) ) . '" style="margin-bottom:20px;">';
+        if ( $lvl !== '' ) {
+            $out .= '<h4 class="stagekitwp-lp-sponsor-level-title">' . esc_html( $labels[ $lvl ] ) . '</h4>';
+        }
+        $out .= '<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;">';
+        foreach ( $groups[ $lvl ] as $s ) {
+            $company = get_post_meta( $s->ID, '_stagekitwp_company', true );
+            $name    = get_post_meta( $s->ID, '_stagekitwp_name', true );
+            $site    = get_post_meta( $s->ID, '_stagekitwp_website', true );
+            $logo    = stagekitwp_get_image_url( get_post_meta( $s->ID, '_stagekitwp_logo', true ) );
+            $banner  = stagekitwp_get_image_url( get_post_meta( $s->ID, '_stagekitwp_banner', true ) );
+            $title   = $company ?: ( $name ?: $s->post_title );
+            $wrap    = function ( $inner ) use ( $site ) {
+                return $site ? '<a href="' . esc_url( $site ) . '" target="_blank" rel="noopener">' . $inner . '</a>' : $inner;
+            };
+            $out .= '<div class="stagekitwp-lp-sponsor" style="max-width:100%;">';
+            if ( $banner ) {
+                $out .= '<div class="stagekitwp-lp-sponsor-banner">' . $wrap( '<img src="' . esc_url( $banner ) . '" alt="' . esc_attr( $title ) . '" style="max-width:100%;height:auto;" loading="lazy">' ) . '</div>';
+            }
+            if ( $logo ) {
+                $out .= '<div class="stagekitwp-lp-sponsor-logo">' . $wrap( '<img src="' . esc_url( $logo ) . '" alt="' . esc_attr( $title ) . '" style="max-width:200px;height:auto;" loading="lazy">' ) . '</div>';
+            }
+            $out .= '<div class="stagekitwp-lp-sponsor-company"><strong>' . $wrap( esc_html( $title ) ) . '</strong></div>';
+            if ( $name && $name !== $title ) {
+                $out .= '<div class="stagekitwp-lp-sponsor-name">' . esc_html( $name ) . '</div>';
+            }
+            if ( $site ) {
+                $out .= '<div class="stagekitwp-lp-sponsor-website"><a href="' . esc_url( $site ) . '" target="_blank" rel="noopener">' . esc_html( preg_replace( '#^https?://(www\.)?#', '', untrailingslashit( $site ) ) ) . '</a></div>';
+            }
+            $out .= '</div>';
+        }
+        $out .= '</div></div>';
+    }
+    return $out;
+}
+
+/**
+ * List of performances that have their own sponsor, as HTML.
+ */
+function stagekitwp_performance_sponsors_html( $show_id ) {
+    $map = stagekitwp_get_performance_sponsors( $show_id );
+    if ( ! $map ) {
+        return '';
+    }
+    ksort( $map );
+    $items = '';
+    foreach ( $map as $datetime => $sponsor_id ) {
+        $ts = strtotime( $datetime );
+        if ( ! $ts || get_post_type( $sponsor_id ) !== 'sponsor' || get_post_status( $sponsor_id ) !== 'publish' ) {
+            continue;
+        }
+        $items .= '<li>' . esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $ts, wp_timezone() ) )
+                . ' &ndash; ' . stagekitwp_sponsor_credit_html( (int) $sponsor_id, 'Sponsored by', false ) . '</li>';
+    }
+    return $items ? '<ul class="stagekitwp-performance-sponsors">' . $items . '</ul>' : '';
+}
+
+/**
+ * [stagekitwp_sponsor_credit show_id="" season="" label="Sponsored by" performances="false"]
+ * Shows the featured sponsor for a show (falls back to the season's), or for a
+ * season when `season` is given. Set performances="true" to list per-performance sponsors.
+ */
+function stagekitwp_sponsor_credit_shortcode( $atts ) {
+    $atts = shortcode_atts( array(
+        'show_id'      => '',
+        'season'       => '',
+        'label'        => 'Sponsored by',
+        'performances' => 'false',
+    ), $atts, 'stagekitwp_sponsor_credit' );
+
+    $html = '';
+    if ( $atts['season'] !== '' ) {
+        $season_id = stagekitwp_resolve_season_attr( $atts['season'] );
+        $sid       = $season_id > 0 ? absint( get_post_meta( $season_id, '_stagekitwp_season_featured_sponsor', true ) ) : 0;
+        if ( $sid && get_post_status( $sid ) === 'publish' ) {
+            $html = stagekitwp_sponsor_credit_html( $sid, $atts['label'] );
+        }
+    } else {
+        $show_id = $atts['show_id'] !== '' ? absint( $atts['show_id'] ) : (int) get_the_ID();
+        if ( $show_id && get_post_type( $show_id ) === 'show' ) {
+            $html = stagekitwp_sponsor_credit_html( stagekitwp_get_show_sponsor_id( $show_id ), $atts['label'] );
+            if ( in_array( strtolower( $atts['performances'] ), array( '1', 'true', 'yes' ), true ) ) {
+                $html .= stagekitwp_performance_sponsors_html( $show_id );
+            }
+        }
+    }
+    return $html ? '<div class="stagekitwp-sponsor-credit-wrap">' . $html . '</div>' : '';
+}
+add_shortcode( 'stagekitwp_sponsor_credit', 'stagekitwp_sponsor_credit_shortcode' );
+
+/* ---------------------------------------------------------------------
+ * Audition slots: each has a start (Y-m-d\TH:i), a duration in minutes
+ * and an optional venue. Stored in _stagekitwp_show_audition_slots.
+ * ------------------------------------------------------------------ */
+
+define( 'STAGEKITWP_AUDITION_DEFAULT_MINUTES', 120 );
+
+/**
+ * Saved audition slots for a show, sorted by start. Legacy single-date
+ * auditions (no time) are not returned here.
+ *
+ * @return array[] Each: array( 'start' => string, 'duration' => int, 'venue' => int ).
+ */
+function stagekitwp_get_audition_slots( $show_id ) {
+    $slots = get_post_meta( $show_id, '_stagekitwp_show_audition_slots', true );
+    if ( ! is_array( $slots ) ) {
+        return array();
+    }
+    $clean = array();
+    foreach ( $slots as $slot ) {
+        if ( ! is_array( $slot ) || empty( $slot['start'] ) || ! is_string( $slot['start'] ) ) {
+            continue;
+        }
+        $clean[] = array(
+            'start'    => $slot['start'],
+            'duration' => max( 1, (int) ( $slot['duration'] ?? STAGEKITWP_AUDITION_DEFAULT_MINUTES ) ),
+            'venue'    => absint( $slot['venue'] ?? 0 ),
+        );
+    }
+    usort( $clean, function ( $a, $b ) {
+        return strcmp( $a['start'], $b['start'] );
+    } );
+    return $clean;
+}
+
+/**
+ * Validate parallel posted arrays into a list of slots. Invalid or duplicate
+ * start values are dropped.
+ */
+function stagekitwp_sanitize_audition_slots( $starts, $durations, $venues ) {
+    $starts    = is_array( $starts ) ? array_values( $starts ) : array();
+    $durations = is_array( $durations ) ? array_values( $durations ) : array();
+    $venues    = is_array( $venues ) ? array_values( $venues ) : array();
+    $slots     = array();
+    foreach ( $starts as $i => $start ) {
+        if ( ! is_string( $start ) ) {
+            continue;
+        }
+        $start = sanitize_text_field( $start );
+        if ( ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/', $start, $m )
+            || ! checkdate( (int) $m[2], (int) $m[3], (int) $m[1] )
+            || (int) $m[4] > 23 || (int) $m[5] > 59 || isset( $slots[ $start ] ) ) {
+            continue;
+        }
+        $minutes = isset( $durations[ $i ] ) && is_scalar( $durations[ $i ] ) ? absint( $durations[ $i ] ) : 0;
+        if ( $minutes < 1 || $minutes > 1440 ) {
+            $minutes = STAGEKITWP_AUDITION_DEFAULT_MINUTES;
+        }
+        $venue = isset( $venues[ $i ] ) && is_scalar( $venues[ $i ] ) ? stagekitwp_sanitize_post_id_of_type( $venues[ $i ], 'venue' ) : '';
+        $slots[ $start ] = array(
+            'start'    => $start,
+            'duration' => $minutes,
+            'venue'    => (int) $venue,
+        );
+    }
+    ksort( $slots );
+    return array_values( $slots );
+}
+
+/**
+ * Save slots and keep the legacy single audition date (used by the
+ * [stagekitwp_auditions] shortcode) in step: the next upcoming slot's date,
+ * or the last slot's date when all are past. With no slots the legacy date
+ * is left as entered.
+ */
+function stagekitwp_save_audition_slots( $show_id, $slots ) {
+    if ( ! $slots ) {
+        delete_post_meta( $show_id, '_stagekitwp_show_audition_slots' );
+        return;
+    }
+    update_post_meta( $show_id, '_stagekitwp_show_audition_slots', $slots );
+    $now    = current_time( 'Y-m-d\TH:i' );
+    $chosen = end( $slots );
+    foreach ( $slots as $slot ) {
+        if ( $slot['start'] >= $now ) {
+            $chosen = $slot;
+            break;
+        }
+    }
+    update_post_meta( $show_id, '_stagekitwp_show_audition_date', substr( $chosen['start'], 0, 10 ) );
+}
+
+/**
+ * Markup for one audition slot row. $names maps start/duration/venue to input names.
+ */
+function stagekitwp_audition_slot_row_html( $names, $slot = array(), $row_class = 'stagekitwp-audition-slot-row', $remove_class = 'stagekitwp-remove-audition-slot' ) {
+    $slot   = wp_parse_args( $slot, array( 'start' => '', 'duration' => STAGEKITWP_AUDITION_DEFAULT_MINUTES, 'venue' => 0 ) );
+    $venues = get_posts( array( 'post_type' => 'venue', 'numberposts' => -1, 'post_status' => 'publish', 'orderby' => 'title', 'order' => 'ASC' ) );
+    $html   = '<p class="' . esc_attr( $row_class ) . '">';
+    $html  .= '<input type="datetime-local" name="' . esc_attr( $names['start'] ) . '" value="' . esc_attr( $slot['start'] ) . '" /> ';
+    $html  .= '<label>Duration (min) <input type="number" min="1" max="1440" step="5" style="width:80px;" name="' . esc_attr( $names['duration'] ) . '" value="' . esc_attr( (string) $slot['duration'] ) . '" /></label> ';
+    $html  .= '<select name="' . esc_attr( $names['venue'] ) . '"><option value="">— Show venue —</option>';
+    foreach ( $venues as $venue ) {
+        $label = get_post_meta( $venue->ID, '_stagekitwp_venue_name', true ) ?: $venue->post_title;
+        $html .= '<option value="' . esc_attr( $venue->ID ) . '" ' . selected( (int) $slot['venue'], $venue->ID, false ) . '>' . esc_html( $label ) . '</option>';
+    }
+    $html .= '</select> <button type="button" class="button ' . esc_attr( $remove_class ) . '">Remove</button></p>';
+    return $html;
+}

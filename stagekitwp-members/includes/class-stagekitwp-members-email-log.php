@@ -22,7 +22,7 @@ class STAGEKITWP_MEMBERS_Email_Log {
     /**
      * Log emails
      */
-    public static function log($to, $subject, $message, $status) {
+    public static function log($to, $subject, $message, $status, $group_id = '') {
 
         global $wpdb;
 
@@ -33,9 +33,26 @@ class STAGEKITWP_MEMBERS_Email_Log {
                 'subject'    => sanitize_text_field($subject),
                 'message'    => wp_kses_post($message),
                 'status'     => sanitize_text_field($status),
+                'group_id'   => sanitize_text_field($group_id),
                 'created_at' => current_time('mysql')
             ]
         );
+    }
+
+    public static function group_counts($group_id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'stagekitwp_members_email_log';
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT status, COUNT(*) AS total FROM {$table} WHERE group_id = %s GROUP BY status",
+            sanitize_text_field($group_id)
+        ));
+        $counts = ['success' => 0, 'failed' => 0];
+        foreach ((array) $rows as $row) {
+            if (isset($counts[$row->status])) {
+                $counts[$row->status] = (int) $row->total;
+            }
+        }
+        return $counts;
     }
 
     /**
@@ -75,8 +92,33 @@ class STAGEKITWP_MEMBERS_Email_Log {
             <?php return; endif; ?>
 
             <?php
-            $logs = $wpdb->get_results("SELECT * FROM {$table} ORDER BY created_at DESC LIMIT 100");
+            $group_id = isset($_GET['stagekitwp_members_group']) ? sanitize_text_field(wp_unslash($_GET['stagekitwp_members_group'])) : '';
+            if ($group_id !== '') {
+                $logs = $wpdb->get_results($wpdb->prepare(
+                    "SELECT * FROM {$table} WHERE group_id = %s ORDER BY created_at DESC LIMIT 500",
+                    $group_id
+                ));
+            } else {
+                $logs = $wpdb->get_results("SELECT * FROM {$table} ORDER BY created_at DESC LIMIT 100");
+            }
+            $groups = STAGEKITWP_MEMBERS_Campaigns::get_all_groups();
             ?>
+
+            <form method="get" style="margin:1em 0">
+                <input type="hidden" name="page" value="stagekitwp-ma-admin">
+                <input type="hidden" name="stagekitwp_members_tab" value="email_logs">
+                <label>Recipient group
+                    <select name="stagekitwp_members_group">
+                        <option value="">All email history</option>
+                        <?php foreach ($groups as $group) : ?>
+                            <option value="<?php echo esc_attr($group['id']); ?>" <?php selected($group_id, $group['id']); ?>>
+                                <?php echo esc_html($group['name'] . (!empty($group['deleted_at']) ? ' (archived)' : '')); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <button class="button">Filter history</button>
+            </form>
 
             <table class="widefat striped">
                 <thead>
@@ -85,6 +127,7 @@ class STAGEKITWP_MEMBERS_Email_Log {
                         <th>To</th>
                         <th>Subject</th>
                         <th>Status</th>
+                        <th>Recipient group</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -102,10 +145,12 @@ class STAGEKITWP_MEMBERS_Email_Log {
                                 <span style="color:red;">❌ Failed</span>
                             <?php endif; ?>
                         </td>
+                        <?php $log_group = $log->group_id ? STAGEKITWP_MEMBERS_Campaigns::get_group_history($log->group_id) : null; ?>
+                        <td><?php echo esc_html($log_group ? $log_group['name'] : ($log->group_id ? 'Unknown group' : 'Individual / system')); ?></td>
                     </tr>
 
                     <tr class="stagekitwp-ma-log-detail" id="log-<?php echo esc_attr($log->id); ?>" style="display:none;">
-                        <td colspan="4" style="background:#f9f9f9;">
+                        <td colspan="5" style="background:#f9f9f9;">
                             <strong>Message:</strong>
                             <div style="margin-top:10px; white-space:pre-wrap;">
                                 <?php echo esc_html($log->message); ?>

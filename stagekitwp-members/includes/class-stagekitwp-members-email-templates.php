@@ -13,11 +13,27 @@ class STAGEKITWP_MEMBERS_Email_Templates {
     public static function register_cpt() {
 
         register_post_type('stagekitwp_email', [
-            'label' => 'Email Templates',
-            'public' => false,
-            'show_ui' => true,
-            'show_in_menu' => false,
-            'supports' => ['title', 'editor'],
+            'labels' => [
+                'name'          => 'Email Templates',
+                'singular_name' => 'Email Template',
+                'add_new_item'  => 'Add Email Template',
+                'edit_item'     => 'Edit Email Template',
+                'menu_name'     => 'Email Templates',
+            ],
+            'public'              => false,
+            'show_ui'             => true,
+            'show_in_menu'        => 'stagekitwp',
+            'menu_icon'           => 'dashicons-email-alt',
+            'exclude_from_search' => true,
+            'publicly_queryable'  => false,
+            'has_archive'         => false,
+            'supports'            => ['title', 'editor'],
+            // Dedicated capability type so Executives (granted via
+            // STAGEKITWP_MEMBERS_Roles::email_template_caps()) can manage
+            // templates in wp-admin without needing the generic
+            // edit_posts/delete_posts caps (which only admins/editors have).
+            'capability_type'     => ['stagekitwp_email', 'stagekitwp_emails'],
+            'map_meta_cap'        => true,
         ]);
     }
 

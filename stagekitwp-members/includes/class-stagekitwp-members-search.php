@@ -16,64 +16,114 @@ class STAGEKITWP_MEMBERS_Search {
             return '<p>Access denied</p>';
         }
 
+        // Save or remove a reusable recipient group.
+        if (
+            isset($_POST['stagekitwp_members_save_group']) &&
+            isset($_POST['stagekitwp_members_group_nonce']) &&
+            wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['stagekitwp_members_group_nonce'])), 'stagekitwp_members_save_group') &&
+            current_user_can(STAGEKITWP_MEMBERS_Roles::CAP_SEND_EMAIL)
+        ) {
+            $name = isset($_POST['stagekitwp_members_group_name'])
+                ? sanitize_text_field(wp_unslash($_POST['stagekitwp_members_group_name']))
+                : '';
+            if ($name !== '') {
+                STAGEKITWP_MEMBERS_Campaigns::save_group($name, STAGEKITWP_MEMBERS_Campaigns::get_filters($_POST));
+                echo '<div class="notice notice-success"><p>Recipient group saved.</p></div>';
+            } else {
+                echo '<div class="notice notice-error"><p>Enter a name for this recipient group.</p></div>';
+            }
+        }
+
+        if (
+            isset($_POST['stagekitwp_members_delete_group']) &&
+            isset($_POST['stagekitwp_members_group_nonce']) &&
+            wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['stagekitwp_members_group_nonce'])), 'stagekitwp_members_save_group') &&
+            current_user_can(STAGEKITWP_MEMBERS_Roles::CAP_SEND_EMAIL)
+        ) {
+            $group_id = sanitize_text_field(wp_unslash($_POST['stagekitwp_members_delete_group']));
+            if (STAGEKITWP_MEMBERS_Campaigns::delete_group($group_id)) {
+                echo '<div class="notice notice-success"><p>Recipient group deleted. Existing email history is retained.</p></div>';
+            }
+        }
+
         // ==========================
         // BULK EMAIL HANDLER
         // ==========================
         if (
             isset($_POST['stagekitwp_members_bulk_email']) &&
             isset($_POST['stagekitwp_members_bulk_email_nonce']) &&
-            wp_verify_nonce($_POST['stagekitwp_members_bulk_email_nonce'], 'stagekitwp_members_bulk_email') &&
+            wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['stagekitwp_members_bulk_email_nonce'])), 'stagekitwp_members_bulk_email') &&
             current_user_can(STAGEKITWP_MEMBERS_Roles::CAP_SEND_EMAIL)
         ) {
-            $subject = sanitize_text_field($_POST['stagekitwp_members_bulk_subject']);
-            $message = wp_kses_post($_POST['stagekitwp_members_bulk_message']);
+            $subject = isset($_POST['stagekitwp_members_bulk_subject'])
+                ? sanitize_text_field(wp_unslash($_POST['stagekitwp_members_bulk_subject']))
+                : '';
+            $message = isset($_POST['stagekitwp_members_bulk_message'])
+                ? wp_kses_post(wp_unslash($_POST['stagekitwp_members_bulk_message']))
+                : '';
 
-            // "Important" bypasses the announcement opt-out. Only Executives/
-            // admins may override preferences.
+            // Only Executives/admins may override announcement preferences.
             $important = !empty($_POST['stagekitwp_members_bulk_important'])
                 && current_user_can(STAGEKITWP_MEMBERS_Roles::CAP_MANAGE_MEMBERS);
 
-            // Optional "Schedule Send" (datetime-local). When it is in the
-            // future, queue the emails instead of sending immediately.
             $schedule_raw = isset($_POST['stagekitwp_members_schedule_time'])
                 ? sanitize_text_field(wp_unslash($_POST['stagekitwp_members_schedule_time']))
                 : '';
             $schedule_ts = $schedule_raw ? strtotime($schedule_raw) : 0;
-            $is_scheduled = ($schedule_ts && $schedule_ts > time());
-
-            $users = self::get_filtered_users();
-            $count   = 0;
+            $send_time = $schedule_ts > time() ? $schedule_ts : time();
+            $group_id = isset($_POST['stagekitwp_members_email_group'])
+                ? sanitize_text_field(wp_unslash($_POST['stagekitwp_members_email_group']))
+                : '';
+            $group = $group_id ? STAGEKITWP_MEMBERS_Campaigns::get_group($group_id) : null;
+            $filters = $group
+                ? STAGEKITWP_MEMBERS_Campaigns::normalize_filters($group['filters'])
+                : STAGEKITWP_MEMBERS_Campaigns::get_filters($_POST);
+            $users = STAGEKITWP_MEMBERS_Campaigns::query_users($filters);
+            $jobs = [];
             $skipped = 0;
+            $context = STAGEKITWP_MEMBERS_Campaigns::campaign_context(
+                isset($_POST['stagekitwp_members_campaign_event']) ? absint($_POST['stagekitwp_members_campaign_event']) : 0,
+                isset($_POST['stagekitwp_members_campaign_position']) ? absint($_POST['stagekitwp_members_campaign_position']) : 0
+            );
+            $context['bulk_campaign'] = true;
 
             foreach ($users as $user) {
-
-                // Respect each member's announcement preference.
                 if (!STAGEKITWP_MEMBERS_Notifications::should_notify(
-                        $user->ID,
-                        STAGEKITWP_MEMBERS_Notifications::TYPE_ANNOUNCEMENT,
-                        $important
-                    )) {
+                    $user->ID,
+                    STAGEKITWP_MEMBERS_Notifications::TYPE_ANNOUNCEMENT,
+                    $important
+                )) {
                     $skipped++;
                     continue;
                 }
-
-                if ($is_scheduled) {
-                    STAGEKITWP_MEMBERS_Email_Queue::add_to_queue($user->user_email, $subject, $message, $schedule_ts);
-                } else {
-                    STAGEKITWP_MEMBERS_Health::send_email($user->user_email, $subject, $message);
-                }
-                $count++;
+                $jobs[] = [
+                    'email' => $user->user_email,
+                    'subject' => $subject,
+                    'message' => $message,
+                    'send_time' => $send_time,
+                    'campaign_id' => $group ? $group_id : '',
+                    'context' => $context,
+                ];
             }
 
-            $suffix = $skipped ? ' (' . intval($skipped) . ' opted out)' : '';
-
-            if ($is_scheduled) {
-                echo '<div class="notice notice-success"><p>' . intval($count) .
-                    ' emails scheduled for ' . esc_html(date_i18n('M j, Y g:i a', $schedule_ts)) .
-                    $suffix . '.</p></div>';
+            if (!$subject || !$message) {
+                echo '<div class="notice notice-error"><p>Enter both a subject and an email message.</p></div>';
+            } elseif (!$jobs) {
+                echo '<div class="notice notice-error"><p>No eligible recipients were found. Opted-out members are excluded unless an authorized sender marked this as important.</p></div>';
             } else {
-                echo '<div class="notice notice-success"><p>Bulk email sent to ' . intval($count) .
-                    ' members' . $suffix . '.</p></div>';
+                $queued = STAGEKITWP_MEMBERS_Email_Queue::add_batch($jobs);
+                if (is_wp_error($queued)) {
+                    echo '<div class="notice notice-error"><p>' . esc_html($queued->get_error_message()) . '</p></div>';
+                } else {
+                    if ($send_time <= time()) {
+                        STAGEKITWP_MEMBERS_Email_Queue::process_queue();
+                    }
+                    $when = $send_time > time()
+                        ? 'scheduled for ' . date_i18n('M j, Y g:i a', $send_time)
+                        : 'queued for batched delivery';
+                    echo '<div class="notice notice-success"><p>' . count($queued) . ' emails ' . esc_html($when) .
+                        ($skipped ? ' (' . intval($skipped) . ' opted out)' : '') . '.</p></div>';
+                }
             }
         }
 
@@ -134,14 +184,15 @@ class STAGEKITWP_MEMBERS_Search {
         <h2>Producer Dashboard</h2>
 
         <!-- =========================== SEARCH =========================== -->
+        <?php $filters = STAGEKITWP_MEMBERS_Campaigns::get_filters($_GET); ?>
         <form method="get" class="stagekitwp-ma-search-form">
             <input type="text" name="stagekitwp_name" placeholder="Search by name or email"
-                   value="<?php echo esc_attr($_GET['stagekitwp_name'] ?? ''); ?>">
+                   value="<?php echo esc_attr($filters['name']); ?>">
 
             <select name="stagekitwp_interest">
                 <option value="0">All interests</option>
                 <?php
-                $selected_interest = (int) ($_GET['stagekitwp_interest'] ?? 0);
+                $selected_interest = (int) $filters['interest'];
                 $interest_terms = get_terms(['taxonomy' => 'stagekitwp_interest', 'hide_empty' => false]);
                 if (!is_wp_error($interest_terms)) {
                     foreach ($interest_terms as $term) {
@@ -156,29 +207,89 @@ class STAGEKITWP_MEMBERS_Search {
                 ?>
             </select>
 
+            <label>Role
+                <select name="stagekitwp_role">
+                    <option value="">All roles</option>
+                    <?php foreach (wp_roles()->roles as $role_slug => $role_data) : ?>
+                        <option value="<?php echo esc_attr($role_slug); ?>" <?php selected($filters['role'], $role_slug); ?>>
+                            <?php echo esc_html(translate_user_role($role_data['name'])); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+
+            <label>Availability date
+                <input type="date" name="stagekitwp_availability_date" value="<?php echo esc_attr($filters['availability_date']); ?>">
+            </label>
+            <label>Status
+                <select name="stagekitwp_availability_status">
+                    <?php foreach (['' => 'Any availability', 'available' => 'Available', 'tentative' => 'Tentative', 'unavailable' => 'Unavailable'] as $value => $label) : ?>
+                        <option value="<?php echo esc_attr($value); ?>" <?php selected($filters['availability_status'], $value); ?>><?php echo esc_html($label); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+
+            <?php self::render_event_filter('RSVP', 'stagekitwp_rsvp_event_id', 'stagekitwp_rsvp_status', $filters['rsvp_event_id'], $filters['rsvp_status'], [
+                '' => 'Any RSVP status', 'going' => 'Going', 'maybe' => 'Maybe', 'declined' => 'Declined', 'attended' => 'Attended',
+            ]); ?>
+            <?php self::render_event_filter('Volunteer', 'stagekitwp_volunteer_event_id', 'stagekitwp_volunteer_status', $filters['volunteer_event_id'], $filters['volunteer_status'], [
+                '' => 'Any volunteer status', 'confirmed' => 'Confirmed', 'waitlist' => 'Waitlist', 'cancelled' => 'Cancelled',
+            ]); ?>
+
+            <label>Saved group preview
+                <select name="stagekitwp_members_email_group">
+                    <option value="">Current filters</option>
+                    <?php foreach (STAGEKITWP_MEMBERS_Campaigns::get_groups() as $saved_group) : ?>
+                        <option value="<?php echo esc_attr($saved_group['id']); ?>" <?php selected(isset($_GET['stagekitwp_members_email_group']) ? sanitize_text_field(wp_unslash($_GET['stagekitwp_members_email_group'])) : '', $saved_group['id']); ?>>
+                            <?php echo esc_html($saved_group['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+
             <button type="submit">Search</button>
-            <?php if (!empty($_GET['stagekitwp_name']) || !empty($_GET['stagekitwp_interest'])): ?>
+            <?php if (array_filter($filters)): ?>
                 <a href="<?php echo esc_url(strtok($_SERVER['REQUEST_URI'], '?')); ?>">Reset</a>
             <?php endif; ?>
         </form>
 
+        <?php if (current_user_can(STAGEKITWP_MEMBERS_Roles::CAP_SEND_EMAIL)) : ?>
+            <form method="post" class="stagekitwp-members-save-group">
+                <?php wp_nonce_field('stagekitwp_members_save_group', 'stagekitwp_members_group_nonce'); ?>
+                <?php self::render_hidden_filters($filters); ?>
+                <label>Save these filters as a group
+                    <input type="text" name="stagekitwp_members_group_name" maxlength="100" required>
+                </label>
+                <button class="button" name="stagekitwp_members_save_group" value="1">Save recipient group</button>
+            </form>
+        <?php endif; ?>
+
         <?php
         $result_users = self::get_filtered_users();
-        echo '<p class="stagekitwp-ma-result-count">' . count($result_users) . ' member(s) found.</p>';
+        $eligible_count = 0;
+        foreach ($result_users as $preview_user) {
+            if (STAGEKITWP_MEMBERS_Notifications::should_notify($preview_user->ID, STAGEKITWP_MEMBERS_Notifications::TYPE_ANNOUNCEMENT)) {
+                $eligible_count++;
+            }
+        }
+        echo '<p class="stagekitwp-ma-result-count">' . count($result_users) . ' member(s) matched; ' .
+            $eligible_count . ' eligible, ' . (count($result_users) - $eligible_count) . ' opted out. Preview capped at ' .
+            STAGEKITWP_MEMBERS_Campaigns::MAX_RECIPIENTS . ' recipients.</p>';
         ?>
 
         <hr>
 		<?php
-			if (isset($_POST['stagekitwp_members_test_email'])) {
-			
+			if (
+                isset($_POST['stagekitwp_members_test_email'], $_POST['stagekitwp_members_bulk_email_nonce']) &&
+                wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['stagekitwp_members_bulk_email_nonce'])), 'stagekitwp_members_bulk_email') &&
+                current_user_can(STAGEKITWP_MEMBERS_Roles::CAP_SEND_EMAIL)
+            ) {
 			    $current_user = wp_get_current_user();
-			
 			    STAGEKITWP_MEMBERS_Health::send_email(
 			        $current_user->user_email,
-			        sanitize_text_field($_POST['stagekitwp_members_bulk_subject']),
-			        wp_kses_post($_POST['stagekitwp_members_bulk_message'])
+			        isset($_POST['stagekitwp_members_bulk_subject']) ? sanitize_text_field(wp_unslash($_POST['stagekitwp_members_bulk_subject'])) : '',
+			        isset($_POST['stagekitwp_members_bulk_message']) ? wp_kses_post(wp_unslash($_POST['stagekitwp_members_bulk_message'])) : ''
 			    );
-			
 			    echo '<div class="notice notice-success"><p>Test email sent to yourself</p></div>';
 			}
 		?>
@@ -188,6 +299,50 @@ class STAGEKITWP_MEMBERS_Search {
         <form method="post">
 
             <?php wp_nonce_field('stagekitwp_members_bulk_email', 'stagekitwp_members_bulk_email_nonce'); ?>
+            <?php self::render_hidden_filters($filters); ?>
+
+            <p>
+                <label>Email recipient group
+                    <select name="stagekitwp_members_email_group">
+                        <option value="">Use the current search filters</option>
+                        <?php foreach (STAGEKITWP_MEMBERS_Campaigns::get_groups() as $saved_group) : ?>
+                            <option value="<?php echo esc_attr($saved_group['id']); ?>">
+                                <?php echo esc_html($saved_group['name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+            </p>
+
+            <p><strong>Optional merge context</strong></p>
+            <p>
+                <label>Event
+                    <select name="stagekitwp_members_campaign_event">
+                        <option value="0">No event</option>
+                        <?php foreach (STAGEKITWP_MEMBERS_Campaigns::event_options() as $campaign_event) : ?>
+                            <?php
+                            $campaign_event_date = (string) get_post_meta($campaign_event->ID, '_stagekitwp_members_event_date', true);
+                            $campaign_event_date = $campaign_event_date ? date_i18n(get_option('date_format'), strtotime($campaign_event_date)) : '';
+                            ?>
+                            <option value="<?php echo (int) $campaign_event->ID; ?>" data-date="<?php echo esc_attr($campaign_event_date); ?>"><?php echo esc_html($campaign_event->post_title); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>Volunteer position
+                    <select name="stagekitwp_members_campaign_position">
+                        <option value="0">No position</option>
+                        <?php foreach (STAGEKITWP_MEMBERS_Campaigns::position_options() as $position) : ?>
+                            <option value="<?php echo (int) $position->id; ?>" data-event="<?php echo (int) $position->event_id; ?>">
+                                <?php echo esc_html($position->title); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+            </p>
+
+            <?php if (current_user_can(STAGEKITWP_MEMBERS_Roles::CAP_SEND_EMAIL)) : ?>
+                <p>Each campaign is capped at <?php echo (int) STAGEKITWP_MEMBERS_Campaigns::MAX_RECIPIENTS; ?> recipients and delivered by the queue in batches of <?php echo (int) STAGEKITWP_MEMBERS_Email_Queue::BATCH_SIZE; ?> per minute.</p>
+            <?php endif; ?>
 
             <select id="stagekitwp-ma-template-select">
                 <option value="">Select Template</option>
@@ -241,6 +396,8 @@ class STAGEKITWP_MEMBERS_Search {
             </p>
 
         </form>
+
+        <?php self::render_saved_groups(); ?>
 
         <hr>
 
@@ -354,18 +511,44 @@ class STAGEKITWP_MEMBERS_Search {
 			    return content;
 			}
 			
-			function replaceVars(message, user = {}) {
+            function escapeHTML(value) {
+                return String(value).replace(/[&<>"']/g, char => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+                })[char]);
+            }
+
+			function replaceVars(message, user = {}, context = {}, escapeValues = true) {
+                const value = input => escapeValues ? escapeHTML(input) : String(input);
 			    return message
-			        .replaceAll('{name}', user?.name || 'John Doe')
-			        .replaceAll('{email}', user?.email || 'user@example.com')
-			        .replaceAll('{interests}', user?.interests || '')
-			        .replaceAll('{profile_link}', user?.profile || '#')
-			        .replaceAll('{site_name}', '<?php echo esc_js(get_bloginfo("name")); ?>');
+			        .replaceAll('{name}', value(user?.name || 'John Doe'))
+			        .replaceAll('{email}', value(user?.email || 'user@example.com'))
+			        .replaceAll('{interests}', value(user?.interests || ''))
+			        .replaceAll('{profile_link}', value(user?.profile || '#'))
+			        .replaceAll('{site_name}', value('<?php echo esc_js(get_bloginfo("name")); ?>'))
+                    .replaceAll('{event}', value(context?.event || ''))
+                    .replaceAll('{position}', value(context?.position || ''))
+                    .replaceAll('{date}', value(context?.date || ''));
 			}
 
 
             // BULK TEMPLATE
             const bulkSelect = document.getElementById('stagekitwp-ma-template-select');
+            const campaignEventSelect = document.querySelector('[name="stagekitwp_members_campaign_event"]');
+            const campaignPositionSelect = document.querySelector('[name="stagekitwp_members_campaign_position"]');
+            const filterCampaignPositions = function() {
+                if (!campaignEventSelect || !campaignPositionSelect) return;
+                Array.from(campaignPositionSelect.options).forEach(option => {
+                    if (option.value !== '0') {
+                        option.hidden = option.dataset.event !== campaignEventSelect.value;
+                    }
+                });
+                const selected = campaignPositionSelect.selectedOptions[0];
+                if (selected && selected.value !== '0' && selected.dataset.event !== campaignEventSelect.value) {
+                    campaignPositionSelect.value = '0';
+                }
+            };
+            campaignEventSelect?.addEventListener('change', filterCampaignPositions);
+            filterCampaignPositions();
             if (bulkSelect) {
                 bulkSelect.addEventListener('change', function() {
                     const opt = this.selectedOptions[0];
@@ -377,14 +560,34 @@ class STAGEKITWP_MEMBERS_Search {
             // BULK PREVIEW
             document.getElementById('stagekitwp-ma-preview-email')?.addEventListener('click', function() {
 
-                const subject = document.querySelector('[name="stagekitwp_members_bulk_subject"]').value;
+                let subject = document.querySelector('[name="stagekitwp_members_bulk_subject"]').value;
                 let content = tinymce.get('stagekitwp_members_bulk_message')?.getContent() || '';
 				content = decodeContent(content);
-                content = replaceVars(content);
+                const eventSelect = document.querySelector('[name="stagekitwp_members_campaign_event"]');
+                const positionSelect = document.querySelector('[name="stagekitwp_members_campaign_position"]');
+                const eventOption = eventSelect?.selectedOptions[0];
+                const positionOption = positionSelect?.selectedOptions[0];
+                const context = {
+                    event: eventOption?.value !== '0' ? eventOption?.textContent || '' : '',
+                    position: positionOption?.value !== '0' ? positionOption?.textContent || '' : '',
+                    date: eventOption?.dataset.date || ''
+                };
+                const options = positionSelect ? Array.from(positionSelect.options) : [];
+                options.forEach(option => {
+                    if (option.value !== '0') {
+                        option.hidden = option.dataset.event !== eventOption?.value;
+                    }
+                });
+                if (positionOption?.value !== '0' && positionOption?.dataset.event !== eventOption?.value) {
+                    positionSelect.value = '0';
+                    context.position = '';
+                }
+                subject = replaceVars(subject, {}, context, false);
+                content = replaceVars(content, {}, context);
 
                 const box = document.getElementById('stagekitwp-ma-preview-container');
                 box.style.display = 'block';
-                box.innerHTML = `<h3>${subject}</h3><hr>${content}`;
+                box.innerHTML = `<h3>${escapeHTML(subject)}</h3><hr>${content}`;
             });
 
             // SINGLE TEMPLATE
@@ -452,10 +655,87 @@ class STAGEKITWP_MEMBERS_Search {
      * Reads stagekitwp_name and stagekitwp_interest from $_GET. Capped for safety.
      */
     private static function get_filtered_users() {
-        return self::query_members(
-            isset($_GET['stagekitwp_name']) ? sanitize_text_field(wp_unslash($_GET['stagekitwp_name'])) : '',
-            isset($_GET['stagekitwp_interest']) ? (int) $_GET['stagekitwp_interest'] : 0
-        );
+        $group_id = isset($_GET['stagekitwp_members_email_group'])
+            ? sanitize_text_field(wp_unslash($_GET['stagekitwp_members_email_group']))
+            : '';
+        $group = $group_id ? STAGEKITWP_MEMBERS_Campaigns::get_group($group_id) : null;
+        $filters = $group
+            ? STAGEKITWP_MEMBERS_Campaigns::normalize_filters($group['filters'])
+            : STAGEKITWP_MEMBERS_Campaigns::get_filters($_GET);
+        return STAGEKITWP_MEMBERS_Campaigns::query_users($filters);
+    }
+
+    private static function render_hidden_filters($filters) {
+        $names = [
+            'name' => 'stagekitwp_name',
+            'interest' => 'stagekitwp_interest',
+            'role' => 'stagekitwp_role',
+            'availability_date' => 'stagekitwp_availability_date',
+            'availability_status' => 'stagekitwp_availability_status',
+            'rsvp_event_id' => 'stagekitwp_rsvp_event_id',
+            'rsvp_status' => 'stagekitwp_rsvp_status',
+            'volunteer_event_id' => 'stagekitwp_volunteer_event_id',
+            'volunteer_status' => 'stagekitwp_volunteer_status',
+        ];
+        foreach ($names as $key => $name) {
+            printf(
+                '<input type="hidden" name="%s" value="%s">',
+                esc_attr($name),
+                esc_attr($filters[$key])
+            );
+        }
+    }
+
+    private static function render_event_filter($label, $event_field, $status_field, $selected_event, $selected_status, $statuses) {
+        ?>
+        <label><?php echo esc_html($label); ?> event
+            <select name="<?php echo esc_attr($event_field); ?>">
+                <option value="0">Any event</option>
+                <?php foreach (STAGEKITWP_MEMBERS_Campaigns::event_options() as $event) : ?>
+                    <option value="<?php echo (int) $event->ID; ?>" <?php selected((int) $selected_event, (int) $event->ID); ?>>
+                        <?php echo esc_html($event->post_title); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label><?php echo esc_html($label); ?> status
+            <select name="<?php echo esc_attr($status_field); ?>">
+                <?php foreach ($statuses as $value => $status_label) : ?>
+                    <option value="<?php echo esc_attr($value); ?>" <?php selected($selected_status, $value); ?>><?php echo esc_html($status_label); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <?php
+    }
+
+    private static function render_saved_groups() {
+        if (!current_user_can(STAGEKITWP_MEMBERS_Roles::CAP_SEND_EMAIL)) {
+            return;
+        }
+        $groups = STAGEKITWP_MEMBERS_Campaigns::get_groups();
+        if (!$groups) {
+            return;
+        }
+        echo '<section class="stagekitwp-members-email-groups"><h3>Saved recipient groups</h3><ul>';
+        foreach ($groups as $group) {
+            $users = STAGEKITWP_MEMBERS_Campaigns::query_users($group['filters']);
+            $counts = STAGEKITWP_MEMBERS_Email_Log::group_counts($group['id']);
+            echo '<li><strong>' . esc_html($group['name']) . '</strong>: ' . count($users) .
+                ' matched; ' . (int) $counts['success'] . ' sent, ' . (int) $counts['failed'] . ' failed.';
+            if (current_user_can('manage_options')) {
+                $history_url = add_query_arg([
+                    'page' => 'stagekitwp-ma-admin',
+                    'stagekitwp_members_tab' => 'email_logs',
+                    'stagekitwp_members_group' => $group['id'],
+                ], admin_url('admin.php'));
+                echo ' <a href="' . esc_url($history_url) . '">View history</a>';
+            }
+            echo '<form method="post" style="display:inline;margin-left:1em">';
+            wp_nonce_field('stagekitwp_members_save_group', 'stagekitwp_members_group_nonce');
+            echo '<button class="button-link-delete" name="stagekitwp_members_delete_group" value="' . esc_attr($group['id']) . '" onclick="return confirm(\'Delete this recipient group? Email history is retained.\')">Delete</button>';
+            echo '</form></li>';
+        }
+        echo '</ul></section>';
     }
 
     /**

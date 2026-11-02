@@ -81,6 +81,25 @@ class STAGEKITWP_MEMBERS_REST {
                 'status' => ['type' => 'string', 'required' => true],
             ],
         ]);
+
+        register_rest_route(self::NS, '/events/(?P<id>\d+)/volunteers', [
+            'methods'             => 'GET',
+            'callback'            => [__CLASS__, 'get_event_volunteers'],
+            'permission_callback' => [__CLASS__, 'can_manage_events'],
+            'args'                => ['id' => ['type' => 'integer', 'sanitize_callback' => 'absint']],
+        ]);
+
+        register_rest_route(self::NS, '/events/(?P<id>\d+)/volunteer', [
+            'methods'             => 'POST',
+            'callback'            => [__CLASS__, 'set_event_volunteer'],
+            'permission_callback' => [__CLASS__, 'can_rsvp'],
+            'args'                => [
+                'id'          => ['type' => 'integer', 'sanitize_callback' => 'absint'],
+                'position_id' => ['type' => 'integer', 'required' => true, 'sanitize_callback' => 'absint'],
+                'intent'      => ['type' => 'string', 'default' => 'signup', 'enum' => ['signup', 'cancel']],
+                'note'        => ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field'],
+            ],
+        ]);
     }
 
     /* ------------------------------------------------------------------ */
@@ -209,6 +228,7 @@ class STAGEKITWP_MEMBERS_REST {
         if (!$post || $post->post_type !== 'stagekitwp_event' || $post->post_status !== 'publish') {
             return new WP_Error('stagekitwp_members_not_found', 'Event not found.', ['status' => 404]);
         }
+
         if (!class_exists('STAGEKITWP_MEMBERS_RSVP') || !in_array($status, STAGEKITWP_MEMBERS_RSVP::STATUSES, true)) {
             return new WP_Error(
                 'stagekitwp_members_bad_status',
@@ -226,6 +246,33 @@ class STAGEKITWP_MEMBERS_REST {
             'status'   => STAGEKITWP_MEMBERS_RSVP::get_status($id, $uid),
             'counts'   => STAGEKITWP_MEMBERS_RSVP::counts($id),
         ]);
+    }
+
+    public static function get_event_volunteers($request) {
+        $id = (int) $request['id'];
+        if (get_post_type($id) !== 'stagekitwp_event') {
+            return new WP_Error('stagekitwp_members_not_found', 'Event not found.', ['status' => 404]);
+        }
+        return rest_ensure_response([
+            'event_id' => $id,
+            'positions' => STAGEKITWP_MEMBERS_Volunteers::get_positions($id),
+            'roster' => STAGEKITWP_MEMBERS_Volunteers::get_rest_roster($id),
+        ]);
+    }
+
+    public static function set_event_volunteer($request) {
+        $id = (int) $request['id'];
+        $event = get_post($id);
+        if (!$event || $event->post_type !== 'stagekitwp_event' || $event->post_status !== 'publish') {
+            return new WP_Error('stagekitwp_members_not_found', 'Event not found.', ['status' => 404]);
+        }
+        return rest_ensure_response(STAGEKITWP_MEMBERS_Volunteers::rest_signup(
+            $id,
+            (int) $request->get_param('position_id'),
+            get_current_user_id(),
+            (string) $request->get_param('intent'),
+            (string) $request->get_param('note')
+        ));
     }
 
     /* ------------------------------------------------------------------ */
@@ -275,6 +322,8 @@ class STAGEKITWP_MEMBERS_REST {
             'date'        => (string) get_post_meta($post->ID, '_stagekitwp_members_event_date', true),
             'start_time'  => (string) get_post_meta($post->ID, '_stagekitwp_members_start_time', true),
             'end_time'    => (string) get_post_meta($post->ID, '_stagekitwp_members_end_time', true),
+            'location'    => (string) STAGEKITWP_MEMBERS_Events::get_location_label($post->ID),
+            'status'      => STAGEKITWP_MEMBERS_Events::get_details($post->ID)['status'],
             'description' => wp_strip_all_tags(strip_shortcodes($post->post_content)),
             'url'         => get_permalink($post->ID),
             'rsvp_counts' => $counts,

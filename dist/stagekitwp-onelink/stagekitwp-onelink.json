@@ -1,10 +1,10 @@
 {
-  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-onelink/stagekitwp-onelink-1.6.0.zip",
-  "tested": "6.6",
+  "new_version": "2.0.0",
+  "download_url": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-onelink/stagekitwp-onelink-2.0.0.zip",
   "requires": "6.0",
   "slug": "stagekitwp-onelink",
   "name": "stagekitwp-onelink",
-  "new_version": "1.6.0",
-  "version": "1.6.0",
-  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-onelink/stagekitwp-onelink-1.6.0.zip"
+  "version": "2.0.0",
+  "tested": "6.6",
+  "package": "https://raw.githubusercontent.com/HuwEvans/StageKitWP/StageKitWP/dist/stagekitwp-onelink/stagekitwp-onelink-2.0.0.zip"
 }

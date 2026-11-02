@@ -12,6 +12,7 @@ function stagekitwp_contributors_shortcode($atts) {
         'gold_label'     => '',
         'silver_label'   => '',
         'bronze_label'   => '',
+        'season'         => '',
     ), $atts, 'stagekitwp_contributors' );
 
     $args = array(
@@ -19,6 +20,10 @@ function stagekitwp_contributors_shortcode($atts) {
         'posts_per_page' => -1,
         'post_status' => 'publish'
     );
+    $season_clause = stagekitwp_season_meta_query( $atts['season'] );
+    if ( $season_clause ) {
+        $args['meta_query'] = array( $season_clause );
+    }
     $contributors = new WP_Query($args);
 
     // Get display settings

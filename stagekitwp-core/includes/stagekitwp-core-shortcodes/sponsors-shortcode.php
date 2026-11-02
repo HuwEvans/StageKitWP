@@ -21,6 +21,7 @@
  *   slides_visible integer      (slider only, default: 4)
  *   autoplay       true|false   (slider only, default: true)
  *   speed          integer ms   (slider only, default: 3000)
+ *   season         ID|slug|title|current|upcoming  (optional, default: all seasons)
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -42,6 +43,7 @@ function stagekitwp_sponsor_shortcode( $atts ) {
         'slides_visible' => '4',
         'autoplay'      => 'true',
         'speed'         => '3000',
+        'season'        => '',
     ], $atts, 'stagekitwp_sponsors' );
 
     $layout = ( $atts['layout'] === 'slider' ) ? 'slider' : 'grid';
@@ -61,11 +63,16 @@ function stagekitwp_sponsor_shortcode( $atts ) {
     if ( $shadow  === 'true' ) { $card_style .= 'box-shadow:0 2px 6px rgba(0,0,0,0.2);'; }
 
     // ── Query ─────────────────────────────────────────────────────────────
-    $query = new WP_Query( [
+    $sponsor_args = [
         'post_type'      => 'sponsor',
         'posts_per_page' => -1,
         'post_status'    => 'publish',
-    ] );
+    ];
+    $season_clause = stagekitwp_season_meta_query( $atts['season'] );
+    if ( $season_clause ) {
+        $sponsor_args['meta_query'] = [ $season_clause ];
+    }
+    $query = new WP_Query( $sponsor_args );
 
     if ( ! $query->have_posts() ) {
         return '<p>No sponsors found.</p>';
